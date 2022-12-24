@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from tortoise.contrib.fastapi import register_tortoise
 from src.routes import user_route
+import config
 
 app = FastAPI(
     title="api swagger",
@@ -11,11 +12,11 @@ register_tortoise(
     app,
     config={
         'connections': {
-            'default': "mysql://root:123456@127.0.0.1:3306/tortoise"
+            'default': config.db_url
         },
         'apps': {
             'models': {
-                "models": ["src.models"],
+                "models": [config.models_path],
                 'default_connection': 'default',
             }
         },

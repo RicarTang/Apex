@@ -56,6 +56,7 @@ async def update_user(user_id: int, user: UserIn_Pydantic):
 async def delete_user(user_id: int):
     """删除用户。"""
     deleted_count = await Users.filter(id=user_id).delete()
+    log.debug("")
     if not deleted_count:
         raise HTTPException(status_code=404, detail=f"User {user_id} not found")
     return schemas.Status(message=f"Deleted user {user_id}")
