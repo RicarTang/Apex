@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 from .models import User_Pydantic
-from typing import List,Optional
+from typing import List, Optional
 
 
 class Status(BaseModel):
@@ -17,3 +17,12 @@ class UserIn(BaseModel):
 
 class Users(BaseModel):
     result: List[User_Pydantic]
+
+
+class LoginIn(BaseModel):
+    username: str
+    password: str
+
+
+class LoginTo(User_Pydantic):
+    access_token: str

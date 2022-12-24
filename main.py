@@ -1,7 +1,10 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from tortoise.contrib.fastapi import register_tortoise
 from src.routes import user_route
 import config
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
+from src.utils.exceptions_util import ResponseException, response_exception
 
 app = FastAPI(
     title="api swagger",
@@ -28,3 +31,16 @@ register_tortoise(
     add_exception_handlers=True,
 )
 app.include_router(user_route, tags=['User'], prefix='/user')
+app.add_exception_handler(ResponseException, response_exception)
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    """修改默认的请求验证错误模型"""
+    return JSONResponse(
+        status_code=422,
+        content={
+            "success": False,
+            "detail": exc.errors()
+        }
+    )
