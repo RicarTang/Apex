@@ -5,12 +5,24 @@ import config
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from src.utils.exceptions_util import ResponseException, response_exception
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(
     title="api swagger",
     version="1.0",
     description="fastapi+tortoise-orm async web framework"
 )
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost",
+        "http://localhost:8080",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 register_tortoise(
     app,
     config={

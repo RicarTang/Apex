@@ -1,56 +1,60 @@
 from fastapi import APIRouter, HTTPException
 from fastapi.encoders import jsonable_encoder
-from src.models import User_Pydantic, UserIn_Pydantic, Users
+from src.models import User_Pydantic, Login_pydantic, Users
 from tortoise.contrib.fastapi import HTTPNotFoundError
 from .. import schemas
 from ..utils.log_util import log
-from ..utils import depends_util
+from ..utils import security_util
 from passlib.hash import md5_crypt
 from ..utils import exceptions_util as exception
 from datetime import timedelta
+from typing import Optional
 
 user_route = APIRouter()
 
 
 @user_route.get("/users",
-                response_model=schemas.Users
+                response_model=schemas.UsersOut
                 )
-async def get_users():
+async def get_users(limit: Optional[int] = 10, offset: Optional[int] = 0):
     """获取所有用户."""
-    result = await User_Pydantic.from_queryset(Users.all())
-    return {"result": result}
+    result = await User_Pydantic.from_queryset(Users.all().offset(offset).limit(limit))
+    return schemas.UsersOut(data=result)
 
 
 @user_route.post("/users",
-                 response_model=User_Pydantic
+                 response_model=schemas.UserOut
                  )
 async def create_user(user: schemas.UserIn):
     """创建用户."""
     user.password = md5_crypt.hash(user.password)
     user_obj = await Users.create(**user.dict(exclude_unset=True))
-    return await User_Pydantic.from_tortoise_orm(user_obj)
+    return schemas.UserOut(data=user_obj)
 
 
 @user_route.get(
     "/get/{user_id}",
-    response_model=User_Pydantic,
+    response_model=schemas.UserOut,
     responses={404: {"model": HTTPNotFoundError}}
 )
 async def get_user(user_id: int):
     """查询单个用户."""
     log.debug(f"{await Users.get(id=user_id).values()}")
-    return await User_Pydantic.from_queryset_single(Users.get(id=user_id))
+    # return await User_Pydantic.from_queryset_single(Users.get(id=user_id))
+    user = await Users.get(id=user_id)
+    return schemas.UserOut(data=user)
 
 
 @user_route.put(
     "/update/{user_id}",
-    response_model=User_Pydantic,
+    response_model=schemas.UserOut,
     responses={404: {"model": HTTPNotFoundError}}
 )
-async def update_user(user_id: int, user: UserIn_Pydantic):
+async def update_user(user_id: int, user: schemas.UserIn):
     """更新用户信息."""
-    await Users.filter(id=user_id).update(**user.dict(exclude_unset=True))
-    return await User_Pydantic.from_queryset_single(Users.get(id=user_id))
+    result = await Users.filter(id=user_id).update(**user.dict(exclude_unset=True))
+    log.debug(f"update更新{result}条数据")
+    return schemas.UserOut(data=await Users.get(id=user_id))
 
 
 @user_route.delete("/delete/{user_id}",
@@ -67,22 +71,24 @@ async def delete_user(user_id: int):
 
 
 @user_route.post("/login",
-                 # response_model=schemas.LoginTo
+                 response_model=schemas.LoginOut
                  )
 async def login(user: schemas.LoginIn):
     """用户登陆."""
-    db_user = await Users.filter(username=user.username).first().values()
-    if not db_user:
-        raise exception.ResponseException(content="user is not exist!")
-    if not md5_crypt.verify(secret=user.password, hash=db_user["password"]):
+    try:
+        query_user = await Login_pydantic.from_tortoise_orm(await Users.filter(username=user.username).first())
+    except AttributeError as e:
+        log.debug(f"错误捕获:{e}")
+        raise exception.ResponseException(content="Object does not exist!")
+    db_user = jsonable_encoder(query_user)
+    if not md5_crypt.verify(secret=user.password, hash=query_user.password):
         raise exception.ResponseException(content="Password Error!")
     access_token_expires = timedelta(
-        minutes=depends_util.ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = depends_util.create_access_token(
+        minutes=security_util.ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = security_util.create_access_token(
         data={"sub": db_user["username"]},
         expires_delta=access_token_expires
     )
     db_user["access_token"] = access_token
-
-    # return schemas.LoginTo(**db_user)
-    return db_user
+    log.debug(f"db_user返回：{db_user}")
+    return schemas.LoginOut(data=db_user)
