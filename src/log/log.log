@@ -1,0 +1,1 @@
+INFO:     2023-02-04 12:14:00,504 - users.py - create_user - line: 32 - message: 成功创建用户：{'username': '唐海兵', 'password': '$1$qFvJZq8i$oF7t6/Cl96rCdTJH.mkml/'}

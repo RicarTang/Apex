@@ -29,6 +29,7 @@ async def create_user(user: schemas.UserIn):
     """创建用户."""
     user.password = md5_crypt.hash(user.password)
     user_obj = await Users.create(**user.dict(exclude_unset=True))
+    log.info(f"成功创建用户：{user.dict(exclude_unset=True)}")
     return schemas.UserOut(data=user_obj)
 
 
