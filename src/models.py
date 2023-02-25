@@ -3,6 +3,7 @@ from tortoise.contrib.pydantic import pydantic_model_creator
 
 
 class TimeStampMixin:
+    """创建/更新时间"""
     created_at = fields.DatetimeField(auto_now_add=True, description="创建时间")
     modified_at = fields.DatetimeField(auto_now=True, description="更新时间")
 
@@ -19,6 +20,9 @@ class Users(models.Model, TimeStampMixin):
     # 类型提示
     comments: fields.ReverseRelation["Comments"]
 
+    def __str__(self):
+        return str(self.id)
+
     def full_name(self) -> str:
         """返回全名"""
         if self.name or self.surname:
@@ -30,15 +34,20 @@ class Users(models.Model, TimeStampMixin):
 
 
 class Comments(models.Model, TimeStampMixin):
+    """用户评论模型"""
     id = fields.IntField(pk=True, index=True)
-    comment = fields.TextField(null=True, description="用户评论")
+    comment = fields.TextField(description="用户评论")
     # 外键
     user: fields.ForeignKeyRelation[Users] = fields.ForeignKeyField(
         model_name="models.Users",
         related_name="comments"
     )
 
+    def __str__(self):
+        return str(self.id)
+
 
 User_Pydantic = pydantic_model_creator(Users, name="User", exclude=("password",))
 Login_pydantic = pydantic_model_creator(Users, name="Login_models")
 UserIn_Pydantic = pydantic_model_creator(Users, name="UserIn_models", exclude_readonly=True)
+Comment_Pydantic = pydantic_model_creator(Comments, name="CommentTo")

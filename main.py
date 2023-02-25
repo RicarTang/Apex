@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Request
 from tortoise.contrib.fastapi import register_tortoise
-from src.routes import user_route
+from src.routes import user_route, comment_route
 import config
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
@@ -40,6 +40,7 @@ register_tortoise(
     add_exception_handlers=True,
 )
 app.include_router(user_route, tags=['User'], prefix='/user')
+app.include_router(comment_route, tags=['Comment'], prefix='/comment')
 app.add_exception_handler(ResponseException, response_exception)
 
 

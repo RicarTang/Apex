@@ -1,6 +1,4 @@
-"""
-暂时丢弃此模块。
-"""
+"""暂时丢弃此模块。"""
 from ..models import Users
 from ..utils.log_util import log
 

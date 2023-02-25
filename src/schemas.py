@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field, Extra
-from .models import User_Pydantic
+from .models import User_Pydantic, Comment_Pydantic
 from typing import List, Optional
 
 
@@ -48,3 +48,28 @@ class LoginIn(BaseModel):
 
 class LoginOut(BaseSchema):
     data: Login
+
+
+class CommentIn(BaseModel):
+    """
+    request schema，
+    用户单条评论。
+    """
+    user_id: int = Field(gt=0, description="用户id")
+    comment: str = Field(max_length=500, description="用户评论")
+
+
+class CommentTo(BaseSchema):
+    """
+    response schema，
+    用户单条评论。
+    """
+    data: Comment_Pydantic
+
+
+class CommentsTo(BaseSchema):
+    """
+    response schema，
+    某个用户的所有评论。
+    """
+    data: List[Comment_Pydantic]
