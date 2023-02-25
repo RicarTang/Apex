@@ -1,1 +1,3 @@
 INFO:     2023-02-04 12:14:00,504 - users.py - create_user - line: 32 - message: 成功创建用户：{'username': '唐海兵', 'password': '$1$qFvJZq8i$oF7t6/Cl96rCdTJH.mkml/'}
+INFO:     2023-02-04 15:23:51,546 - users.py - create_user - line: 32 - message: 成功创建用户：{'username': '赖明', 'surname': '厂从强点史放时', 'name': '养所包克', 'descriptions': 'esse', 'password': '$1$w9NDFUki$qToBcz2.8Y1r5QI.7iwyr1'}
+INFO:     2023-02-04 15:23:59,384 - users.py - create_user - line: 32 - message: 成功创建用户：{'username': '唐伟', 'surname': '带相没地起毛', 'name': '加经音毛更适电', 'descriptions': 'occa', 'password': '$1$fGxNyZDc$ArmX7NO/2mxKmIWyfn4ZL1'}
