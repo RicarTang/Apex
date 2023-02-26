@@ -1,8 +1,8 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter
 from src.models import Comments, Users
 from .. import schemas
 from ..utils.log_util import log
-from typing import List
+from ..utils import exceptions_util as exception
 
 comment_route = APIRouter()
 
@@ -29,5 +29,5 @@ async def get_user_comment(user_id: int):
         coms = await user.comments.all()
         log.debug(f"用户{user}的所有评论：{coms}")
     except AttributeError:
-        raise HTTPException(status_code=202, detail="用户不存在！")
+        raise exception.ResponseException(content="用户不存在！")
     return schemas.CommentsTo(data=coms)
