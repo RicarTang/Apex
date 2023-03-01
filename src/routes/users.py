@@ -107,5 +107,5 @@ async def login(user: OAuth2PasswordRequestForm = Depends()):
     access_token = security_util.create_access_token(
         data={"sub": query_user.username},
         expires_delta=access_token_expires)
-    db_user["access_token"] = access_token
-    return schemas.Login(data=db_user,access_token=db_user["access_token"],token_type="bearer")
+    # db_user["access_token"] = access_token
+    return schemas.Login(data=db_user,access_token=access_token,token_type="bearer")

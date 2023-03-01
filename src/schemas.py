@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field, Extra
-from .models import User_Pydantic, Comment_Pydantic
+from .models import User_Pydantic, Comment_Pydantic, Login_pydantic
 from typing import List, Optional
 
 
@@ -38,7 +38,8 @@ class Login(BaseSchema, extra=Extra.ignore):
     extra=Extra.ignore,表示忽略多的属性，
     不加时，多了模型没有的属性会报错
     """
-    data: User_Pydantic
+    data: Login_pydantic
+    # data: User_Pydantic
     access_token: str
     token_type: str
 
