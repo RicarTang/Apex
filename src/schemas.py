@@ -33,12 +33,14 @@ class UsersOut(BaseSchema):
     data: List[User_Pydantic]
 
 
-class Login(User_Pydantic, extra=Extra.ignore):
+class Login(BaseSchema, extra=Extra.ignore):
     """
     extra=Extra.ignore,表示忽略多的属性，
     不加时，多了模型没有的属性会报错
     """
+    data: User_Pydantic
     access_token: str
+    token_type: str
 
 
 class LoginIn(BaseModel):
@@ -46,8 +48,8 @@ class LoginIn(BaseModel):
     password: str
 
 
-class LoginOut(BaseSchema):
-    data: Login
+# class LoginOut(BaseSchema):
+    
 
 
 class CommentIn(BaseModel):
