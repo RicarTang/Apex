@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends,UploadFile
 from fastapi.encoders import jsonable_encoder
 from src.models import User_Pydantic, Login_pydantic, Users
 from tortoise.contrib.fastapi import HTTPNotFoundError
@@ -113,3 +113,10 @@ async def login(user: OAuth2PasswordRequestForm = Depends()):
     return schemas.Login(data=db_user,
                          access_token=access_token,
                          token_type="bearer")
+
+@user_route.post('/uploadfile')
+async def uploadfile(file:UploadFile):
+    with open(f"./src/static/{file.filename}",'wb') as f:
+        f.write(await file.read())
+    
+    return {"filename":file.filename}
