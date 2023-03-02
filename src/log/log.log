@@ -4,3 +4,6 @@ INFO:     2023-02-04 15:23:59,384 - users.py - create_user - line: 32 - message:
 INFO:     2023-03-01 11:20:00,278 - users.py - create_user - line: 32 - message: 成功创建用户：{'username': 'tang', 'surname': 'string', 'name': 'string', 'descriptions': '管理员', 'password': '$1$l..eRY1r$48DCaFJ0qPOfsdydNY9IH/'}
 INFO:     2023-03-01 11:26:26,593 - users.py - create_user - line: 33 - message: 成功创建用户：{'username': 'tang1', 'password': '$1$US0yvHdS$dG83EV7ZWIBMdCmQbj1oJ1'}
 INFO:     2023-03-01 16:18:55,370 - users.py - create_user - line: 38 - message: 成功创建用户：{'username': 'tang', 'password': '$1$fwT.HSCJ$wEH7vUBR1nIvVoSaVXYSx.'}
+INFO:     2023-03-02 10:37:25,718 - users.py - create_user - line: 38 - message: 成功创建用户：{'username': 'tang1', 'password': '$1$47YRnko3$lXP2Hj2WtCvMZZhaiiVui0'}
+INFO:     2023-03-02 11:10:01,957 - users.py - create_user - line: 38 - message: 成功创建用户：{'username': 'tang2', 'password': '$1$upGSjr3Q$jCadvL5u8FGcVJ77YJFAu1'}
+INFO:     2023-03-02 11:23:40,408 - users.py - create_user - line: 38 - message: 成功创建用户：{'username': 'tang3', 'password': '$1$B/yQiINV$27E/oVCZePwhGaCUEP/cq/'}
