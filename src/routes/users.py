@@ -23,8 +23,8 @@ async def get_users(limit: Optional[int] = 10, offset: Optional[int] = 0):
     return schemas.UsersOut(data=result)
 
 
-@user_route.get('/me', response_model=schemas.User)
-async def get_current_user(current_user: schemas.User = Depends(
+@user_route.get('/me', response_model=schemas.UserPy)
+async def get_current_user(current_user: schemas.UserPy = Depends(
     security_util.get_current_user)):
     """获取当前用户"""
     return current_user
@@ -88,7 +88,7 @@ async def login(user: OAuth2PasswordRequestForm = Depends()):
     # try:
     #     # query_user = await Login_pydantic.from_tortoise_orm(
     #     #     await Users.filter(username=user.username).first())
-        
+
     # except AttributeError as e:
     #     log.debug(f"查询数据库用户错误:{e}")
     #     raise exception.ResponseException(content="Object does not exist!")
@@ -105,7 +105,8 @@ async def login(user: OAuth2PasswordRequestForm = Depends()):
         minutes=security_util.ACCESS_TOKEN_EXPIRE_MINUTES)
     # 创建jwt
     access_token = security_util.create_access_token(
-        data={"sub": query_user.username},
-        expires_delta=access_token_expires)
+        data={"sub": query_user.username}, expires_delta=access_token_expires)
     # db_user["access_token"] = access_token
-    return schemas.Login(data=db_user,access_token=access_token,token_type="bearer")
+    return schemas.Login(data=db_user,
+                         access_token=access_token,
+                         token_type="bearer")

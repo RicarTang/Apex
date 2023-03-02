@@ -53,14 +53,12 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
         print("JWTError")
         raise credentials_exception
 
-    user = await Users.get(username=username)
+    user = await Users.get(username=username).values()
     log.debug(f"当前用户：{user}")
     # if user is None:
     #     raise credentials_exception
-    user_dict = jsonable_encoder(user[0])
-    user_dict["access_token"] = token
-    log.debug(f"user_dict:{user_dict}")
-    return user_dict
+    user["access_token"] = token
+    return user
 
 # def get_current_active_user(current_user:schemas.User=Depends(get_current_user)):
 #     """获取当前活动用户"""

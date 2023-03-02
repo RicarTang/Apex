@@ -28,14 +28,14 @@ class Users(models.Model, TimeStampMixin):
     def __str__(self):
         return str(self.id)
 
-    def full_name(self) -> str:
-        """返回全名"""
-        if self.name or self.surname:
-            return f"{self.surname or ''} {self.name or ''}".strip()
-        return self.username
+    # def full_name(self) -> str:
+    #     """返回全名"""
+    #     if self.name or self.surname:
+    #         return f"{self.surname or ''} {self.name or ''}".strip()
+    #     return self.username
 
-    class PydanticMeta:
-        computed = ["full_name"]
+    # class PydanticMeta:
+    #     computed = ["full_name"]
 
 
 class Comments(models.Model, TimeStampMixin):
