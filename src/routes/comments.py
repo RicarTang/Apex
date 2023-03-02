@@ -7,7 +7,9 @@ from ..utils import security_util, exceptions_util as exception
 comment_route = APIRouter()
 
 
-@comment_route.post('/create', response_model=schemas.CommentTo)
+@comment_route.post('/create',
+                    summary="发表评论",
+                    response_model=schemas.CommentTo)
 async def create_comment(comment: schemas.CommentIn):
     """创建comment"""
     com = await Comments.create(**comment.dict(exclude_unset=True))
@@ -15,7 +17,9 @@ async def create_comment(comment: schemas.CommentIn):
     return schemas.CommentTo(data=com)
 
 
-@comment_route.get('/comments/{user_id}', response_model=schemas.CommentsTo)
+@comment_route.get('/comments/{user_id}',
+                   summary="获取用户评论",
+                   response_model=schemas.CommentsTo)
 async def get_user_comment(user_id: int):
     """获取某个user的comments"""
     try:
@@ -28,12 +32,12 @@ async def get_user_comment(user_id: int):
     return schemas.CommentsTo(data=coms)
 
 
-@comment_route.get('/me', response_model=schemas.CommentsTo)
+@comment_route.get('/me', summary="获取我的评论", response_model=schemas.CommentsTo)
 async def get_comments_me(current_user: schemas.UserPy = Depends(
     security_util.get_current_user)):
     """当前用户的所有评论"""
     user = await Users.filter(username=current_user.username
-                                  ).first().prefetch_related('comments')
+                              ).first().prefetch_related('comments')
     comments = await user.comments.all()
     log.debug(f"comments:{comments}")
     return schemas.CommentsTo(data=comments)
