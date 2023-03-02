@@ -10,7 +10,7 @@ class TimeStampMixin:
 
 # class Disabled(IntEnum):
 #     TRUE = 1
-    FALSE = 0
+    # FALSE = 0
 
 class Users(models.Model, TimeStampMixin):
     """用户模型"""

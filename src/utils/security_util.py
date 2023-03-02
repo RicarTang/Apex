@@ -9,6 +9,7 @@ from ..models import Users
 from .. import schemas
 from fastapi.encoders import jsonable_encoder
 from ..utils.log_util import log
+from tortoise.queryset import QuerySet
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/user/login")
 # jwt相关配置
@@ -34,7 +35,7 @@ def create_access_token(data: dict, expires_delta: Union[timedelta, None] = None
     log.debug(f"encoded_jwt:{encoded_jwt}")
     return encoded_jwt
 
-async def get_current_user(token: str = Depends(oauth2_scheme)):
+async def get_current_user(token: str = Depends(oauth2_scheme)) -> QuerySet:
     """得到当前用户"""
     print("get_current_user")
     log.debug(f"token:{token}")
@@ -53,11 +54,11 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
         print("JWTError")
         raise credentials_exception
 
-    user = await Users.get(username=username).values()
+    user = await Users.get(username=username)
     log.debug(f"当前用户：{user}")
     # if user is None:
     #     raise credentials_exception
-    user["access_token"] = token
+    # user["access_token"] = token
     return user
 
 # def get_current_active_user(current_user:schemas.User=Depends(get_current_user)):
