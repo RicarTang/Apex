@@ -12,7 +12,7 @@ def set_log():
     if not is_exists:
         os.makedirs(os.path.join(os.path.dirname(__file__),'../log'))
     # 文件日志处理器
-    file_handler = logging.FileHandler(os.path.join(os.path.dirname(__file__), f'../{datetime.date.today()}.log'), encoding='utf-8')
+    file_handler = logging.FileHandler(os.path.join(os.path.dirname(__file__), f'../log/{datetime.date.today()}.log'), encoding='utf-8')
     file_handler.setLevel(config.file_log_level)
     log_format = logging.Formatter(config.log_formatter)
     file_handler.setFormatter(log_format)
