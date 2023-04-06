@@ -11,7 +11,6 @@ from ..utils import security_util
 from datetime import timedelta
 from typing import Optional
 from fastapi.security import OAuth2PasswordRequestForm
-
 user_route = APIRouter()
 
 
