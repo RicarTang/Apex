@@ -11,6 +11,7 @@ uvicorn = "*"
 python-jose = "*"
 python-multipart = "*"
 tortoise-orm = {extras = ["asyncmy"], version = "*"}
+cryptography = "*"
 
 [dev-packages]
 
