@@ -12,6 +12,7 @@ python-jose = "*"
 python-multipart = "*"
 tortoise-orm = {extras = ["asyncmy"], version = "*"}
 cryptography = "*"
+apscheduler = "*"
 
 [dev-packages]
 

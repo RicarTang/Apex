@@ -5,6 +5,8 @@ import config
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from src.utils.exceptions_util import ResponseException, response_exception
+from src.utils.background_task_util import scheduler
+from src.utils.log_util import log
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(title="api swagger",
@@ -54,3 +56,8 @@ async def validation_exception_handler(request: Request,
                             "success": False,
                             "detail": exc.errors()
                         })
+
+try:
+    scheduler.start()
+except:
+    log.info("暂无后台任务！")
