@@ -133,7 +133,3 @@ dmypy.json
 
 # 忽略log文件目录
 /log
-
-# pdm python解释器路径文件
-.pdm-python
-.pdm.toml

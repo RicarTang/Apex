@@ -1,0 +1,21 @@
+[[source]]
+url = "https://pypi.douban.com/simple"
+verify_ssl = true
+name = "pip_conf_index_global"
+
+[packages]
+pydantic = "*"
+fastapi = "*"
+passlib = "*"
+uvicorn = "*"
+python-jose = "*"
+python-multipart = "*"
+tortoise-orm = {extras = ["asyncmy"], version = "*"}
+
+[dev-packages]
+
+[requires]
+python_version = "3.10"
+
+[scripts]
+dev = "uvicorn main:app --reload --port 4000"
