@@ -13,8 +13,10 @@ python-multipart = "*"
 tortoise-orm = {extras = ["asyncmy"], version = "*"}
 cryptography = "*"
 apscheduler = "*"
+pytz-deprecation-shim = "*"
 
 [dev-packages]
+black = "*"
 
 [requires]
 python_version = "3.10"
