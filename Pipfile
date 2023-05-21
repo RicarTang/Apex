@@ -22,4 +22,4 @@ black = "*"
 python_version = "3.10"
 
 [scripts]
-dev = "uvicorn main:app --reload --port 4000"
+dev = "uvicorn main:app --reload --host 0.0.0.0 --port 4000"
