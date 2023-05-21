@@ -11,17 +11,18 @@ from ..utils import security_util
 from datetime import timedelta
 from typing import Optional
 from fastapi.security import OAuth2PasswordRequestForm
-user_route = APIRouter()
+
+user_api = APIRouter()
 
 
-@user_route.get("/users", summary="获取所有用户", response_model=schemas.UsersOut)
+@user_api.get("/users", summary="获取所有用户", response_model=schemas.UsersOut)
 async def get_users(limit: Optional[int] = 10, offset: Optional[int] = 0):
     """获取所有用户."""
     result = await User_Pydantic.from_queryset(Users.all().offset(offset).limit(limit))
     return schemas.UsersOut(data=result)
 
 
-@user_route.get("/me", summary="获取当前用户", response_model=schemas.UserPy)
+@user_api.get("/me", summary="获取当前用户", response_model=schemas.UserPy)
 async def get_current_user(
     current_user: schemas.UserPy = Depends(security_util.get_current_user),
 ):
@@ -29,7 +30,7 @@ async def get_current_user(
     return current_user
 
 
-@user_route.post("/create", summary="创建用户", response_model=schemas.UserOut)
+@user_api.post("/create", summary="创建用户", response_model=schemas.UserOut)
 async def create_user(user: schemas.UserIn):
     """创建用户."""
     user.password = md5_crypt.hash(user.password)
@@ -38,7 +39,7 @@ async def create_user(user: schemas.UserIn):
     return schemas.UserOut(data=user_obj)
 
 
-@user_route.get(
+@user_api.get(
     "/get/{user_id}",
     response_model=schemas.UserOut,
     summary="查询用户",
@@ -52,7 +53,7 @@ async def get_user(user_id: int):
     return schemas.UserOut(data=user)
 
 
-@user_route.put(
+@user_api.put(
     "/update/{user_id}",
     response_model=schemas.UserOut,
     summary="更新用户",
@@ -66,7 +67,7 @@ async def update_user(user_id: int, user: schemas.UserIn):
     return schemas.UserOut(data=await Users.get(id=user_id))
 
 
-@user_route.delete(
+@user_api.delete(
     "/delete/{user_id}",
     response_model=schemas.Status,
     summary="删除用户",
@@ -81,9 +82,9 @@ async def delete_user(user_id: int):
     return schemas.Status(message=f"Deleted user {user_id}")
 
 
-@user_route.post("/login", summary="登录", response_model=schemas.Login)
+@user_api.post("/login", summary="登录", response_model=schemas.Login)
 async def login(user: schemas.LoginIn):
-# async def login(user: OAuth2PasswordRequestForm = Depends()):  # OAuth2PasswordRequestForm表单登陆
+    # async def login(user: OAuth2PasswordRequestForm = Depends()):  # OAuth2PasswordRequestForm表单登陆
     """用户登陆."""
     # try:
     #     # query_user = await Login_pydantic.from_tortoise_orm(
@@ -111,7 +112,7 @@ async def login(user: schemas.LoginIn):
     return schemas.Login(data=db_user, access_token=access_token, token_type="bearer")
 
 
-@user_route.post("/uploadfile")
+@user_api.post("/uploadfile")
 async def uploadfile(file: UploadFile):
     with open(f"./src/static/{file.filename}", "wb") as f:
         f.write(await file.read())
