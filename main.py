@@ -60,4 +60,6 @@ async def validation_exception_handler(request: Request,
 try:
     scheduler.start()
 except:
-    log.info("暂无后台任务！")
+    log.info("后台任务启动失败！")
+else: 
+	log.info("暂无后台任务！")
