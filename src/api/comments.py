@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends
-from src.models import Comments, Users
+from src.db.models import Comments, Users
 from .. import schemas
 from ..utils.log_util import log
 from ..utils import security_util, exceptions_util as exception

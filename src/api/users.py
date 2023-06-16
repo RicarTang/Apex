@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends, UploadFile
 from fastapi.encoders import jsonable_encoder
-from src.models import User_Pydantic, Login_pydantic, Users
+from src.db.models import User_Pydantic, Login_pydantic, Users
 from tortoise.contrib.fastapi import HTTPNotFoundError
 from .. import schemas
 from ..utils.log_util import log

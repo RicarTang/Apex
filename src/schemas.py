@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field, Extra
-from .models import User_Pydantic, Comment_Pydantic, Login_pydantic
+from .db.models import User_Pydantic, Comment_Pydantic, Login_pydantic
 from typing import List, Optional
 
 

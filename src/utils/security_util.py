@@ -5,7 +5,7 @@ from fastapi.security import OAuth2PasswordBearer
 from passlib.hash import md5_crypt
 from fastapi import Depends
 from fastapi.exceptions import HTTPException
-from ..models import Users
+from ..db.models import Users
 from .. import schemas
 from fastapi.encoders import jsonable_encoder
 from ..utils.log_util import log

@@ -1,5 +1,5 @@
 """暂时丢弃此模块。"""
-from ..models import Users
+from ..db.models import Users
 from ..utils.log_util import log
 
 

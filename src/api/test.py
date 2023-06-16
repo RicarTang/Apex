@@ -1,5 +1,5 @@
 from ..schemas import User
-from ..models import Users
+from ..db.models import Users
 from datetime import datetime, timedelta
 from typing import Union
 from fastapi import Depends, FastAPI, HTTPException, status,APIRouter

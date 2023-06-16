@@ -10,4 +10,4 @@ log_formatter = "%(levelname)s:     %(asctime)s - %(filename)s - %(funcName)s - 
 db_url = "mysql://root:123456@127.0.0.1:3306/tortoise"
 
 # models
-models_path = "src.models"
+models_path = "src.db.models"
