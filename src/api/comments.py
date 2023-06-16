@@ -13,7 +13,8 @@ async def create_comment(
     current_user: schemas.UserPy = Depends(security_util.get_current_user),
 ):
     """创建comment"""
-    com = await Comments.create(**comment.dict(exclude_unset=True))
+    # com = await Comments.create(**comment.dict(exclude_unset=True))
+    com = await Comments.create(user_id=current_user.id, comment=comment)
     log.debug(f"com返回参数：{await com.first().values()}")
     return schemas.CommentTo(data=com)
 
