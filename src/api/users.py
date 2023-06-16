@@ -16,7 +16,11 @@ user_api = APIRouter()
 
 
 @user_api.get("/users", summary="获取所有用户", response_model=schemas.UsersOut)
-async def get_users(limit: Optional[int] = 10, offset: Optional[int] = 0):
+async def get_users(
+    limit: Optional[int] = 10,
+    offset: Optional[int] = 0,
+    current_user: schemas.UserPy = Depends(security_util.get_current_user),
+):
     """获取所有用户."""
     result = await User_Pydantic.from_queryset(Users.all().offset(offset).limit(limit))
     return schemas.UsersOut(data=result)
@@ -45,7 +49,9 @@ async def create_user(user: schemas.UserIn):
     summary="查询用户",
     responses={404: {"model": HTTPNotFoundError}},
 )
-async def get_user(user_id: int):
+async def get_user(
+    user_id: int, current_user: schemas.UserPy = Depends(security_util.get_current_user)
+):
     """查询单个用户."""
     log.debug(f"{await Users.get(id=user_id).values()}")
     # return await User_Pydantic.from_queryset_single(Users.get(id=user_id))
@@ -59,7 +65,11 @@ async def get_user(user_id: int):
     summary="更新用户",
     responses={404: {"model": HTTPNotFoundError}},
 )
-async def update_user(user_id: int, user: schemas.UserIn):
+async def update_user(
+    user_id: int,
+    user: schemas.UserIn,
+    current_user: schemas.UserPy = Depends(security_util.get_current_user),
+):
     """更新用户信息."""
     user.password = md5_crypt.hash(user.password)
     result = await Users.filter(id=user_id).update(**user.dict(exclude_unset=True))
@@ -73,7 +83,9 @@ async def update_user(user_id: int, user: schemas.UserIn):
     summary="删除用户",
     responses={404: {"model": HTTPNotFoundError}},
 )
-async def delete_user(user_id: int):
+async def delete_user(
+    user_id: int, current_user: schemas.UserPy = Depends(security_util.get_current_user)
+):
     """删除用户."""
     deleted_count = await Users.filter(id=user_id).delete()
     log.debug("")
@@ -83,8 +95,10 @@ async def delete_user(user_id: int):
 
 
 @user_api.post("/login", summary="登录", response_model=schemas.Login)
-async def login(user: schemas.LoginIn):
-    # async def login(user: OAuth2PasswordRequestForm = Depends()):  # OAuth2PasswordRequestForm表单登陆
+# async def login(user: schemas.LoginIn):
+async def login(
+    user: OAuth2PasswordRequestForm = Depends(),
+):  # OAuth2PasswordRequestForm表单登陆
     """用户登陆."""
     # try:
     #     # query_user = await Login_pydantic.from_tortoise_orm(

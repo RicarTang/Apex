@@ -8,7 +8,10 @@ comment_api = APIRouter()
 
 
 @comment_api.post("/create", summary="发表评论", response_model=schemas.CommentTo)
-async def create_comment(comment: schemas.CommentIn):
+async def create_comment(
+    comment: schemas.CommentIn,
+    current_user: schemas.UserPy = Depends(security_util.get_current_user),
+):
     """创建comment"""
     com = await Comments.create(**comment.dict(exclude_unset=True))
     log.debug(f"com返回参数：{await com.first().values()}")
@@ -18,7 +21,9 @@ async def create_comment(comment: schemas.CommentIn):
 @comment_api.get(
     "/comments/{user_id}", summary="获取用户评论", response_model=schemas.CommentsTo
 )
-async def get_user_comment(user_id: int):
+async def get_user_comment(
+    user_id: int, current_user: schemas.UserPy = Depends(security_util.get_current_user)
+):
     """获取某个user的comments"""
     try:
         user = await Users.filter(id=user_id).first().prefetch_related("comments")
