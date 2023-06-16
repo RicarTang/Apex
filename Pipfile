@@ -14,6 +14,7 @@ tortoise-orm = {extras = ["asyncmy"], version = "*"}
 cryptography = "*"
 apscheduler = "*"
 pytz-deprecation-shim = "*"
+aerich = "*"
 
 [dev-packages]
 black = "*"
@@ -23,3 +24,7 @@ python_version = "3.10"
 
 [scripts]
 dev = "uvicorn main:app --reload --host 0.0.0.0 --port 4000"
+aerichInit = "aerich init -t src.db.settings.TORTOISE_ORM"
+initDb = "aerich init-db"
+migrate = "aerich migrate"
+dbUpgrade = "aerich upgrade"

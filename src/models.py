@@ -8,9 +8,9 @@ class TimeStampMixin:
     created_at = fields.DatetimeField(auto_now_add=True, description="创建时间")
     modified_at = fields.DatetimeField(auto_now=True, description="更新时间")
 
-# class Disabled(IntEnum):
-#     TRUE = 1
-    # FALSE = 0
+class Disabled(IntEnum):
+    TRUE = 1
+    FALSE = 0
 
 class Users(models.Model, TimeStampMixin):
     """用户模型"""
@@ -21,7 +21,7 @@ class Users(models.Model, TimeStampMixin):
     surname = fields.CharField(max_length=50, null=True, description="姓")
     descriptions = fields.CharField(max_length=30, null=True, description="个人描述")
     password = fields.CharField(max_length=128, description="密码")
-    # disabled = fields.CharEnumField(enum_type=Disabled,default=Disabled.FALSE,description="用户活动状态")
+    disabled = fields.IntEnumField(enum_type=Disabled,default=Disabled.FALSE,description="用户活动状态")
     # 类型提示
     comments: fields.ReverseRelation["Comments"]
 
