@@ -57,6 +57,7 @@ class RoleIn(BaseModel):
     """角色request schema"""
 
     name: str = Field(max_length=20, description="角色名称")
+    description: Optional[str] = Field(max_length=50, description="角色详情")
 
 
 class RoleTo(BaseSchema):

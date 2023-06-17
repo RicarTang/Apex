@@ -7,7 +7,7 @@ from ..utils.log_util import log
 admin_api = APIRouter()
 
 
-@admin_api.post("/create", summary="创建角色", response_model=schemas.RoleTo)
+@admin_api.post("/role/create", summary="创建角色", response_model=schemas.RoleTo)
 async def create_role(name: schemas.RoleIn):
     """创建角色api
 
