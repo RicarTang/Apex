@@ -1,10 +1,11 @@
 from pydantic import BaseModel, Field, Extra
-from .db.models import User_Pydantic, Comment_Pydantic, Login_pydantic
+from .db.models import User_Pydantic, Comment_Pydantic, Login_pydantic, Role_Pydantic
 from typing import List, Optional
 
 
 class BaseSchema(BaseModel):
     """success状态"""
+
     success: bool = Field(default=True)
 
 
@@ -14,6 +15,7 @@ class Status(BaseSchema):
 
 class User(BaseModel):
     """用户"""
+
     username: str
     surname: Optional[str]
     name: Optional[str]
@@ -22,11 +24,13 @@ class User(BaseModel):
 
 class UserIn(User):
     """用户request schema"""
+
     password: str = Field(min_length=6, max_length=20)
 
 
 class UserOut(BaseSchema):
     """单用户response schema"""
+
     data: User_Pydantic
 
     # class Config:
@@ -35,18 +39,35 @@ class UserOut(BaseSchema):
 
 class UsersOut(BaseSchema):
     """用户集response schema"""
+
     data: List[User_Pydantic]
 
-class UserPy(User_Pydantic,extra=Extra.ignore):
+
+class UserPy(User_Pydantic, extra=Extra.ignore):
     """
     extra=Extra.ignore,表示忽略多的属性，
     不加时，多了模型没有的属性会报错，
     这里忽略password属性
     """
+
     pass
+
+
+class RoleIn(BaseModel):
+    """角色request schema"""
+
+    name: str = Field(max_length=20, description="角色名称")
+
+
+class RoleTo(BaseSchema):
+    """角色response schema"""
+
+    data: Role_Pydantic
+
 
 class Login(BaseSchema):
     """登录response schema"""
+
     data: UserPy
     access_token: str
     token_type: str
@@ -54,6 +75,7 @@ class Login(BaseSchema):
 
 class LoginIn(BaseModel):
     """登录request schema"""
+
     username: str
     password: str
 
@@ -66,6 +88,7 @@ class CommentIn(BaseModel):
     request schema，
     用户单条评论。
     """
+
     # user_id: int = Field(gt=0, description="用户id")
     comment: str = Field(max_length=50, description="用户评论")
 
@@ -75,6 +98,7 @@ class CommentTo(BaseSchema):
     response schema，
     用户单条评论。
     """
+
     data: Comment_Pydantic
 
 
@@ -83,4 +107,5 @@ class CommentsTo(BaseSchema):
     response schema，
     某个用户的所有评论。
     """
+
     data: List[Comment_Pydantic]

@@ -48,11 +48,17 @@ class Role(models.Model, TimeStampMixin):
     """角色表"""
 
     id = fields.IntField(pk=True, index=True)
-    name = fields.CharField(max_length=20, description="角色名称")
+    name = fields.CharField(max_length=20, unique=True, description="角色名称")
     # 与用户多对多关系
     users: fields.ManyToManyRelation[Users] = fields.ManyToManyField(
         "models.Users", related_name="roles"
     )
+
+
+# class Permission(models.Model, TimeStampMixin):
+#     """权限表"""
+
+#     id = fields.IntField(pk=True, index=True)
 
 
 class Comments(models.Model, TimeStampMixin):
@@ -69,9 +75,13 @@ class Comments(models.Model, TimeStampMixin):
         return str(self.id)
 
 
+# 用户schema
 User_Pydantic = pydantic_model_creator(Users, name="User", exclude=("password",))
 Login_pydantic = pydantic_model_creator(Users, name="Login_models")
 UserIn_Pydantic = pydantic_model_creator(
     Users, name="UserIn_models", exclude_readonly=True
 )
+# 评论schema
 Comment_Pydantic = pydantic_model_creator(Comments, name="CommentTo")
+# 角色schema
+Role_Pydantic = pydantic_model_creator(Role, name="RoleTo")
