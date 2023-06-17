@@ -14,8 +14,8 @@ async def create_comment(
 ):
     """创建comment"""
     # com = await Comments.create(**comment.dict(exclude_unset=True))
-    com = await Comments.create(user_id=current_user.id, comment=comment)
-    log.debug(f"com返回参数：{await com.first().values()}")
+    com = await Comments.create(user_id=current_user.id, comment=comment.comment)
+    # log.debug(f"com返回参数：{await com.first().values()}")
     return schemas.CommentTo(data=com)
 
 

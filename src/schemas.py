@@ -67,7 +67,7 @@ class CommentIn(BaseModel):
     用户单条评论。
     """
     # user_id: int = Field(gt=0, description="用户id")
-    comment: str = Field(max_length=500, description="用户评论")
+    comment: str = Field(max_length=50, description="用户评论")
 
 
 class CommentTo(BaseSchema):
