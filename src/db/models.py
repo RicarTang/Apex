@@ -11,8 +11,18 @@ class TimeStampMixin:
 
 
 class Disabled(IntEnum):
+    """用户disabled枚举"""
+
     TRUE = 1
     FALSE = 0
+
+
+class PermissionCode(IntEnum):
+    """权限code"""
+
+    LOW = 0
+    MEDIUM = 1
+    HIGH = 2
 
 
 class Users(models.Model, TimeStampMixin):
@@ -49,16 +59,22 @@ class Role(models.Model, TimeStampMixin):
 
     id = fields.IntField(pk=True, index=True)
     name = fields.CharField(max_length=20, unique=True, description="角色名称")
+
     # 与用户多对多关系
     users: fields.ManyToManyRelation[Users] = fields.ManyToManyField(
         "models.Users", related_name="roles"
     )
 
 
-# class Permission(models.Model, TimeStampMixin):
-#     """权限表"""
+class Permission(models.Model, TimeStampMixin):
+    """权限表"""
 
-#     id = fields.IntField(pk=True, index=True)
+    id = fields.IntField(pk=True, index=True)
+    name = fields.CharField(max_length=20, unique=True, description="权限名称")
+    description = fields.CharField(max_length=50, description="权限解释")
+    code = fields.IntEnumField(
+        enum_type=PermissionCode, default=PermissionCode.MEDIUM, description="权限级别代码"
+    )
 
 
 class Comments(models.Model, TimeStampMixin):
