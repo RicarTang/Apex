@@ -5,12 +5,15 @@ from enum import IntEnum
 
 class TimeStampMixin:
     """创建/更新时间"""
+
     created_at = fields.DatetimeField(auto_now_add=True, description="创建时间")
     modified_at = fields.DatetimeField(auto_now=True, description="更新时间")
+
 
 class Disabled(IntEnum):
     TRUE = 1
     FALSE = 0
+
 
 class Users(models.Model, TimeStampMixin):
     """用户模型"""
@@ -21,7 +24,9 @@ class Users(models.Model, TimeStampMixin):
     surname = fields.CharField(max_length=50, null=True, description="姓")
     descriptions = fields.CharField(max_length=30, null=True, description="个人描述")
     password = fields.CharField(max_length=128, description="密码")
-    disabled = fields.IntEnumField(enum_type=Disabled,default=Disabled.FALSE,description="用户活动状态")
+    disabled = fields.IntEnumField(
+        enum_type=Disabled, default=Disabled.FALSE, description="用户活动状态"
+    )
     # 类型提示
     comments: fields.ReverseRelation["Comments"]
 
@@ -40,12 +45,12 @@ class Users(models.Model, TimeStampMixin):
 
 class Comments(models.Model, TimeStampMixin):
     """用户评论模型"""
+
     id = fields.IntField(pk=True, index=True)
     comment = fields.TextField(description="用户评论")
     # 外键
     user: fields.ForeignKeyRelation[Users] = fields.ForeignKeyField(
-        model_name="models.Users",
-        related_name="comments"
+        model_name="models.Users", related_name="comments"
     )
 
     def __str__(self):
@@ -54,5 +59,7 @@ class Comments(models.Model, TimeStampMixin):
 
 User_Pydantic = pydantic_model_creator(Users, name="User", exclude=("password",))
 Login_pydantic = pydantic_model_creator(Users, name="Login_models")
-UserIn_Pydantic = pydantic_model_creator(Users, name="UserIn_models", exclude_readonly=True)
+UserIn_Pydantic = pydantic_model_creator(
+    Users, name="UserIn_models", exclude_readonly=True
+)
 Comment_Pydantic = pydantic_model_creator(Comments, name="CommentTo")
