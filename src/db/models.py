@@ -64,6 +64,8 @@ class Role(models.Model, TimeStampMixin):
     users: fields.ManyToManyRelation[Users] = fields.ManyToManyField(
         "models.Users", related_name="roles"
     )
+    # 与权限表多对多
+    permissions: fields.ManyToManyRelation["Permission"]
 
 
 class Permission(models.Model, TimeStampMixin):
@@ -75,7 +77,7 @@ class Permission(models.Model, TimeStampMixin):
     code = fields.IntEnumField(
         enum_type=PermissionCode, default=PermissionCode.MEDIUM, description="权限级别代码"
     )
-
+    roles: fields.ManyToManyRelation[Role] = fields.ManyToManyField("models.Role",related_name="permissions")    
 
 class Comments(models.Model, TimeStampMixin):
     """用户评论模型"""
