@@ -27,7 +27,7 @@ app.add_middleware(
 register_tortoise(
     app,
     config=TORTOISE_ORM,
-    generate_schemas=False,  # 重启服务时自动生成数据库表
+    generate_schemas=False,  # 重启服务时自动生成数据库表；关闭，改为使用aerich
     add_exception_handlers=True,
 )
 # router
