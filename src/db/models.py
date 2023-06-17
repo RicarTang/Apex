@@ -27,8 +27,9 @@ class Users(models.Model, TimeStampMixin):
     disabled = fields.IntEnumField(
         enum_type=Disabled, default=Disabled.FALSE, description="用户活动状态"
     )
-    # 类型提示
+    # 关联关系
     comments: fields.ReverseRelation["Comments"]
+    roles: fields.ManyToManyRelation["Role"]
 
     def __str__(self):
         return str(self.id)
@@ -41,6 +42,17 @@ class Users(models.Model, TimeStampMixin):
 
     # class PydanticMeta:
     #     computed = ["full_name"]
+
+
+class Role(models.Model, TimeStampMixin):
+    """角色表"""
+
+    id = fields.IntField(pk=True, index=True)
+    name = fields.CharField(max_length=20, description="角色名称")
+    # 与用户多对多关系
+    users: fields.ManyToManyRelation[Users] = fields.ManyToManyField(
+        "models.Users", related_name="roles"
+    )
 
 
 class Comments(models.Model, TimeStampMixin):
