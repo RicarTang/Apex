@@ -59,6 +59,7 @@ class Role(models.Model, TimeStampMixin):
 
     id = fields.IntField(pk=True, index=True)
     name = fields.CharField(max_length=20, unique=True, description="角色名称")
+    description = fields.CharField(max_length=50, description="角色详情")
 
     # 与用户多对多关系
     users: fields.ManyToManyRelation[Users] = fields.ManyToManyField(
@@ -74,10 +75,13 @@ class Permission(models.Model, TimeStampMixin):
     id = fields.IntField(pk=True, index=True)
     name = fields.CharField(max_length=20, unique=True, description="权限名称")
     description = fields.CharField(max_length=50, description="权限解释")
-    code = fields.IntEnumField(
+    permission_code = fields.IntEnumField(
         enum_type=PermissionCode, default=PermissionCode.MEDIUM, description="权限级别代码"
     )
-    roles: fields.ManyToManyRelation[Role] = fields.ManyToManyField("models.Role",related_name="permissions")    
+    roles: fields.ManyToManyRelation[Role] = fields.ManyToManyField(
+        "models.Role", related_name="permissions"
+    )
+
 
 class Comments(models.Model, TimeStampMixin):
     """用户评论模型"""
