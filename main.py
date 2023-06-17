@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Request
 from tortoise.contrib.fastapi import register_tortoise
-from src.api import user_api, comment_api, test_api, role_api
+from src.api import user_api, comment_api, test_api, admin_api
 
 # import config
 from fastapi.exceptions import RequestValidationError
@@ -33,7 +33,7 @@ register_tortoise(
 # router
 app.include_router(user_api, tags=["User"], prefix="/user")
 app.include_router(comment_api, tags=["Comment"], prefix="/comment")
-app.include_router(role_api, tags=["Role"], prefix="/role")
+app.include_router(admin_api, tags=["Admin"], prefix="/admin")
 # app.include_router(test_route, tags=['Test'], prefix='/test')
 # exception
 app.add_exception_handler(ResponseException, response_exception)
