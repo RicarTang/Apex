@@ -1,5 +1,14 @@
-from pydantic import BaseModel, Field, Extra
-from .db.models import User_Pydantic, Comment_Pydantic, Login_pydantic, Role_Pydantic
+from pydantic import BaseModel, Field, Extra, validator, ValidationError
+from .db.models import (
+    User_Pydantic,
+    Comment_Pydantic,
+    Login_pydantic,
+    Role_Pydantic,
+    Permission_Pydantic,
+    DisabledEnum,
+    # PermissionIn_Pydantic,
+    PermissionCodeEnum,
+)
 from typing import List, Optional
 
 
@@ -20,6 +29,9 @@ class User(BaseModel):
     surname: Optional[str]
     name: Optional[str]
     descriptions: Optional[str] = Field(max_length=50)
+    disabled: Optional[DisabledEnum] = Field(
+        default=DisabledEnum.FALSE, description="0:Disable,1:Enable"
+    )
 
 
 class UserIn(User):
@@ -64,6 +76,22 @@ class RoleTo(BaseSchema):
     """角色response schema"""
 
     data: Role_Pydantic
+
+
+class PermissionIn(BaseModel):
+    """permission request schema"""
+
+    name: str = Field(max_length=20, description="权限名称")
+    description: str = Field(max_length=50, description="权限介绍")
+    permission_code: PermissionCodeEnum = Field(
+        default=PermissionCodeEnum.MEDIUM, description="权限级别码"
+    )
+
+
+class PermissionTo(BaseSchema):
+    """permission response schema"""
+
+    data: Permission_Pydantic
 
 
 class Login(BaseSchema):

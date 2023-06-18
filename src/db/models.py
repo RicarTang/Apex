@@ -10,14 +10,14 @@ class TimeStampMixin:
     update_at = fields.DatetimeField(auto_now=True, description="更新时间")
 
 
-class Disabled(IntEnum):
+class DisabledEnum(IntEnum):
     """用户disabled枚举"""
 
     TRUE = 1
     FALSE = 0
 
 
-class PermissionCode(IntEnum):
+class PermissionCodeEnum(IntEnum):
     """权限code"""
 
     LOW = 0
@@ -35,7 +35,7 @@ class Users(models.Model, TimeStampMixin):
     descriptions = fields.CharField(max_length=30, null=True, description="个人描述")
     password = fields.CharField(max_length=128, description="密码")
     disabled = fields.IntEnumField(
-        enum_type=Disabled, default=Disabled.FALSE, description="用户活动状态"
+        enum_type=DisabledEnum, default=DisabledEnum.FALSE, description="用户活动状态"
     )
     # 关联关系
     comments: fields.ReverseRelation["Comments"]
@@ -76,7 +76,7 @@ class Permission(models.Model, TimeStampMixin):
     name = fields.CharField(max_length=20, unique=True, description="权限名称")
     description = fields.CharField(max_length=50, null=True, description="权限解释")
     permission_code = fields.IntEnumField(
-        enum_type=PermissionCode, default=PermissionCode.MEDIUM, description="权限级别代码"
+        enum_type=PermissionCodeEnum, default=PermissionCodeEnum.MEDIUM, description="权限级别代码"
     )
     roles: fields.ManyToManyRelation[Role] = fields.ManyToManyField(
         "models.Role", related_name="permissions"
@@ -107,3 +107,8 @@ UserIn_Pydantic = pydantic_model_creator(
 Comment_Pydantic = pydantic_model_creator(Comments, name="CommentTo")
 # 角色schema
 Role_Pydantic = pydantic_model_creator(Role, name="RoleTo")
+# 权限
+# PermissionIn_Pydantic = pydantic_model_creator(
+#     Permission, name="PermissionIo", exclude=("id",), exclude_readonly=True
+# )
+Permission_Pydantic = pydantic_model_creator(Permission, name="PermissionTo")
