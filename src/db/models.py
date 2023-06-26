@@ -35,7 +35,9 @@ class Users(models.Model, TimeStampMixin):
     descriptions = fields.CharField(max_length=30, null=True, description="个人描述")
     password = fields.CharField(max_length=128, description="密码")
     disabled = fields.IntEnumField(
-        enum_type=DisabledEnum, default=DisabledEnum.FALSE, description="用户活动状态"
+        enum_type=DisabledEnum,
+        default=DisabledEnum.FALSE,
+        description="用户活动状态,0:enabled,1:disabled",
     )
     # 关联关系
     comments: fields.ReverseRelation["Comments"]
@@ -69,6 +71,34 @@ class Role(models.Model, TimeStampMixin):
     permissions: fields.ManyToManyRelation["Permission"]
 
 
+class CasbinRule(models.Model):
+    """casbin规则表"""
+
+    id: fields.IntField = fields.IntField(pk=True)
+    ptype: fields.CharField = fields.CharField(max_length=255)
+    v0: fields.CharField = fields.CharField(max_length=255, null=True)
+    v1: fields.CharField = fields.CharField(max_length=255, null=True)
+    v2: fields.CharField = fields.CharField(max_length=255, null=True)
+    v3: fields.CharField = fields.CharField(max_length=255, null=True)
+    v4: fields.CharField = fields.CharField(max_length=255, null=True)
+    v5: fields.CharField = fields.CharField(max_length=255, null=True)
+
+    class Meta:
+        table: str = "casbin_rule"
+
+    def __str__(self):
+        arr = [self.ptype]
+        for v in (self.v0, self.v1, self.v2, self.v3, self.v4, self.v5):
+            if v is None:
+                break
+            arr.append(v)
+
+        return ", ".join(arr)
+
+    def __repr__(self):
+        return '<CasbinRule {}: "{}">'.format(self.id, str(self))
+
+
 class Permission(models.Model, TimeStampMixin):
     """权限表"""
 
@@ -76,7 +106,9 @@ class Permission(models.Model, TimeStampMixin):
     name = fields.CharField(max_length=20, unique=True, description="权限名称")
     description = fields.CharField(max_length=50, null=True, description="权限解释")
     permission_code = fields.IntEnumField(
-        enum_type=PermissionCodeEnum, default=PermissionCodeEnum.MEDIUM, description="权限级别代码"
+        enum_type=PermissionCodeEnum,
+        default=PermissionCodeEnum.MEDIUM,
+        description="权限级别代码",
     )
     roles: fields.ManyToManyRelation[Role] = fields.ManyToManyField(
         "models.Role", related_name="permissions"

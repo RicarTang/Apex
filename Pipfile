@@ -16,11 +16,12 @@ apscheduler = "*"
 pytz-deprecation-shim = "*"
 aerich = "*"
 casbin = "*"
-fastapi-authz = "*"
-pyjwt = "*"
+casbin-tortoise-adapter = "*"
 
 [dev-packages]
 black = "*"
+fastapi-authz = "*"
+pyjwt = "*"
 
 [requires]
 python_version = "3.10"
@@ -29,5 +30,5 @@ python_version = "3.10"
 dev = "uvicorn main:app --reload --host 0.0.0.0 --port 4000"
 aerich_init = "aerich init -t src.db.settings.TORTOISE_ORM"
 init_db = "aerich init-db"
-migrate = "aerich migrate"
-upgrade = "aerich upgrade"
+migrate_db = "aerich migrate"
+upgrade_db = "aerich upgrade"
