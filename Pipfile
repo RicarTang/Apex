@@ -15,6 +15,9 @@ cryptography = "*"
 apscheduler = "*"
 pytz-deprecation-shim = "*"
 aerich = "*"
+casbin = "*"
+fastapi-authz = "*"
+pyjwt = "*"
 
 [dev-packages]
 black = "*"
