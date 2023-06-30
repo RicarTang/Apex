@@ -2,7 +2,7 @@ from pydantic import BaseModel, Field, Extra, validator, ValidationError
 from .db.models import (
     User_Pydantic,
     Comment_Pydantic,
-    Login_pydantic,
+    # Login_pydantic,
     Role_Pydantic,
     Permission_Pydantic,
     DisabledEnum,
@@ -29,7 +29,7 @@ class User(BaseModel):
     surname: Optional[str]
     name: Optional[str]
     descriptions: Optional[str] = Field(max_length=50)
-    disabled: Optional[DisabledEnum] = Field(
+    is_active: Optional[DisabledEnum] = Field(
         default=DisabledEnum.ENABLE, description="0:Disable,1:Enable"
     )
 
