@@ -2,10 +2,10 @@ import config
 
 
 TORTOISE_ORM = {
-    "connections": {"default": config.db_url},
+    "connections": {"default": config.DB_URL},
     "apps": {
         "models": {
-            "models": ["aerich.models",config.models_path],
+            "models": ["aerich.models",config.MODELS_PATH],
             "default_connection": "default",
         }
     },
