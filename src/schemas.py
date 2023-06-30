@@ -30,7 +30,7 @@ class User(BaseModel):
     name: Optional[str]
     descriptions: Optional[str] = Field(max_length=50)
     disabled: Optional[DisabledEnum] = Field(
-        default=DisabledEnum.FALSE, description="0:Disable,1:Enable"
+        default=DisabledEnum.ENABLE, description="0:Disable,1:Enable"
     )
 
 

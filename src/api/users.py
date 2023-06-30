@@ -95,10 +95,10 @@ async def delete_user(
 
 
 @user_api.post("/login", summary="登录", response_model=schemas.Login)
-# async def login(user: schemas.LoginIn):
-async def login(
-    user: OAuth2PasswordRequestForm = Depends(),
-):  # OAuth2PasswordRequestForm表单登陆
+async def login(user: schemas.LoginIn):
+# async def login(
+#     user: OAuth2PasswordRequestForm = Depends(),
+# ):  # OAuth2PasswordRequestForm表单登陆
     """用户登陆."""
     # try:
     #     # query_user = await Login_pydantic.from_tortoise_orm(

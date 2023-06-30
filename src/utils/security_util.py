@@ -1,7 +1,7 @@
 from typing import Union
 from jose import JWTError, jwt
 from datetime import timedelta, datetime
-from fastapi.security import OAuth2PasswordBearer
+from fastapi.security import OAuth2PasswordBearer,HTTPBearer,HTTPAuthorizationCredentials
 from passlib.hash import md5_crypt
 from fastapi import Depends
 from fastapi.exceptions import HTTPException
@@ -11,7 +11,8 @@ from fastapi.encoders import jsonable_encoder
 from ..utils.log_util import log
 from tortoise.queryset import QuerySet
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/user/login")
+# oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/user/login")
+oauth2_bearer = HTTPBearer()
 # jwt相关配置
 SECRET_KEY = "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7"
 ALGORITHM = "HS256"
@@ -35,17 +36,17 @@ def create_access_token(data: dict, expires_delta: Union[timedelta, None] = None
     log.debug(f"encoded_jwt:{encoded_jwt}")
     return encoded_jwt
 
-async def get_current_user(token: str = Depends(oauth2_scheme)) -> QuerySet:
+async def get_current_user(bearer: HTTPAuthorizationCredentials = Depends(oauth2_bearer)) -> QuerySet:
     """得到当前用户"""
     print("get_current_user")
-    log.debug(f"token:{token}")
+    log.debug(f"bearer:{bearer}")
     credentials_exception = HTTPException(
         status_code=401,
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        payload = jwt.decode(bearer.credentials, SECRET_KEY, algorithms=[ALGORITHM])
         log.debug(f"payload:{payload}")
         username: str = payload.get("sub")
         if username is None:

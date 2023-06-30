@@ -13,8 +13,8 @@ class TimeStampMixin:
 class DisabledEnum(IntEnum):
     """用户disabled枚举"""
 
-    TRUE = 1
-    FALSE = 0
+    ENABLE = 1
+    DISABLE = 0
 
 
 class PermissionCodeEnum(IntEnum):
@@ -34,10 +34,10 @@ class Users(models.Model, TimeStampMixin):
     surname = fields.CharField(max_length=50, null=True, description="姓")
     descriptions = fields.CharField(max_length=30, null=True, description="个人描述")
     password = fields.CharField(max_length=128, description="密码")
-    disabled = fields.IntEnumField(
+    is_active = fields.IntEnumField(
         enum_type=DisabledEnum,
-        default=DisabledEnum.FALSE,
-        description="用户活动状态,0:enabled,1:disabled",
+        default=DisabledEnum.ENABLE,
+        description="用户活动状态,0:disable,1:enabled",
     )
     # 关联关系
     comments: fields.ReverseRelation["Comments"]
