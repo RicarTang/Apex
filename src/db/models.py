@@ -44,7 +44,7 @@ class Users(models.Model, TimeStampMixin):
     roles: fields.ManyToManyRelation["Role"]
 
     def __str__(self):
-        return str(self.id)
+        return str(self.username)
 
 
 class Role(models.Model, TimeStampMixin):
@@ -59,7 +59,7 @@ class Role(models.Model, TimeStampMixin):
         "models.Users", related_name="roles"
     )
     # 与权限表多对多
-    permissions: fields.ManyToManyRelation["Permission"]
+    # permissions: fields.ManyToManyRelation["Permission"]
 
 
 class CasbinRule(models.Model):
@@ -131,7 +131,7 @@ Comment_Pydantic = pydantic_model_creator(Comments, name="CommentTo")
 # 角色schema
 Role_Pydantic = pydantic_model_creator(Role, name="RoleTo")
 # 权限
-# PermissionIn_Pydantic = pydantic_model_creator(
-#     Permission, name="PermissionIo", exclude=("id",), exclude_readonly=True
-# )
+PermissionIn_Pydantic = pydantic_model_creator(
+    Permission, name="PermissionIo", exclude=("id",), exclude_readonly=True
+)
 Permission_Pydantic = pydantic_model_creator(Permission, name="PermissionTo")

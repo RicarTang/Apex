@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Depends, UploadFile
+from fastapi import APIRouter, HTTPException, Depends, UploadFile, Request
 from fastapi.encoders import jsonable_encoder
 from src.db.models import User_Pydantic, Login_pydantic, Users
 from tortoise.contrib.fastapi import HTTPNotFoundError
@@ -10,7 +10,8 @@ from ..utils import exceptions_util as exception
 from ..utils import security_util
 from datetime import timedelta
 from typing import Optional
-from fastapi.security import OAuth2PasswordRequestForm
+
+# from fastapi.security import OAuth2PasswordRequestForm
 
 user_api = APIRouter()
 
@@ -28,13 +29,22 @@ async def get_users(
 
 @user_api.get("/me", summary="获取当前用户", response_model=schemas.UserPy)
 async def get_current_user(
+    request: Request,
     current_user: schemas.UserPy = Depends(security_util.get_current_user),
 ):
     """获取当前用户"""
+    
+    auth_hearder = request.headers["authorization"]
+    token = auth_hearder.split(' ')
+    log.debug(f'token:{token}')
     return current_user
 
 
-@user_api.post("/create", summary="创建用户", response_model=schemas.UserOut)
+@user_api.post(
+    "/create",
+    summary="创建用户",
+    response_model=schemas.UserOut,
+)
 async def create_user(user: schemas.UserIn):
     """创建用户."""
     user.password = md5_crypt.hash(user.password)
@@ -94,11 +104,11 @@ async def delete_user(
     return schemas.Status(message=f"Deleted user {user_id}")
 
 
-@user_api.post("/login", summary="登录", response_model=schemas.Login)
+@user_api.post("/login", summary="登录", dependencies=[], response_model=schemas.Login)
 async def login(user: schemas.LoginIn):
-# async def login(
-#     user: OAuth2PasswordRequestForm = Depends(),
-# ):  # OAuth2PasswordRequestForm表单登陆
+    # async def login(
+    #     user: OAuth2PasswordRequestForm = Depends(),
+    # ):  # OAuth2PasswordRequestForm表单登陆
     """用户登陆."""
     # try:
     #     # query_user = await Login_pydantic.from_tortoise_orm(

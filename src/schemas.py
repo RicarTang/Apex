@@ -6,7 +6,7 @@ from .db.models import (
     Role_Pydantic,
     Permission_Pydantic,
     DisabledEnum,
-    # PermissionIn_Pydantic,
+    PermissionIn_Pydantic,
     PermissionCodeEnum,
 )
 from typing import List, Optional
