@@ -2,13 +2,12 @@ from fastapi import FastAPI, Request, Depends
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi_authz.middleware import CasbinMiddleware
-from starlette.middleware.authentication import AuthenticationMiddleware
+# from fastapi_authz.middleware import CasbinMiddleware
+# from starlette.middleware.authentication import AuthenticationMiddleware
 from tortoise.contrib.fastapi import register_tortoise
-from src.core.authentication import JWTAuthenticationBackend,enforcer,JWTMiddleware
+# from src.core.authentication import JWTAuthenticationBackend,enforcer,JWTMiddleware
 from src.api import user_api, comment_api, test_api, admin_api
 from src.utils.exceptions_util import ResponseException, response_exception
-from src.utils.security_util import get_current_user
 from src.utils.background_task_util import scheduler
 from src.utils.log_util import log
 from src.db.settings import TORTOISE_ORM
@@ -17,7 +16,6 @@ app = FastAPI(
     title="api swagger",
     version="1.0",
     description="fastapi+tortoise-orm async web framework",
-    # dependencies=[Depends(get_current_user)]
 )
 
 app.add_middleware(

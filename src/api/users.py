@@ -1,15 +1,17 @@
+from typing import Optional
+from datetime import timedelta
 from fastapi import APIRouter, HTTPException, Depends, UploadFile, Request
 from fastapi.encoders import jsonable_encoder
+from passlib.hash import md5_crypt
 from src.db.models import User_Pydantic, Login_pydantic, Users
 from tortoise.contrib.fastapi import HTTPNotFoundError
 from .. import schemas
 from ..utils.log_util import log
 from ..utils import security_util
-from passlib.hash import md5_crypt
 from ..utils import exceptions_util as exception
 from ..utils import security_util
-from datetime import timedelta
-from typing import Optional
+from ..core.authentication import enforcer
+
 
 # from fastapi.security import OAuth2PasswordRequestForm
 

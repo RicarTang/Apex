@@ -1,4 +1,4 @@
-"""安全权限模块"""
+"""安全权限模块(先不重构至core)"""
 from typing import Union
 from datetime import timedelta, datetime
 from jose import JWTError, jwt
