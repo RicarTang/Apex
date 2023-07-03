@@ -2,15 +2,16 @@ from fastapi import FastAPI, Request, Depends
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
-# from fastapi_authz.middleware import CasbinMiddleware
-# from starlette.middleware.authentication import AuthenticationMiddleware
+from fastapi_authz import CasbinMiddleware
+from starlette.middleware.authentication import AuthenticationMiddleware
 from tortoise.contrib.fastapi import register_tortoise
-# from src.core.authentication import JWTAuthenticationBackend,enforcer,JWTMiddleware
+from src.core.authentication import JWTAuthenticationBackend,enforcer,JWTMiddleware
 from src.api import user_api, comment_api, test_api, admin_api
 from src.utils.exceptions_util import ResponseException, response_exception
 from src.utils.background_task_util import scheduler
 from src.utils.log_util import log
 from src.db.settings import TORTOISE_ORM
+from src.utils.security_util import check_bearer_auth
 
 app = FastAPI(
     title="api swagger",
@@ -25,9 +26,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-# app.add_middleware(AuthenticationMiddleware, backend=JWTAuthenticationBackend)
-# app.add_middleware(AuthenticationMiddleware, backend=JWTMiddleware)
-# app.add_middleware(CasbinMiddleware, enforcer=enforcer)
+app.add_middleware(CasbinMiddleware, enforcer=enforcer)
+app.add_middleware(AuthenticationMiddleware, backend=JWTAuthenticationBackend())
 
 register_tortoise(
     app,
@@ -37,8 +37,8 @@ register_tortoise(
 )
 # router
 app.include_router(user_api, tags=["User"], prefix="/user")
-app.include_router(comment_api, tags=["Comment"], prefix="/comment")
-app.include_router(admin_api, tags=["Admin"], prefix="/admin")
+app.include_router(comment_api, tags=["Comment"], prefix="/comment",dependencies=[Depends(check_bearer_auth)])
+app.include_router(admin_api, tags=["Admin"], prefix="/admin",dependencies=[Depends(check_bearer_auth)])
 # app.include_router(test_route, tags=['Test'], prefix='/test')
 # exception
 app.add_exception_handler(ResponseException, response_exception)
@@ -58,3 +58,7 @@ except:
     log.info("后台任务启动失败！")
 else:
     log.info("暂无后台任务！")
+
+@app.get('/demo')
+def demo():
+    print("dsfk")

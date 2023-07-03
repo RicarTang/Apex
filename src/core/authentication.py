@@ -2,11 +2,12 @@
 from fastapi import Request
 from fastapi.security import HTTPBearer
 from fastapi.exceptions import HTTPException
-from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.authentication import (
     AuthenticationBackend,
     AuthCredentials,
     UnauthenticatedUser,
+    AuthenticationError,
+    SimpleUser
 )
 from jose import JWTError, jwt
 from casbin import Enforcer
@@ -14,8 +15,9 @@ from casbin_tortoise_adapter import TortoiseAdapter
 
 
 adapter = TortoiseAdapter()
-# casbin实例
-enforcer = Enforcer("rbac_model.conf", adapter)
+# # casbin实例
+# enforcer = Enforcer("rbac_model.conf", adapter)
+enforcer = Enforcer("casbin/rbac_model.conf", "casbin/rbac_policy.csv")
 
 
 oauth2_bearer = HTTPBearer()
@@ -51,14 +53,10 @@ class JWTMiddleware(AuthenticationBackend):
 
 
 class JWTAuthenticationBackend(AuthenticationBackend):
-    """验证JWT
-
-    Args:
-        AuthenticationBackend (_type_): 继承AuthenticationBackend
-    """
+    """验证JWT"""
 
     async def authenticate(self, request: Request):
-        """验证用户
+        """重写authenticate
 
         Args:
             request (Request): Request对象
@@ -71,22 +69,21 @@ class JWTAuthenticationBackend(AuthenticationBackend):
             detail="Could not validate credentials",
             headers={"WWW-Authenticate": "Bearer"},
         )
-        # 从请求中获取 JWT 令牌并根据令牌验证用户身份
+        print(request.scope)
+        print(1)
         if "Authorization" not in request.headers:
-            return
-        auth = request.headers["authorization"]
+            return None
+
+        auth = request.headers["Authorization"]
         try:
             scheme, credentials = auth.split()
             if scheme.lower() != "bearer":
                 return
             decoded = jwt.decode(credentials, SECRET_KEY, algorithms=[ALGORITHM])
-            username = decoded.get("sub")
-            if username is None:
-                raise credentials_exception
-        except (ValueError, UnicodeDecodeError, JWTError) as exc:
-            raise credentials_exception
+        except (ValueError, UnicodeDecodeError, JWTError):
+            raise AuthenticationError("Invalid basic auth credentials")
+        username = decoded.get("sub")
+        print(3)
+        return AuthCredentials(["authenticated"]), SimpleUser(username)
 
-        # if user:
-        #     return AuthCredentials(scopes=[user.role]), user
 
-        # return AuthCredentials(), UnauthenticatedUser()

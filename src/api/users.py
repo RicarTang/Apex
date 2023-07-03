@@ -10,7 +10,7 @@ from ..utils.log_util import log
 from ..utils import security_util
 from ..utils import exceptions_util as exception
 from ..utils import security_util
-from ..core.authentication import enforcer
+# from ..core.authentication import enforcer
 
 
 # from fastapi.security import OAuth2PasswordRequestForm
@@ -106,8 +106,8 @@ async def delete_user(
     return schemas.Status(message=f"Deleted user {user_id}")
 
 
-@user_api.post("/login", summary="登录", dependencies=[], response_model=schemas.Login)
-async def login(user: schemas.LoginIn):
+@user_api.post("/login", summary="登录", response_model=schemas.Login)
+async def login(user: schemas.LoginIn,request: Request):
     # async def login(
     #     user: OAuth2PasswordRequestForm = Depends(),
     # ):  # OAuth2PasswordRequestForm表单登陆

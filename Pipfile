@@ -17,6 +17,7 @@ pytz-deprecation-shim = "*"
 aerich = "*"
 casbin = "*"
 casbin-tortoise-adapter = "*"
+fastapi-authz = "*"
 
 [dev-packages]
 black = "*"
