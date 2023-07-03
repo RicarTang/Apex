@@ -26,8 +26,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-app.add_middleware(CasbinMiddleware, enforcer=enforcer)
-app.add_middleware(AuthenticationMiddleware, backend=JWTAuthenticationBackend())
+# app.add_middleware(CasbinMiddleware, enforcer=enforcer)
+# app.add_middleware(AuthenticationMiddleware, backend=JWTAuthenticationBackend())
 
 register_tortoise(
     app,

@@ -10,6 +10,7 @@ from ..utils.log_util import log
 from ..utils import security_util
 from ..utils import exceptions_util as exception
 from ..utils import security_util
+
 # from ..core.authentication import enforcer
 
 
@@ -35,10 +36,10 @@ async def check_bearer_auth(
     current_user: schemas.UserPy = Depends(security_util.check_bearer_auth),
 ):
     """获取当前用户"""
-    
+
     auth_hearder = request.headers["authorization"]
-    token = auth_hearder.split(' ')
-    log.debug(f'token:{token}')
+    token = auth_hearder.split(" ")
+    log.debug(f"token:{token}")
     return current_user
 
 
@@ -62,7 +63,11 @@ async def create_user(user: schemas.UserIn):
     responses={404: {"model": HTTPNotFoundError}},
 )
 async def get_user(
-    user_id: int, current_user: schemas.UserPy = Depends(security_util.check_bearer_auth)
+    user_id: int,
+    current_user: schemas.UserPy = Depends(security_util.check_bearer_auth),
+    user_authorization: schemas.UserPy = Depends(
+        security_util.get_current_user_authorization
+    ),
 ):
     """查询单个用户."""
     log.debug(f"{await Users.get(id=user_id).values()}")
@@ -96,7 +101,8 @@ async def update_user(
     responses={404: {"model": HTTPNotFoundError}},
 )
 async def delete_user(
-    user_id: int, current_user: schemas.UserPy = Depends(security_util.check_bearer_auth)
+    user_id: int,
+    current_user: schemas.UserPy = Depends(security_util.check_bearer_auth),
 ):
     """删除用户."""
     deleted_count = await Users.filter(id=user_id).delete()
@@ -107,7 +113,7 @@ async def delete_user(
 
 
 @user_api.post("/login", summary="登录", response_model=schemas.Login)
-async def login(user: schemas.LoginIn,request: Request):
+async def login(user: schemas.LoginIn, request: Request):
     # async def login(
     #     user: OAuth2PasswordRequestForm = Depends(),
     # ):  # OAuth2PasswordRequestForm表单登陆

@@ -1,5 +1,5 @@
 p, dataset1_admin, /dataset1/*, *
-p, *, /user/login, *
+p, *, /user/get/*, *
 
 p, anonymous, /, GET
 

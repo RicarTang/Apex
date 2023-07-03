@@ -10,10 +10,10 @@ from fastapi.exceptions import HTTPException
 from tortoise.queryset import QuerySet
 from ..db.models import Users
 
-# from .. import schemas
+from .. import schemas
 # from fastapi.encoders import jsonable_encoder
 from ..utils.log_util import log
-
+from ..core.authentication import enforcer
 
 # oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/user/login")
 oauth2_bearer = HTTPBearer()
@@ -74,6 +74,17 @@ async def check_bearer_auth(
     user = await Users.get(username=username)
     log.debug(f"当前用户：{user}")
     return user
+
+async def get_current_user_authorization(request:Request,current_user: schemas.UserPy = Depends(check_bearer_auth)):
+    """校验用户访问权限"""
+    sub = current_user.username
+    obj = request.url.path
+    act = request.method
+    if not(enforcer.enforce(sub, obj, act)):
+        raise HTTPException(
+            status_code=403,
+            detail="Method not authorized for this user")
+    return current_user
 
 
 # def get_current_active_user(current_user:schemas.User=Depends(check_bearer_auth)):
