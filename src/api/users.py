@@ -22,7 +22,7 @@ user_api = APIRouter()
 async def get_users(
     limit: Optional[int] = 10,
     offset: Optional[int] = 0,
-    current_user: schemas.UserPy = Depends(security_util.get_current_user),
+    current_user: schemas.UserPy = Depends(security_util.check_bearer_auth),
 ):
     """获取所有用户."""
     result = await User_Pydantic.from_queryset(Users.all().offset(offset).limit(limit))
@@ -30,9 +30,9 @@ async def get_users(
 
 
 @user_api.get("/me", summary="获取当前用户", response_model=schemas.UserPy)
-async def get_current_user(
+async def check_bearer_auth(
     request: Request,
-    current_user: schemas.UserPy = Depends(security_util.get_current_user),
+    current_user: schemas.UserPy = Depends(security_util.check_bearer_auth),
 ):
     """获取当前用户"""
     
@@ -62,7 +62,7 @@ async def create_user(user: schemas.UserIn):
     responses={404: {"model": HTTPNotFoundError}},
 )
 async def get_user(
-    user_id: int, current_user: schemas.UserPy = Depends(security_util.get_current_user)
+    user_id: int, current_user: schemas.UserPy = Depends(security_util.check_bearer_auth)
 ):
     """查询单个用户."""
     log.debug(f"{await Users.get(id=user_id).values()}")
@@ -80,7 +80,7 @@ async def get_user(
 async def update_user(
     user_id: int,
     user: schemas.UserIn,
-    current_user: schemas.UserPy = Depends(security_util.get_current_user),
+    current_user: schemas.UserPy = Depends(security_util.check_bearer_auth),
 ):
     """更新用户信息."""
     user.password = md5_crypt.hash(user.password)
@@ -96,7 +96,7 @@ async def update_user(
     responses={404: {"model": HTTPNotFoundError}},
 )
 async def delete_user(
-    user_id: int, current_user: schemas.UserPy = Depends(security_util.get_current_user)
+    user_id: int, current_user: schemas.UserPy = Depends(security_util.check_bearer_auth)
 ):
     """删除用户."""
     deleted_count = await Users.filter(id=user_id).delete()

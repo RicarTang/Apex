@@ -41,7 +41,7 @@ def create_access_token(data: dict, expires_delta: Union[timedelta, None] = None
     return encoded_jwt
 
 
-async def get_current_user(
+async def check_bearer_auth(
     request: Request, bearer: HTTPAuthorizationCredentials = Depends(oauth2_bearer)
 ) -> QuerySet:
     """校验token,得到当前用户
@@ -76,7 +76,7 @@ async def get_current_user(
     return user
 
 
-# def get_current_active_user(current_user:schemas.User=Depends(get_current_user)):
+# def get_current_active_user(current_user:schemas.User=Depends(check_bearer_auth)):
 #     """获取当前活动用户"""
 #     print("get_current_active_user")
 #     if current_user.disabled:
