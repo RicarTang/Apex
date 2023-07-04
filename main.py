@@ -2,10 +2,7 @@ from fastapi import FastAPI, Request, Depends
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi_authz import CasbinMiddleware
-from starlette.middleware.authentication import AuthenticationMiddleware
 from tortoise.contrib.fastapi import register_tortoise
-from src.core.authentication import JWTAuthenticationBackend,enforcer,JWTMiddleware
 from src.api import user_api, comment_api, test_api, admin_api
 from src.utils.exceptions_util import ResponseException, response_exception
 from src.utils.background_task_util import scheduler
@@ -26,8 +23,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-# app.add_middleware(CasbinMiddleware, enforcer=enforcer)
-# app.add_middleware(AuthenticationMiddleware, backend=JWTAuthenticationBackend())
 
 register_tortoise(
     app,

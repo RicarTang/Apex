@@ -1,6 +1,0 @@
-p, dataset1_admin, /dataset1/*, *
-p, *, /user/get/*, *
-
-p, anonymous, /, GET
-
-g, cathy, dataset1_admin
