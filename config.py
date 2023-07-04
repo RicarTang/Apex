@@ -21,4 +21,4 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
 
 # casbin
-RBAC_MODEL = os.path.join(ROOT_PATH,"src","utils","casbin","rbac_model.conf")
+RBAC_MODEL_PATH = os.path.join(ROOT_PATH,"src","utils","casbin","rbac_model.conf")

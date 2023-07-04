@@ -9,12 +9,10 @@ from .. import schemas
 from ..utils.log_util import log
 from ..core.security import create_access_token,check_jwt_auth
 from ..utils import exceptions_util as exception
-import config
+from ..core.authentication import get_current_user_authorization
+from casbin_tortoise_adapter import CasbinRule
 
-# from ..core.authentication import enforcer
 
-
-# from fastapi.security import OAuth2PasswordRequestForm
 
 user_api = APIRouter()
 
@@ -33,13 +31,11 @@ async def get_users(
 @user_api.get("/me", summary="获取当前用户", response_model=schemas.UserPy)
 async def check_jwt_auth(
     request: Request,
-    current_user: schemas.UserPy = Depends(check_jwt_auth),
+    # current_user: schemas.UserPy = Depends(check_jwt_auth),
+    current_user: schemas.UserPy = Depends(get_current_user_authorization)
+
 ):
     """获取当前用户"""
-
-    auth_hearder = request.headers["authorization"]
-    token = auth_hearder.split(" ")
-    log.debug(f"token:{token}")
     return current_user
 
 
@@ -82,7 +78,7 @@ async def get_user(
 async def update_user(
     user_id: int,
     user: schemas.UserIn,
-    current_user: schemas.UserPy = Depends(check_jwt_auth),
+    current_user: schemas.UserPy = Depends(get_current_user_authorization)
 ):
     """更新用户信息."""
     user.password = md5_crypt.hash(user.password)
@@ -99,7 +95,7 @@ async def update_user(
 )
 async def delete_user(
     user_id: int,
-    current_user: schemas.UserPy = Depends(check_jwt_auth),
+    current_user: schemas.UserPy = Depends(get_current_user_authorization)
 ):
     """删除用户."""
     deleted_count = await Users.filter(id=user_id).delete()
@@ -133,7 +129,7 @@ async def login(user: schemas.LoginIn, request: Request):
         raise exception.ResponseException(content="Password Error!")
     # 创建jwt
     access_token = create_access_token(
-        data={"sub": query_user.username}, expires_delta=access_token_expires
+        data={"sub": query_user.username}
     )
     # db_user["access_token"] = access_token
     return schemas.Login(data=db_user, access_token=access_token, token_type="bearer")
