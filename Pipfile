@@ -15,6 +15,8 @@ cryptography = "*"
 apscheduler = "*"
 pytz-deprecation-shim = "*"
 aerich = "*"
+casbin = "*"
+casbin-tortoise-adapter = "*"
 
 [dev-packages]
 black = "*"

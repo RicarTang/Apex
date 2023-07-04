@@ -59,7 +59,7 @@ async def check_jwt_auth(
         if username is None:
             raise credentials_exception
     except JWTError:
-        print("JWTError")
+        log.error("JWT校验错误！")
         raise credentials_exception
 
     user = await Users.get(username=username)

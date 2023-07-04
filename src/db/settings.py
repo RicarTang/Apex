@@ -5,7 +5,7 @@ TORTOISE_ORM = {
     "connections": {"default": config.DB_URL},
     "apps": {
         "models": {
-            "models": ["aerich.models",config.MODELS_PATH],
+            "models": ["aerich.models",config.MODELS_PATH,"casbin_tortoise_adapter"],
             "default_connection": "default",
         }
     },
