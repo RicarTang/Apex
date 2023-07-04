@@ -18,12 +18,12 @@ test_api = APIRouter()
 #     return {"token":token}
 
 
-# async def check_bearer_auth(token:str = Depends(oauth2_scheme)):
+# async def check_jwt_auth(token:str = Depends(oauth2_scheme)):
 #     user = await Users.filter(id=1).first()
 #     return user
 
 # @test_api.get('/user/me')
-# async def get_user_me(current_user:User = Depends(check_bearer_auth)):
+# async def get_user_me(current_user:User = Depends(check_jwt_auth)):
 #     return current_user
 
     
@@ -111,8 +111,8 @@ def create_access_token(data: dict, expires_delta: Union[timedelta, None] = None
     return encoded_jwt
 
 
-async def check_bearer_auth(token: str = Depends(oauth2_scheme)):
-    print("check_bearer_auth")
+async def check_jwt_auth(token: str = Depends(oauth2_scheme)):
+    print("check_jwt_auth")
     print(token)
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -134,7 +134,7 @@ async def check_bearer_auth(token: str = Depends(oauth2_scheme)):
     return user
 
 
-async def get_current_active_user(current_user: User = Depends(check_bearer_auth)):
+async def get_current_active_user(current_user: User = Depends(check_jwt_auth)):
     print("get_current_active_user")
     if current_user.disabled:
         raise HTTPException(status_code=400, detail="Inactive user")

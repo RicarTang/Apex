@@ -8,7 +8,7 @@ from src.utils.exceptions_util import ResponseException, response_exception
 from src.utils.background_task_util import scheduler
 from src.utils.log_util import log
 from src.db.settings import TORTOISE_ORM
-from src.utils.security_util import check_bearer_auth
+from src.core.security import check_jwt_auth
 
 app = FastAPI(
     title="api swagger",
@@ -32,8 +32,8 @@ register_tortoise(
 )
 # router
 app.include_router(user_api, tags=["User"], prefix="/user")
-app.include_router(comment_api, tags=["Comment"], prefix="/comment",dependencies=[Depends(check_bearer_auth)])
-app.include_router(admin_api, tags=["Admin"], prefix="/admin",dependencies=[Depends(check_bearer_auth)])
+app.include_router(comment_api, tags=["Comment"], prefix="/comment",dependencies=[Depends(check_jwt_auth)])
+app.include_router(admin_api, tags=["Admin"], prefix="/admin",dependencies=[Depends(check_jwt_auth)])
 # app.include_router(test_route, tags=['Test'], prefix='/test')
 # exception
 app.add_exception_handler(ResponseException, response_exception)

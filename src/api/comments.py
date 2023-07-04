@@ -1,8 +1,9 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
 from src.db.models import Comments, Users
 from .. import schemas
 from ..utils.log_util import log
-from ..utils import security_util, exceptions_util as exception
+from ..utils import exceptions_util as exception
+from ..core.security import check_jwt_auth
 
 comment_api = APIRouter()
 
@@ -10,7 +11,7 @@ comment_api = APIRouter()
 @comment_api.post("/create", summary="发表评论", response_model=schemas.CommentTo)
 async def create_comment(
     comment: schemas.CommentIn,
-    # current_user: schemas.UserPy = Depends(security_util.check_bearer_auth),
+    current_user: schemas.UserPy = Depends(check_jwt_auth),
 ):
     """创建comment"""
     # com = await Comments.create(**comment.dict(exclude_unset=True))
@@ -23,8 +24,7 @@ async def create_comment(
     "/comments/{user_id}", summary="获取用户评论", response_model=schemas.CommentsTo
 )
 async def get_user_comment(
-    user_id: int, 
-    # current_user: schemas.UserPy = Depends(security_util.check_bearer_auth)
+    user_id: int,
 ):
     """获取某个user的comments"""
     try:
@@ -37,9 +37,7 @@ async def get_user_comment(
 
 
 @comment_api.get("/me", summary="获取我的评论", response_model=schemas.CommentsTo)
-async def get_comments_me(
-    # current_user: schemas.UserPy = Depends(security_util.check_bearer_auth),
-):
+async def get_comments_me(current_user: schemas.UserPy = Depends(check_jwt_auth)):
     """当前用户的所有评论"""
     user = (
         await Users.filter(username=current_user.username)

@@ -7,9 +7,9 @@ from src.db.models import User_Pydantic, Login_pydantic, Users
 from tortoise.contrib.fastapi import HTTPNotFoundError
 from .. import schemas
 from ..utils.log_util import log
-from ..utils import security_util
+from ..core.security import create_access_token,check_jwt_auth
 from ..utils import exceptions_util as exception
-from ..utils import security_util
+import config
 
 # from ..core.authentication import enforcer
 
@@ -23,7 +23,7 @@ user_api = APIRouter()
 async def get_users(
     limit: Optional[int] = 10,
     offset: Optional[int] = 0,
-    current_user: schemas.UserPy = Depends(security_util.check_bearer_auth),
+    current_user: schemas.UserPy = Depends(check_jwt_auth),
 ):
     """获取所有用户."""
     result = await User_Pydantic.from_queryset(Users.all().offset(offset).limit(limit))
@@ -31,9 +31,9 @@ async def get_users(
 
 
 @user_api.get("/me", summary="获取当前用户", response_model=schemas.UserPy)
-async def check_bearer_auth(
+async def check_jwt_auth(
     request: Request,
-    current_user: schemas.UserPy = Depends(security_util.check_bearer_auth),
+    current_user: schemas.UserPy = Depends(check_jwt_auth),
 ):
     """获取当前用户"""
 
@@ -64,10 +64,7 @@ async def create_user(user: schemas.UserIn):
 )
 async def get_user(
     user_id: int,
-    current_user: schemas.UserPy = Depends(security_util.check_bearer_auth),
-    user_authorization: schemas.UserPy = Depends(
-        security_util.get_current_user_authorization
-    ),
+    current_user: schemas.UserPy = Depends(check_jwt_auth),
 ):
     """查询单个用户."""
     log.debug(f"{await Users.get(id=user_id).values()}")
@@ -85,7 +82,7 @@ async def get_user(
 async def update_user(
     user_id: int,
     user: schemas.UserIn,
-    current_user: schemas.UserPy = Depends(security_util.check_bearer_auth),
+    current_user: schemas.UserPy = Depends(check_jwt_auth),
 ):
     """更新用户信息."""
     user.password = md5_crypt.hash(user.password)
@@ -102,7 +99,7 @@ async def update_user(
 )
 async def delete_user(
     user_id: int,
-    current_user: schemas.UserPy = Depends(security_util.check_bearer_auth),
+    current_user: schemas.UserPy = Depends(check_jwt_auth),
 ):
     """删除用户."""
     deleted_count = await Users.filter(id=user_id).delete()
@@ -134,10 +131,8 @@ async def login(user: schemas.LoginIn, request: Request):
     # 验证密码
     if not md5_crypt.verify(secret=user.password, hash=query_user.password):
         raise exception.ResponseException(content="Password Error!")
-    # jwt失效时间
-    access_token_expires = timedelta(minutes=security_util.ACCESS_TOKEN_EXPIRE_MINUTES)
     # 创建jwt
-    access_token = security_util.create_access_token(
+    access_token = create_access_token(
         data={"sub": query_user.username}, expires_delta=access_token_expires
     )
     # db_user["access_token"] = access_token
