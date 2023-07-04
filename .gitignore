@@ -133,3 +133,6 @@ dmypy.json
 
 # 忽略log文件目录
 /log
+
+# 忽略迁移文件
+/migrations/*
