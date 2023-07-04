@@ -136,3 +136,5 @@ dmypy.json
 
 # 忽略迁移文件
 /migrations/*
+# 忽略.idea目录
+.idea/
