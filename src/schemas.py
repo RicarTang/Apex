@@ -1,15 +1,33 @@
+from typing import List, Optional, TypeVar, Generic
 from pydantic import BaseModel, Field, Extra, validator, ValidationError
+from pydantic.generics import GenericModel
 from .db.models import (
     User_Pydantic,
     Comment_Pydantic,
     # Login_pydantic,
     Role_Pydantic,
-    Permission_Pydantic,
     DisabledEnum,
-    PermissionIn_Pydantic,
-    PermissionCodeEnum,
 )
-from typing import List, Optional
+
+
+Data = TypeVar("Data")
+
+
+class ResultResponse(GenericModel, Generic[Data]):
+    """
+    自定义返回模型，使用 generic-models 定义自定义模型
+    https://pydantic-docs.helpmanual.io/usage/models/#generic-models
+    所有返回数据都用如下格式，方便前端统一处理
+    {
+        code: 200,
+        message: '请求成功',
+        data: None
+    }
+    """
+
+    code: int = Field(default=200, description="返回码")
+    message: str = Field(default="请求成功", description="消息内容")
+    result: Optional[Data]
 
 
 class BaseSchema(BaseModel):
@@ -49,10 +67,11 @@ class UserOut(BaseSchema):
     #     orm_mode = True
 
 
-class UsersOut(BaseSchema):
+class UsersOut(User_Pydantic):
     """用户集response schema"""
 
-    data: List[User_Pydantic]
+    # List[User_Pydantic]
+    pass
 
 
 class UserPy(User_Pydantic, extra=Extra.ignore):
@@ -78,20 +97,10 @@ class RoleTo(BaseSchema):
     data: Role_Pydantic
 
 
-class PermissionIn(BaseModel):
-    """permission request schema"""
-
-    name: str = Field(max_length=20, description="权限名称")
-    description: str = Field(max_length=50, description="权限介绍")
-    permission_code: PermissionCodeEnum = Field(
-        default=PermissionCodeEnum.MEDIUM, description="权限级别码"
-    )
 
 
-class PermissionTo(BaseSchema):
-    """permission response schema"""
 
-    data: Permission_Pydantic
+
 
 
 class Login(BaseSchema):

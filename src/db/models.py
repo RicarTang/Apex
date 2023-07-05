@@ -11,12 +11,7 @@ class DisabledEnum(IntEnum):
     DISABLE = 0
 
 
-class PermissionCodeEnum(IntEnum):
-    """权限code"""
 
-    LOW = 0
-    MEDIUM = 1
-    HIGH = 2
 
 
 class Users(AbstractBaseModel, TimeStampMixin):
