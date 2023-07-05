@@ -7,7 +7,7 @@ from ..utils.log_util import log
 admin_api = APIRouter()
 
 
-@admin_api.post("/role/create", summary="创建角色", response_model=schemas.RoleTo)
+@admin_api.post("/role/create", summary="创建角色", response_model=schemas.ResultResponse[schemas.RoleTo])
 async def create_role(body: schemas.RoleIn):
     """创建角色api
 
@@ -19,7 +19,7 @@ async def create_role(body: schemas.RoleIn):
     """
     role_obj = await Role.create(**body.dict(exclude_unset=True))
     log.debug(f"role_name返回:{role_obj}")
-    return schemas.RoleTo(data=role_obj)
+    return schemas.ResultResponse[schemas.RoleTo](result=role_obj)
 
 
 

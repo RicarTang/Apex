@@ -18,7 +18,7 @@ user_api = APIRouter()
 @user_api.get(
     "/users",
     summary="获取所有用户",
-    response_model=schemas.ResultResponse[List[schemas.UsersOut]],
+    response_model=schemas.ResultResponse[schemas.UsersOut],
     dependencies=[Depends(check_jwt_auth)],
 )
 async def get_users(
@@ -27,7 +27,7 @@ async def get_users(
 ):
     """获取所有用户."""
     result = await User_Pydantic.from_queryset(Users.all().offset(offset).limit(limit))
-    return schemas.ResultResponse[List[schemas.UsersOut]](result=result)
+    return schemas.ResultResponse[schemas.UsersOut](result=result)
 
 
 @user_api.get(

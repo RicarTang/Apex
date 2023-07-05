@@ -10,8 +10,7 @@ from ..utils.log_util import log
 import config
 
 
-
-oauth2_bearer = HTTPBearer()
+oauth2_bearer = HTTPBearer(auto_error=False)
 
 
 def create_access_token(data: dict, expires_delta: Union[timedelta, None] = None):
@@ -25,7 +24,9 @@ def create_access_token(data: dict, expires_delta: Union[timedelta, None] = None
     if expires_delta:
         expire = datetime.utcnow() + expires_delta
     else:
-        expire = datetime.utcnow() + timedelta(minutes=config.ACCESS_TOKEN_EXPIRE_MINUTES)
+        expire = datetime.utcnow() + timedelta(
+            minutes=config.ACCESS_TOKEN_EXPIRE_MINUTES
+        )
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, config.SECRET_KEY, algorithm=config.ALGORITHM)
     log.debug(f"encoded_jwt:{encoded_jwt}")
@@ -52,14 +53,24 @@ async def check_jwt_auth(
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
+    unauthorized_exception = HTTPException(
+        status_code=401,
+        detail="Not authenticated",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+
     try:
-        # decode校验
-        payload = jwt.decode(bearer.credentials, config.SECRET_KEY, algorithms=[config.ALGORITHM])
+        try:
+            # decode校验
+            payload = jwt.decode(
+                bearer.credentials, config.SECRET_KEY, algorithms=[config.ALGORITHM]
+            )
+        except AttributeError:
+            raise unauthorized_exception
         username: str = payload.get("sub")
         if username is None:
             raise credentials_exception
     except JWTError:
-        log.error("JWT校验错误！")
         raise credentials_exception
 
     user = await Users.get(username=username)

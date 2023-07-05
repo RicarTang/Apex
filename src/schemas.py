@@ -66,7 +66,7 @@ class UserOut(User_Pydantic):
     #     orm_mode = True
 
 
-class UsersOut(User_Pydantic):
+class UsersOut(List[User_Pydantic]):
     """用户集response schema"""
 
     # List[User_Pydantic]
@@ -90,16 +90,10 @@ class RoleIn(BaseModel):
     description: Optional[str] = Field(max_length=50, description="角色详情")
 
 
-class RoleTo(BaseSchema):
+class RoleTo(Role_Pydantic):
     """角色response schema"""
 
-    data: Role_Pydantic
-
-
-
-
-
-
+    pass
 
 
 class Login(BaseModel):
@@ -116,6 +110,10 @@ class LoginIn(BaseModel):
     username: str
     password: str
 
+    class Config:
+        """docs scheam添加example"""
+        schema_extra = {"example": {"username": "tang", "password": "123456"}}
+
 
 # class LoginOut(BaseSchema):
 
@@ -130,19 +128,18 @@ class CommentIn(BaseModel):
     comment: str = Field(max_length=50, description="用户评论")
 
 
-class CommentTo(BaseSchema):
+class CommentTo(Comment_Pydantic):
     """
     response schema，
     用户单条评论。
     """
 
-    data: Comment_Pydantic
+    pass
 
-
-class CommentsTo(BaseSchema):
+class CommentsTo(List[Comment_Pydantic]):
     """
     response schema，
     某个用户的所有评论。
     """
 
-    data: List[Comment_Pydantic]
+    pass
