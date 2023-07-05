@@ -1,13 +1,9 @@
 from tortoise import fields, models
 from tortoise.contrib.pydantic import pydantic_model_creator
 from enum import IntEnum
+from .base_models import TimeStampMixin,AbstractBaseModel
 
 
-class TimeStampMixin:
-    """创建/更新时间"""
-
-    created_at = fields.DatetimeField(auto_now_add=True, description="创建时间")
-    update_at = fields.DatetimeField(auto_now=True, description="更新时间")
 
 
 class DisabledEnum(IntEnum):
@@ -25,10 +21,8 @@ class PermissionCodeEnum(IntEnum):
     HIGH = 2
 
 
-class Users(models.Model, TimeStampMixin):
+class Users(models.Model, AbstractBaseModel,TimeStampMixin):
     """用户模型"""
-
-    id = fields.IntField(pk=True, index=True)
     username = fields.CharField(max_length=20, unique=True, description="用户名")
     name = fields.CharField(max_length=50, null=True, description="名")
     surname = fields.CharField(max_length=50, null=True, description="姓")
@@ -47,7 +41,7 @@ class Users(models.Model, TimeStampMixin):
         return str(self.username)
 
 
-class Role(models.Model, TimeStampMixin):
+class Role(models.Model,AbstractBaseModel, TimeStampMixin):
     """角色表"""
 
     id = fields.IntField(pk=True, index=True)

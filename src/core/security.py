@@ -63,5 +63,7 @@ async def check_jwt_auth(
         raise credentials_exception
 
     user = await Users.get(username=username)
+    # 保存用户到request
+    request.state.user = user
     log.debug(f"当前用户：{user}")
     return user
