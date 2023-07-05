@@ -61,7 +61,7 @@ class Comments(AbstractBaseModel, TimeStampMixin):
 
 
 # 用户schema
-User_Pydantic = pydantic_model_creator(Users, name="User", exclude=("password",))
+User_Pydantic = pydantic_model_creator(Users, name="User", exclude=("password","is_delete"))
 Login_pydantic = pydantic_model_creator(Users, name="Login_models")
 UserIn_Pydantic = pydantic_model_creator(
     Users, name="UserIn_models", exclude_readonly=True

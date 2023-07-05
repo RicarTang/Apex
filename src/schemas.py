@@ -10,10 +10,10 @@ from .db.models import (
 )
 
 
-Data = TypeVar("Data")
+DataT = TypeVar("DataT")
 
 
-class ResultResponse(GenericModel, Generic[Data]):
+class ResultResponse(GenericModel, Generic[DataT]):
     """
     自定义返回模型，使用 generic-models 定义自定义模型
     https://pydantic-docs.helpmanual.io/usage/models/#generic-models
@@ -27,7 +27,7 @@ class ResultResponse(GenericModel, Generic[Data]):
 
     code: int = Field(default=200, description="返回码")
     message: str = Field(default="请求成功", description="消息内容")
-    result: Optional[Data]
+    result: Optional[DataT]
 
 
 class BaseSchema(BaseModel):
@@ -58,11 +58,10 @@ class UserIn(User):
     password: str = Field(min_length=6, max_length=20)
 
 
-class UserOut(BaseSchema):
+class UserOut(User_Pydantic):
     """单用户response schema"""
 
-    data: User_Pydantic
-
+    pass
     # class Config:
     #     orm_mode = True
 
@@ -103,7 +102,7 @@ class RoleTo(BaseSchema):
 
 
 
-class Login(BaseSchema):
+class Login(BaseModel):
     """登录response schema"""
 
     data: UserPy

@@ -1,4 +1,4 @@
-from typing import Optional,List
+from typing import Optional, List
 from datetime import timedelta
 from fastapi import APIRouter, HTTPException, Depends, UploadFile, Request
 from fastapi.encoders import jsonable_encoder
@@ -27,39 +27,39 @@ async def get_users(
 ):
     """获取所有用户."""
     result = await User_Pydantic.from_queryset(Users.all().offset(offset).limit(limit))
-    return schemas.ResultResponse[List[schemas.UsersOut]]
+    return schemas.ResultResponse[List[schemas.UsersOut]](result=result)
 
 
 @user_api.get(
     "/me",
     summary="获取当前用户",
-    response_model=schemas.UserPy,
-    dependencies=[Depends(Authority(("user", "read")))],
+    response_model=schemas.ResultResponse[schemas.UserPy],
+    # dependencies=[Depends(Authority(("user", "read")))],
 )
 async def check_jwt_auth(
     request: Request,
     current_user: schemas.UserPy = Depends(check_jwt_auth),
 ):
     """获取当前用户"""
-    return current_user
+    return schemas.ResultResponse[schemas.UserPy](result=current_user)
 
 
 @user_api.post(
     "/create",
     summary="创建用户",
-    response_model=schemas.UserOut,
+    response_model=schemas.ResultResponse[schemas.UserOut],
 )
 async def create_user(user: schemas.UserIn):
     """创建用户."""
     user.password = md5_crypt.hash(user.password)
     user_obj = await Users.create(**user.dict(exclude_unset=True))
     log.info(f"成功创建用户：{user.dict(exclude_unset=True)}")
-    return schemas.UserOut(data=user_obj)
+    return schemas.ResultResponse[schemas.UserOut](result=user_obj)
 
 
 @user_api.get(
     "/get/{user_id}",
-    response_model=schemas.UserOut,
+    response_model=schemas.ResultResponse[schemas.UserOut],
     summary="查询用户",
     responses={404: {"model": HTTPNotFoundError}},
     dependencies=[Depends(check_jwt_auth)],
@@ -69,12 +69,12 @@ async def get_user(user_id: int):
     log.debug(f"{await Users.get(id=user_id).values()}")
     # return await User_Pydantic.from_queryset_single(Users.get(id=user_id))
     user = await Users.get(id=user_id)
-    return schemas.UserOut(data=user)
+    return schemas.ResultResponse[schemas.UserOut](result=user)
 
 
 @user_api.put(
     "/update/{user_id}",
-    response_model=schemas.UserOut,
+    response_model=schemas.ResultResponse[schemas.UserOut],
     summary="更新用户",
     responses={404: {"model": HTTPNotFoundError}},
     dependencies=[Depends(check_jwt_auth)],
@@ -84,12 +84,12 @@ async def update_user(user_id: int, user: schemas.UserIn):
     user.password = md5_crypt.hash(user.password)
     result = await Users.filter(id=user_id).update(**user.dict(exclude_unset=True))
     log.debug(f"update更新{result}条数据")
-    return schemas.UserOut(data=await Users.get(id=user_id))
+    return schemas.ResultResponse[schemas.UserOut](result=await Users.get(id=user_id))
 
 
 @user_api.delete(
     "/delete/{user_id}",
-    response_model=schemas.Status,
+    response_model=schemas.ResultResponse[str],
     summary="删除用户",
     responses={404: {"model": HTTPNotFoundError}},
     dependencies=[Depends(check_jwt_auth)],
@@ -100,10 +100,12 @@ async def delete_user(user_id: int):
     log.debug("")
     if not deleted_count:
         raise HTTPException(status_code=404, detail=f"User {user_id} not found")
-    return schemas.Status(message=f"Deleted user {user_id}")
+    return schemas.ResultResponse[str](message=f"Deleted user {user_id}")
 
 
-@user_api.post("/login", summary="登录", response_model=schemas.Login)
+@user_api.post(
+    "/login", summary="登录", response_model=schemas.ResultResponse[schemas.Login]
+)
 async def login(user: schemas.LoginIn, request: Request):
     # async def login(
     #     user: OAuth2PasswordRequestForm = Depends(),
@@ -122,7 +124,11 @@ async def login(user: schemas.LoginIn, request: Request):
     # 创建jwt
     access_token = create_access_token(data={"sub": query_user.username})
     # db_user["access_token"] = access_token
-    return schemas.Login(data=db_user, access_token=access_token, token_type="bearer")
+    return schemas.ResultResponse[schemas.Login](
+        result=schemas.Login(
+            data=db_user, access_token=access_token, token_type="bearer"
+        )
+    )
 
 
 @user_api.post("/uploadfile")
