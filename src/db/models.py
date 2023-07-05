@@ -1,9 +1,7 @@
 from tortoise import fields, models
 from tortoise.contrib.pydantic import pydantic_model_creator
 from enum import IntEnum
-from .base_models import TimeStampMixin,AbstractBaseModel
-
-
+from .base_models import TimeStampMixin, AbstractBaseModel
 
 
 class DisabledEnum(IntEnum):
@@ -21,8 +19,9 @@ class PermissionCodeEnum(IntEnum):
     HIGH = 2
 
 
-class Users(models.Model, AbstractBaseModel,TimeStampMixin):
+class Users(AbstractBaseModel, TimeStampMixin):
     """用户模型"""
+
     username = fields.CharField(max_length=20, unique=True, description="用户名")
     name = fields.CharField(max_length=50, null=True, description="名")
     surname = fields.CharField(max_length=50, null=True, description="姓")
@@ -41,10 +40,9 @@ class Users(models.Model, AbstractBaseModel,TimeStampMixin):
         return str(self.username)
 
 
-class Role(models.Model,AbstractBaseModel, TimeStampMixin):
+class Role(AbstractBaseModel, TimeStampMixin):
     """角色表"""
 
-    id = fields.IntField(pk=True, index=True)
     name = fields.CharField(max_length=20, unique=True, description="角色名称")
     description = fields.CharField(max_length=50, null=True, description="角色详情")
 
@@ -52,32 +50,11 @@ class Role(models.Model,AbstractBaseModel, TimeStampMixin):
     users: fields.ManyToManyRelation[Users] = fields.ManyToManyField(
         "models.Users", related_name="roles"
     )
-    # 与权限表多对多
-    # permissions: fields.ManyToManyRelation["Permission"]
 
 
-
-
-class Permission(models.Model, TimeStampMixin):
-    """权限表"""
-
-    id = fields.IntField(pk=True, index=True)
-    name = fields.CharField(max_length=20, unique=True, description="权限名称")
-    description = fields.CharField(max_length=50, null=True, description="权限解释")
-    permission_code = fields.IntEnumField(
-        enum_type=PermissionCodeEnum,
-        default=PermissionCodeEnum.MEDIUM,
-        description="权限级别代码",
-    )
-    roles: fields.ManyToManyRelation[Role] = fields.ManyToManyField(
-        "models.Role", related_name="permissions"
-    )
-
-
-class Comments(models.Model, TimeStampMixin):
+class Comments(AbstractBaseModel, TimeStampMixin):
     """用户评论模型"""
 
-    id = fields.IntField(pk=True, index=True)
     comment = fields.TextField(description="用户评论")
     # 外键
     user: fields.ForeignKeyRelation[Users] = fields.ForeignKeyField(
@@ -98,8 +75,3 @@ UserIn_Pydantic = pydantic_model_creator(
 Comment_Pydantic = pydantic_model_creator(Comments, name="CommentTo")
 # 角色schema
 Role_Pydantic = pydantic_model_creator(Role, name="RoleTo")
-# 权限
-PermissionIn_Pydantic = pydantic_model_creator(
-    Permission, name="PermissionIo", exclude=("id",), exclude_readonly=True
-)
-Permission_Pydantic = pydantic_model_creator(Permission, name="PermissionTo")
