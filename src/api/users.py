@@ -34,11 +34,11 @@ async def get_users(
     "/me",
     summary="获取当前用户",
     response_model=schemas.ResultResponse[schemas.UserPy],
-    # dependencies=[Depends(Authority(("user", "read")))],
+    dependencies=[Depends(Authority("user,read"))],
 )
 async def check_jwt_auth(
     request: Request,
-    current_user: schemas.UserPy = Depends(check_jwt_auth),
+    current_user: schemas.UserPy = Depends(check_jwt_auth)
 ):
     """获取当前用户"""
     return schemas.ResultResponse[schemas.UserPy](result=current_user)
