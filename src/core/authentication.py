@@ -1,10 +1,8 @@
 from typing import Any
-from fastapi import Request, Depends
+from fastapi import Request
 from fastapi.exceptions import HTTPException
-from casbin import Enforcer
-from casbin_tortoise_adapter import TortoiseAdapter, CasbinRule
-from .security import check_jwt_auth
-from .. import schemas
+import casbin
+import casbin_tortoise_adapter
 import config
 from ..utils.log_util import log
 from .util import Singleton
@@ -12,8 +10,9 @@ from .util import Singleton
 
 class TortoiseCasbin(metaclass=Singleton):
     def __init__(self, model: str) -> None:
-        adapter = TortoiseAdapter()
-        self.enforcer = Enforcer(str(model), adapter)
+        print('*'*20, '初始化 casbin')
+        adapter = casbin_tortoise_adapter.TortoiseAdapter()
+        self.enforce = casbin.Enforcer(str(model), adapter)
 
     async def has_permission(self, user: str, model: str, act: str) -> bool:
         """
@@ -32,21 +31,22 @@ class TortoiseCasbin(metaclass=Singleton):
 
     def __getattr__(self, attr: str) -> Any:
         return getattr(self.enforce, attr)
-
-
+    
 class Authority:
-    """认证类"""
-
-    def __init__(self, policy: str) -> None:
+    """认证依赖类"""
+    def __init__(self, policy: str):
+        """
+        :param policy:
+        """
         self.policy = policy
 
-    async def __call__(self, request: Request, *args: Any, **kwds: Any) -> Any:
+    async def __call__(self, request: Request):
         """
         超级管理员不需要进行权限认证
         :param request:
         :return:
         """
-        model, act = self.policy.split(",")
+        model, act = self.policy.split(',')
         e = await get_casbin()
 
         # 超级用户拥有所有权限
@@ -58,21 +58,18 @@ class Authority:
                 status_code=403, detail="Method not authorized for this user"
             )
 
-
-# async def get_current_user_authorization(request:Request,current_user: schemas.UserPy = Depends(check_jwt_auth)):
-#     """校验用户访问权限"""
-#     log.debug(await CasbinRule.all())
-#     # 因为casbin的load_policy方法不是异步加载，所以得手动加载策略
-#     await adapter.load_policy(e.get_model())
-#     await adapter.add_policy("","p",["admin","*","*"])
-#     sub = current_user.username
-#     obj = request.url.path
-#     act = request.method
-#     if not(e.enforce(sub, obj, act)):
-#         raise HTTPException(
-#             status_code=403,
-#             detail="Method not authorized for this user")
-#     return current_user
+async def check_authority(policy):
+    """
+    进行权限认证
+    :param policy: 字符串，以 user,model,act拼接而成，例如"user,auth,add"
+    :return:
+    """
+    user, model, act = policy.split(',')
+    e = await get_casbin()
+    if not await e.has_permission(user, model, act):
+        raise HTTPException(
+                status_code=403, detail="Method not authorized for this user"
+            )
 
 
 async def get_casbin() -> TortoiseCasbin:
@@ -81,7 +78,7 @@ async def get_casbin() -> TortoiseCasbin:
     :return:
     """
     tor_casbin = TortoiseCasbin(config.RBAC_MODEL_PATH)
-    if not hasattr(tor_casbin, "load"):
-        setattr(tor_casbin, "load", True)
+    if not hasattr(tor_casbin, 'load'):
+        setattr(tor_casbin, 'load', True)
         await tor_casbin.load_policy()
     return tor_casbin
