@@ -13,10 +13,10 @@ from ..core.authentication import Authority
 from ..crud import UsersCrud
 
 
-user_api = APIRouter()
+router = APIRouter()
 
 
-@user_api.get(
+@router.get(
     "/users",
     summary="获取所有用户",
     response_model=schemas.ResultResponse[schemas.UsersOut],
@@ -31,7 +31,7 @@ async def get_users(
     return schemas.ResultResponse[schemas.UsersOut](result=result)
 
 
-@user_api.get(
+@router.get(
     "/role",
     summary="获取当前用户角色",
     # response_model=schemas.ResultResponse[schemas.RoleTo],
@@ -50,7 +50,7 @@ async def query_user_role(request: Request):
 
 
 
-@user_api.get(
+@router.get(
     "/me",
     summary="获取当前用户",
     response_model=schemas.ResultResponse[schemas.UserPy],
@@ -64,7 +64,7 @@ async def get_current_user(
     return schemas.ResultResponse[schemas.UserPy](result=request.state.user)
 
 
-@user_api.post(
+@router.post(
     "/create",
     summary="创建用户",
     response_model=schemas.ResultResponse[schemas.UserOut],
@@ -85,7 +85,7 @@ async def create_user(user: schemas.UserIn):
     return schemas.ResultResponse[schemas.UserOut](result=user_obj)
 
 
-@user_api.get(
+@router.get(
     "/{user_id}",
     response_model=schemas.ResultResponse[schemas.UserOut],
     summary="查询用户",
@@ -100,7 +100,7 @@ async def get_user(user_id: int):
     return schemas.ResultResponse[schemas.UserOut](result=user)
 
 
-@user_api.put(
+@router.put(
     "/{user_id}",
     response_model=schemas.ResultResponse[schemas.UserOut],
     summary="更新用户",
@@ -115,7 +115,7 @@ async def update_user(user_id: int, user: schemas.UserIn):
     return schemas.ResultResponse[schemas.UserOut](result=await Users.get(id=user_id))
 
 
-@user_api.delete(
+@router.delete(
     "/{user_id}",
     response_model=schemas.ResultResponse[str],
     summary="删除用户",
@@ -131,7 +131,7 @@ async def delete_user(user_id: int):
     return schemas.ResultResponse[str](message=f"Deleted user {user_id}")
 
 
-@user_api.post(
+@router.post(
     "/login", summary="登录", response_model=schemas.ResultResponse[schemas.Login]
 )
 async def login(user: schemas.LoginIn, request: Request):
@@ -159,7 +159,7 @@ async def login(user: schemas.LoginIn, request: Request):
     )
 
 
-@user_api.post("/uploadfile", deprecated=True)
+@router.post("/uploadfile", deprecated=True)
 async def uploadfile(file: UploadFile):
     with open(f"./src/static/{file.filename}", "wb") as f:
         f.write(await file.read())

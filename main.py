@@ -3,7 +3,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from tortoise.contrib.fastapi import register_tortoise
-from src.api import user_api, comment_api, test_api, admin_api
+from src.api import user_api, comment_api, admin_api
 from src.utils.exceptions_util import ResponseException, response_exception
 from src.utils.background_task_util import scheduler
 from src.utils.log_util import log

@@ -6,10 +6,10 @@ from ..crud import UsersCrud
 from ..utils.log_util import log
 
 
-admin_api = APIRouter()
+router = APIRouter()
 
 
-@admin_api.post(
+@router.post(
     "/role/create",
     summary="创建角色",
     response_model=schemas.ResultResponse[schemas.RoleTo],
@@ -28,7 +28,7 @@ async def create_role(body: schemas.RoleIn):
     return schemas.ResultResponse[schemas.RoleTo](result=role_obj)
 
 
-@admin_api.delete(
+@router.delete(
     "/role/{role_id}",
     summary="删除角色",
     response_model=schemas.ResultResponse[schemas.RoleTo],
@@ -42,7 +42,7 @@ async def delete_role(role_id: int):
     pass
 
 
-@admin_api.put(
+@router.put(
     "/role/{role_id}",
     summary="更新角色",
     response_model=schemas.ResultResponse[schemas.RoleTo],
@@ -58,7 +58,7 @@ async def update_role(
     pass
 
 
-@admin_api.get(
+@router.get(
     "/role/{role_id}",
     summary="查询角色",
     response_model=schemas.ResultResponse[schemas.RoleTo],
@@ -72,7 +72,7 @@ async def query_role(role_id):
     return
 
 
-@admin_api.get(
+@router.get(
     "/role/roles",
     summary="查询所有角色",
     response_model=schemas.ResultResponse[schemas.RoleTo],
@@ -90,7 +90,7 @@ async def query_roles(
     pass
 
 
-@admin_api.post(
+@router.post(
     "/user/role",
     summary="新增用户角色",
     # response_model=schemas.ResultResponse[schemas.UserAddRoleTo],
@@ -104,19 +104,19 @@ async def add_user_role(res: schemas.UserAddRoleIn):
     return schemas.ResultResponse[str]()
 
 
-@admin_api.post("/premission", summary="新增角色权限")
+@router.post("/premission", summary="新增角色权限")
 async def set_role_premission():
     """设置角色权限"""
     pass
 
 
-@admin_api.put("/premission/update", summary="修改角色权限")
+@router.put("/premission/update", summary="修改角色权限")
 async def update_role_premission():
     """修改角色权限"""
     pass
 
 
-@admin_api.delete("/premission/delete", summary="删除角色权限")
+@router.delete("/premission/delete", summary="删除角色权限")
 async def delete_role_premission():
     """删除角色权限"""
     pass

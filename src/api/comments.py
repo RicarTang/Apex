@@ -5,10 +5,10 @@ from ..utils.log_util import log
 from ..utils import exceptions_util as exception
 from ..core.security import check_jwt_auth
 
-comment_api = APIRouter()
+router = APIRouter()
 
 
-@comment_api.post("/create", summary="发表评论", response_model=schemas.ResultResponse[schemas.CommentTo])
+@router.post("/create", summary="发表评论", response_model=schemas.ResultResponse[schemas.CommentTo])
 async def create_comment(
     comment: schemas.CommentIn,
     current_user: schemas.UserPy = Depends(check_jwt_auth),
@@ -20,7 +20,7 @@ async def create_comment(
     return schemas.ResultResponse[schemas.CommentTo](result=com)
 
 
-@comment_api.get(
+@router.get(
     "/comments/{user_id}", summary="获取用户评论", response_model=schemas.ResultResponse[schemas.CommentsTo]
 )
 async def get_user_comment(
@@ -36,7 +36,7 @@ async def get_user_comment(
     return schemas.ResultResponse[schemas.CommentsTo](result=coms)
 
 
-@comment_api.get("/me", summary="获取我的评论", response_model=schemas.ResultResponse[schemas.CommentsTo])
+@router.get("/me", summary="获取我的评论", response_model=schemas.ResultResponse[schemas.CommentsTo])
 async def get_comments_me(current_user: schemas.UserPy = Depends(check_jwt_auth)):
     """当前用户的所有评论"""
     user = (
