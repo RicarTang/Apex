@@ -22,10 +22,15 @@ pipenv run aerich_init # 需要在根目录
 ```Bash
 pipenv run init_db
 ```
-> Tips💡：如果有修改modules表结构，需要迁移同步数据库表结构。
-> pipenv run migrate_db
-> pipenv run upgrade_db
 4. 运行
 ```Bash
 pipenv run dev
+```
+> Tips💡：如果有修改modules表结构，需要迁移同步数据库表结构。
+
+```Bash
+pipenv run migrate_db # 生成迁移文件
+```
+```Bash
+pipenv run upgrade_db # 迁移，修改数据库表结构
 ```
