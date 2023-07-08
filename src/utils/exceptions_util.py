@@ -8,7 +8,7 @@ class ResponseException(Exception):
     def __init__(self, content: str):
         self.content = content
 
-
+# 不使用此exception，返回同时使用pydantic通用模型
 # @app.exception_handler(ResponseException)
 async def response_exception(request: Request, exc: ResponseException):
     return JSONResponse(

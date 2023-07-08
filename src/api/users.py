@@ -148,7 +148,9 @@ async def login(user: schemas.LoginIn, request: Request):
     db_user = jsonable_encoder(query_user)
     # 验证密码
     if not md5_crypt.verify(secret=user.password, hash=query_user.password):
-        raise exception.ResponseException(content="Password Error!")
+        return schemas.ResultResponse[str](message="Password Error!")
+    if not query_user.is_active:
+        return schemas.ResultResponse[str](message="The user status is unavailable!")
     # 创建jwt
     access_token = create_access_token(data={"sub": query_user.username})
     # db_user["access_token"] = access_token

@@ -34,8 +34,8 @@ register_tortoise(
 app.include_router(user_api, tags=["User"], prefix="/user")
 app.include_router(comment_api, tags=["Comment"], prefix="/comment",dependencies=[Depends(check_jwt_auth)])
 app.include_router(admin_api, tags=["Admin"], prefix="/admin",dependencies=[Depends(check_jwt_auth)])
-# app.include_router(test_route, tags=['Test'], prefix='/test')
-# exception
+
+# 注册exception
 app.add_exception_handler(ResponseException, response_exception)
 
 
@@ -43,7 +43,7 @@ app.add_exception_handler(ResponseException, response_exception)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
     """修改默认的请求验证错误模型"""
     return JSONResponse(
-        status_code=422, content={"success": False, "detail": exc.errors()}
+        status_code=422, content={"code": 400, "message": exc.errors()}
     )
 
 
