@@ -20,32 +20,20 @@ class ResultResponse(GenericModel, Generic[DataT]):
     所有返回数据都用如下格式，方便前端统一处理
     {
         code: 200,
-        message: '请求成功',
+        message: 'success',
         data: None
     }
     """
 
     code: int = Field(default=200, description="返回码")
-    message: str = Field(default="请求成功", description="消息内容")
+    message: str = Field(default="success", description="消息内容")
     result: Optional[DataT]
-
-
-class BaseSchema(BaseModel):
-    """success状态"""
-
-    success: bool = Field(default=True)
-
-
-class Status(BaseSchema):
-    message: str
 
 
 class User(BaseModel):
     """用户"""
 
     username: str
-    surname: Optional[str]
-    name: Optional[str]
     descriptions: Optional[str] = Field(max_length=50)
     is_active: Optional[DisabledEnum] = Field(
         default=DisabledEnum.ENABLE, description="0:Disable,1:Enable"
@@ -53,13 +41,14 @@ class User(BaseModel):
 
 
 class UserIn(User):
-    """用户request schema"""
+    """用户req schema"""
 
     password: str = Field(min_length=6, max_length=20)
+    user_role: str
 
 
 class UserOut(User_Pydantic):
-    """单用户response schema"""
+    """单用户res schema"""
 
     pass
     # class Config:
@@ -67,7 +56,7 @@ class UserOut(User_Pydantic):
 
 
 class UsersOut(List[User_Pydantic]):
-    """用户集response schema"""
+    """用户集res schema"""
 
     # List[User_Pydantic]
     pass
@@ -84,20 +73,31 @@ class UserPy(User_Pydantic, extra=Extra.ignore):
 
 
 class RoleIn(BaseModel):
-    """角色request schema"""
+    """角色req schema"""
 
     name: str = Field(max_length=20, description="角色名称")
     description: Optional[str] = Field(max_length=50, description="角色详情")
 
 
 class RoleTo(Role_Pydantic):
-    """角色response schema"""
+    """角色res schema"""
 
     pass
 
 
+class UserAddRoleIn(BaseModel):
+    """用户添加角色req schema"""
+
+    user_id: int
+    role: str
+
+class UserAddRoleTo(BaseModel):
+    """用户添加角色res schema"""
+    pass
+
+
 class Login(BaseModel):
-    """登录response schema"""
+    """登录res schema"""
 
     data: UserPy
     access_token: str
@@ -105,13 +105,14 @@ class Login(BaseModel):
 
 
 class LoginIn(BaseModel):
-    """登录request schema"""
+    """登录req schema"""
 
     username: str
     password: str
 
     class Config:
         """docs scheam添加example"""
+
         schema_extra = {"example": {"username": "tang", "password": "123456"}}
 
 
@@ -120,7 +121,7 @@ class LoginIn(BaseModel):
 
 class CommentIn(BaseModel):
     """
-    request schema，
+    req schema，
     用户单条评论。
     """
 
@@ -130,15 +131,16 @@ class CommentIn(BaseModel):
 
 class CommentTo(Comment_Pydantic):
     """
-    response schema，
+    res schema，
     用户单条评论。
     """
 
     pass
 
+
 class CommentsTo(List[Comment_Pydantic]):
     """
-    response schema，
+    res schema，
     某个用户的所有评论。
     """
 

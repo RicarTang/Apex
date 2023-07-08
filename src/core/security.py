@@ -58,6 +58,11 @@ async def check_jwt_auth(
         detail="Not authenticated",
         headers={"WWW-Authenticate": "Bearer"},
     )
+    user_is_not_active_exception = HTTPException(
+        status_code=403,
+        detail="User is not active",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
 
     try:
         try:
@@ -74,6 +79,8 @@ async def check_jwt_auth(
         raise credentials_exception
 
     user = await Users.get(username=username)
+    if not user.is_active:
+        raise user_is_not_active_exception
     # 保存用户到request
     request.state.user = user
     log.debug(f"当前用户：{user}")

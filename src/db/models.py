@@ -10,22 +10,26 @@ class DisabledEnum(IntEnum):
     ENABLE = 1
     DISABLE = 0
 
-
-
-
+class IsSuperEnum(IntEnum):
+    """true / false"""
+    TRUE = 1
+    FALSE = 0
 
 class Users(AbstractBaseModel, TimeStampMixin):
     """用户模型"""
 
     username = fields.CharField(max_length=20, unique=True, description="用户名")
-    name = fields.CharField(max_length=50, null=True, description="名")
-    surname = fields.CharField(max_length=50, null=True, description="姓")
     descriptions = fields.CharField(max_length=30, null=True, description="个人描述")
     password = fields.CharField(max_length=128, description="密码")
     is_active = fields.IntEnumField(
         enum_type=DisabledEnum,
         default=DisabledEnum.ENABLE,
         description="用户活动状态,0:disable,1:enabled",
+    )
+    is_super = fields.IntEnumField(
+        enum_type=IsSuperEnum,
+        default=IsSuperEnum.FALSE,
+        description="用户时候是超级管理员,1: True,0: False"
     )
     # 关联关系
     comments: fields.ReverseRelation["Comments"]
@@ -61,7 +65,9 @@ class Comments(AbstractBaseModel, TimeStampMixin):
 
 
 # 用户schema
-User_Pydantic = pydantic_model_creator(Users, name="User", exclude=("password","is_delete"))
+User_Pydantic = pydantic_model_creator(
+    Users, name="User", exclude=("password", "is_delete")
+)
 Login_pydantic = pydantic_model_creator(Users, name="Login_models")
 UserIn_Pydantic = pydantic_model_creator(
     Users, name="UserIn_models", exclude_readonly=True
@@ -69,4 +75,4 @@ UserIn_Pydantic = pydantic_model_creator(
 # 评论schema
 Comment_Pydantic = pydantic_model_creator(Comments, name="CommentTo")
 # 角色schema
-Role_Pydantic = pydantic_model_creator(Role, name="RoleTo")
+Role_Pydantic = pydantic_model_creator(Role, name="RoleTo", exclude_readonly=True)

@@ -3,13 +3,14 @@ from datetime import timedelta
 from fastapi import APIRouter, HTTPException, Depends, UploadFile, Request
 from fastapi.encoders import jsonable_encoder
 from passlib.hash import md5_crypt
-from src.db.models import User_Pydantic, Login_pydantic, Users
+from src.db.models import User_Pydantic, Login_pydantic, Users, Role
 from tortoise.contrib.fastapi import HTTPNotFoundError
 from .. import schemas
 from ..utils.log_util import log
 from ..core.security import create_access_token, check_jwt_auth
 from ..utils import exceptions_util as exception
 from ..core.authentication import Authority
+from ..crud import UsersCrud
 
 
 user_api = APIRouter()
@@ -31,14 +32,33 @@ async def get_users(
 
 
 @user_api.get(
+    "/role",
+    summary="获取当前用户角色",
+    # response_model=schemas.ResultResponse[schemas.RoleTo],
+    dependencies=[Depends(check_jwt_auth)],
+)
+async def query_user_role(request: Request):
+    """查询当前用户角色
+
+    Args:
+        user_id (int): 用户id
+    """
+    log.debug(f"state用户：{request.state.user.id}")
+    user_role = await UsersCrud.query_user_role(id=request.state.user.id)
+    # return schemas.ResultResponse[schemas.RoleTo](result=user_role)
+    return user_role
+
+
+
+@user_api.get(
     "/me",
     summary="获取当前用户",
     response_model=schemas.ResultResponse[schemas.UserPy],
-    dependencies=[Depends(check_jwt_auth),Depends(Authority("user,read"))],
+    dependencies=[Depends(check_jwt_auth), Depends(Authority("user,read"))],
 )
-async def check_jwt_auth(
+async def get_current_user(
     request: Request,
-    # current_user: schemas.UserPy = 
+    # current_user: schemas.UserPy =
 ):
     """获取当前用户"""
     return schemas.ResultResponse[schemas.UserPy](result=request.state.user)
@@ -52,13 +72,21 @@ async def check_jwt_auth(
 async def create_user(user: schemas.UserIn):
     """创建用户."""
     user.password = md5_crypt.hash(user.password)
-    user_obj = await Users.create(**user.dict(exclude_unset=True))
+    user_obj = await Users(**user.dict(exclude_unset=True))
+    # 添加用户角色
+    role = await Role.filter(name=user.user_role).first()
+    if not role:
+        return schemas.ResultResponse[str](
+            message=f"role: {user.user_role} is not exist!"
+        )
+    await user_obj.save()
+    await user_obj.roles.add(role)
     log.info(f"成功创建用户：{user.dict(exclude_unset=True)}")
     return schemas.ResultResponse[schemas.UserOut](result=user_obj)
 
 
 @user_api.get(
-    "/get/{user_id}",
+    "/{user_id}",
     response_model=schemas.ResultResponse[schemas.UserOut],
     summary="查询用户",
     responses={404: {"model": HTTPNotFoundError}},
@@ -73,7 +101,7 @@ async def get_user(user_id: int):
 
 
 @user_api.put(
-    "/update/{user_id}",
+    "/{user_id}",
     response_model=schemas.ResultResponse[schemas.UserOut],
     summary="更新用户",
     responses={404: {"model": HTTPNotFoundError}},
@@ -88,7 +116,7 @@ async def update_user(user_id: int, user: schemas.UserIn):
 
 
 @user_api.delete(
-    "/delete/{user_id}",
+    "/{user_id}",
     response_model=schemas.ResultResponse[str],
     summary="删除用户",
     responses={404: {"model": HTTPNotFoundError}},
@@ -131,7 +159,7 @@ async def login(user: schemas.LoginIn, request: Request):
     )
 
 
-@user_api.post("/uploadfile")
+@user_api.post("/uploadfile", deprecated=True)
 async def uploadfile(file: UploadFile):
     with open(f"./src/static/{file.filename}", "wb") as f:
         f.write(await file.read())
