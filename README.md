@@ -14,11 +14,18 @@
 ```Bash
 pipenv install
 ```
-2. 迁移数据表
+2. 初始化aerich
 ```Bash
 pipenv run aerich_init # 需要在根目录
 ```
-3. 运行
+3. 初始化数据库表
+```Bash
+pipenv run init_db
+```
+> Tips💡：如果有修改modules表结构，需要迁移同步数据库表结构。
+> pipenv run migrate_db
+> pipenv run upgrade_db
+4. 运行
 ```Bash
 pipenv run dev
 ```
