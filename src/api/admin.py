@@ -2,8 +2,9 @@ from typing import Optional
 from fastapi import APIRouter, HTTPException, Depends
 from .. import schemas
 from src.db.models import Role, Users
-from ..crud import UsersCrud
+from ..crud import UsersCrud, RolePermCrud
 from ..utils.log_util import log
+from ..core.authentication import get_casbin, Authority
 
 
 router = APIRouter()
@@ -13,6 +14,7 @@ router = APIRouter()
     "/role/create",
     summary="创建角色",
     response_model=schemas.ResultResponse[schemas.RoleTo],
+    dependencies=[Depends(Authority("admin,add"))]
 )
 async def create_role(body: schemas.RoleIn):
     """创建角色
@@ -104,19 +106,35 @@ async def add_user_role(res: schemas.UserAddRoleIn):
     return schemas.ResultResponse[str]()
 
 
-@router.post("/premission", summary="新增角色权限")
-async def set_role_premission():
+@router.post(
+    "/permission",
+    summary="新增角色权限",
+    response_model=schemas.ResultResponse[str],
+    dependencies=[Depends(Authority("admin,add"))],
+)
+async def set_role_permission(req: schemas.RolePermIn):
     """设置角色权限"""
-    pass
+    # 查询角色
+    role = await RolePermCrud.query_role(name=req.role)
+    if not role:
+        return schemas.ResultResponse[str](
+            code=404, message=f"Role:{req.role} does not exist!"
+        )
+    e = await get_casbin()
+    if await e.add_permission_for_role(req.role, req.model, req.act):
+        return schemas.ResultResponse[str]()
+    return schemas.ResultResponse[str](
+        message="Description Failed to add the role permission because the role permission already exists!"
+    )
 
 
-@router.put("/premission/update", summary="修改角色权限")
-async def update_role_premission():
+@router.put("/permission/update", summary="修改角色权限")
+async def update_role_permission():
     """修改角色权限"""
     pass
 
 
-@router.delete("/premission/delete", summary="删除角色权限")
-async def delete_role_premission():
+@router.delete("/permission/delete", summary="删除角色权限")
+async def delete_role_permission():
     """删除角色权限"""
     pass

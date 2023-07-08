@@ -39,9 +39,11 @@ async def check_jwt_auth(
     """校验JWT,return当前用户
 
     Args:
-        request (Request): Requeset对象
+        request (Request): Request对象
+        bearer (HTTPAuthorizationCredentials, optional): _description_. Defaults to Depends(oauth2_bearer).
 
     Raises:
+        unauthorized_exception: _description_
         credentials_exception: _description_
         credentials_exception: _description_
 

@@ -1,5 +1,6 @@
 """暂时丢弃此模块。"""
-from ..db.models import Users,Role,Comments
+from tortoise.exceptions import DoesNotExist
+from ..db.models import Users, Role, Comments
 from ..utils.log_util import log
 
 
@@ -37,3 +38,22 @@ class UsersCrud:
         user = await Users.filter(**kwargs).first().prefetch_related("roles")
         user_role = await user.roles.all()
         return user_role
+
+
+class RolePermCrud:
+    """角色权限crud"""
+
+    @staticmethod
+    async def query_role(**kwargs):
+        """查询角色"""
+        try:
+            role = await Role.get(**kwargs)
+        except DoesNotExist:
+            return None
+        return role
+
+    @staticmethod
+    async def add_role_permission(**kwargs):
+        """新增角色权限(casbin_rule)"""
+        # 查询role是否存在
+        # 保存casbin policy

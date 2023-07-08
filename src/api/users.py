@@ -105,7 +105,7 @@ async def get_user(user_id: int):
     response_model=schemas.ResultResponse[schemas.UserOut],
     summary="更新用户",
     responses={404: {"model": HTTPNotFoundError}},
-    dependencies=[Depends(check_jwt_auth)],
+    dependencies=[Depends(check_jwt_auth),Depends(Authority("user,update"))],
 )
 async def update_user(user_id: int, user: schemas.UserIn):
     """更新用户信息."""
@@ -120,7 +120,7 @@ async def update_user(user_id: int, user: schemas.UserIn):
     response_model=schemas.ResultResponse[str],
     summary="删除用户",
     responses={404: {"model": HTTPNotFoundError}},
-    dependencies=[Depends(check_jwt_auth)],
+    dependencies=[Depends(check_jwt_auth),Depends(Authority("user,delete"))],
 )
 async def delete_user(user_id: int):
     """删除用户."""
@@ -150,7 +150,11 @@ async def login(user: schemas.LoginIn, request: Request):
     if not md5_crypt.verify(secret=user.password, hash=query_user.password):
         return schemas.ResultResponse[str](message="Password Error!")
     if not query_user.is_active:
-        return schemas.ResultResponse[str](message="The user status is unavailable!")
+        # return schemas.ResultResponse[str](message="The user status is unavailable!")
+        raise HTTPException(
+            status_code=403,
+            detail="The user status is unavailable!"
+        )
     # 创建jwt
     access_token = create_access_token(data={"sub": query_user.username})
     # db_user["access_token"] = access_token

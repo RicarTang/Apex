@@ -1,1 +1,1 @@
-from .crud import UsersCrud
+from .crud import UsersCrud,RolePermCrud

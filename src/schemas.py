@@ -27,7 +27,7 @@ class ResultResponse(GenericModel, Generic[DataT]):
 
     code: int = Field(default=200, description="返回码")
     message: str = Field(default="success", description="消息内容")
-    result: Optional[DataT]
+    result: Optional[DataT] = Field(description="返回数据主体")
 
 
 class User(BaseModel):
@@ -95,6 +95,19 @@ class UserAddRoleTo(BaseModel):
     """用户添加角色res schema"""
     pass
 
+class RolePermIn(BaseModel):
+    role: str = Field(..., description='角色')
+    model: str = Field(..., description='模块')
+    act: str = Field(..., description='权限行为')
+
+    class Config:
+        schema_extra = {
+            'example': {
+                'role': 'admin',
+                'model': 'admin',
+                'act': 'add'
+            }
+        }
 
 class Login(BaseModel):
     """登录res schema"""
