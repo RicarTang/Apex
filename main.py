@@ -1,4 +1,6 @@
+import sys
 from fastapi import FastAPI, Request, Depends
+from fastapi.staticfiles import StaticFiles
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -15,6 +17,15 @@ app = FastAPI(
     version="1.0",
     description="fastapi+tortoise-orm async web framework",
 )
+
+# 挂载静态文件
+app.mount("/static",StaticFiles(directory="static"),name="static")
+
+# 修改默认swagger参数
+@app.on_event("startup")
+def use_local_swagger_static():
+    sys.modules["fastapi.applications"].get_swagger_ui_html.__kwdefaults__["swagger_js_url"] = "/static/swagger-ui/swagger-ui-bundle.js"
+    sys.modules["fastapi.applications"].get_swagger_ui_html.__kwdefaults__["swagger_css_url"] = "/static/swagger-ui/swagger-ui.css"
 
 app.add_middleware(
     CORSMiddleware,
