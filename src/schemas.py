@@ -120,8 +120,8 @@ class Login(BaseModel):
 class LoginIn(BaseModel):
     """登录req schema"""
 
-    username: str
-    password: str
+    username: str = Field(min_length=2,max_length=20) 
+    password: str = Field(min_length=6,max_length=20)
 
     class Config:
         """docs scheam添加example"""
