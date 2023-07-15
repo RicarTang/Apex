@@ -33,7 +33,7 @@ class ResultResponse(GenericModel, Generic[DataT]):
 class User(BaseModel):
     """用户"""
 
-    username: str
+    username: str = Field(max_length=20)
     descriptions: Optional[str] = Field(max_length=50)
     is_active: Optional[DisabledEnum] = Field(
         default=DisabledEnum.ENABLE, description="0:Disable,1:Enable"
