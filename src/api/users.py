@@ -1,10 +1,10 @@
 from typing import Optional, List
 from datetime import timedelta
-from fastapi import APIRouter, HTTPException, Depends, UploadFile, Request
+from fastapi import APIRouter, HTTPException, Depends, UploadFile, Request, Query
 from fastapi.encoders import jsonable_encoder
 from passlib.hash import md5_crypt
-from src.db.models import User_Pydantic, Login_pydantic, Users, Role
 from tortoise.contrib.fastapi import HTTPNotFoundError
+from src.db.models import User_Pydantic, Login_pydantic, Users, Role
 from .. import schemas
 from ..utils.log_util import log
 from ..core.security import create_access_token, check_jwt_auth
@@ -23,11 +23,13 @@ router = APIRouter()
     dependencies=[Depends(check_jwt_auth)],
 )
 async def get_users(
-    limit: Optional[int] = 10,
-    offset: Optional[int] = 0,
+    pagesize: Optional[int] = Query(default=20, ge=10),
+    page: Optional[int] = Query(default=1, gt=0),
 ):
     """获取所有用户."""
-    result = await User_Pydantic.from_queryset(Users.all().offset(offset).limit(limit))
+    result = await User_Pydantic.from_queryset(
+        Users.all().offset(pagesize * (page - 1)).limit(pagesize)
+    )
     return schemas.ResultResponse[schemas.UsersOut](result=result)
 
 
@@ -47,7 +49,6 @@ async def query_user_role(request: Request):
     user_role = await UsersCrud.query_user_role(id=request.state.user.id)
     # return schemas.ResultResponse[schemas.RoleTo](result=user_role)
     return user_role
-
 
 
 @router.get(
@@ -105,7 +106,7 @@ async def get_user(user_id: int):
     response_model=schemas.ResultResponse[schemas.UserOut],
     summary="更新用户",
     responses={404: {"model": HTTPNotFoundError}},
-    dependencies=[Depends(check_jwt_auth),Depends(Authority("user,update"))],
+    dependencies=[Depends(check_jwt_auth), Depends(Authority("user,update"))],
 )
 async def update_user(user_id: int, user: schemas.UserIn):
     """更新用户信息."""
@@ -120,7 +121,7 @@ async def update_user(user_id: int, user: schemas.UserIn):
     response_model=schemas.ResultResponse[str],
     summary="删除用户",
     responses={404: {"model": HTTPNotFoundError}},
-    dependencies=[Depends(check_jwt_auth),Depends(Authority("user,delete"))],
+    dependencies=[Depends(check_jwt_auth), Depends(Authority("user,delete"))],
 )
 async def delete_user(user_id: int):
     """删除用户."""
@@ -151,10 +152,7 @@ async def login(user: schemas.LoginIn, request: Request):
         return schemas.ResultResponse[str](message="Password Error!")
     if not query_user.is_active:
         # return schemas.ResultResponse[str](message="The user status is unavailable!")
-        raise HTTPException(
-            status_code=403,
-            detail="The user status is unavailable!"
-        )
+        raise HTTPException(status_code=403, detail="The user status is unavailable!")
     # 创建jwt
     access_token = create_access_token(data={"sub": query_user.username})
     # db_user["access_token"] = access_token
