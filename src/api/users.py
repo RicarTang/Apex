@@ -72,6 +72,7 @@ async def get_current_user(
     "/create",
     summary="创建用户",
     response_model=schemas.ResultResponse[schemas.UserOut],
+    dependencies=[Depends(check_jwt_auth), Depends(Authority("user,create"))],
 )
 async def create_user(user: schemas.UserIn):
     """创建用户."""
