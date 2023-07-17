@@ -1,2 +1,2 @@
 #!/bin/bash
-python3 -m uvicorn main:app --reload --host 0.0.0.0 --port 4000
+python3 -m gunicorn main:app --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:4000

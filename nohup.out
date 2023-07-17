@@ -1,0 +1,18 @@
+[2023-07-17 18:38:21 +0800] [451269] [INFO] Starting gunicorn 20.1.0
+[2023-07-17 18:38:21 +0800] [451269] [INFO] Listening at: http://0.0.0.0:4000 (451269)
+[2023-07-17 18:38:21 +0800] [451269] [INFO] Using worker: uvicorn.workers.UvicornWorker
+[2023-07-17 18:38:21 +0800] [451270] [INFO] Booting worker with pid: 451270
+INFO:     2023-07-17 18:38:22,227 - main.py - <module> - line: 66 - message: 暂无后台任务！
+[2023-07-17 18:38:22 +0800] [451270] [INFO] Started server process [451270]
+[2023-07-17 18:38:22 +0800] [451270] [INFO] Waiting for application startup.
+[2023-07-17 18:38:22 +0800] [451270] [INFO] Application startup complete.
+[2023-07-17 18:39:21 +0800] [451269] [WARNING] Worker with pid 451270 was terminated due to signal 1
+[2023-07-17 18:39:21 +0800] [455131] [INFO] Booting worker with pid: 455131
+[2023-07-17 18:39:21 +0800] [451269] [INFO] Handling signal: hup
+[2023-07-17 18:39:21 +0800] [451269] [INFO] Hang up: Master
+[2023-07-17 18:39:21 +0800] [451269] [WARNING] Worker with pid 455131 was terminated due to signal 15
+[2023-07-17 18:39:21 +0800] [455132] [INFO] Booting worker with pid: 455132
+INFO:     2023-07-17 18:39:21,705 - main.py - <module> - line: 66 - message: 暂无后台任务！
+[2023-07-17 18:39:21 +0800] [455132] [INFO] Started server process [455132]
+[2023-07-17 18:39:21 +0800] [455132] [INFO] Waiting for application startup.
+[2023-07-17 18:39:21 +0800] [455132] [INFO] Application startup complete.
