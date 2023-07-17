@@ -40,7 +40,7 @@ async def get_users(
 @router.get(
     "/role",
     summary="获取当前用户角色",
-    # response_model=schemas.ResultResponse[schemas.RoleTo],
+    response_model=schemas.ResultResponse[schemas.RolesTo],
     dependencies=[Depends(check_jwt_auth)],
 )
 async def query_user_role(request: Request):
@@ -51,8 +51,7 @@ async def query_user_role(request: Request):
     """
     log.debug(f"state用户：{request.state.user.id}")
     user_role = await UsersCrud.query_user_role(id=request.state.user.id)
-    # return schemas.ResultResponse[schemas.RoleTo](result=user_role)
-    return user_role
+    return schemas.ResultResponse[schemas.RolesTo](result=schemas.RolesTo(user_role))
 
 
 @router.get(
@@ -140,9 +139,6 @@ async def delete_user(user_id: int):
     "/login", summary="登录", response_model=schemas.ResultResponse[schemas.Login]
 )
 async def login(user: schemas.LoginIn, request: Request):
-    # async def login(
-    #     user: OAuth2PasswordRequestForm = Depends(),
-    # ):  # OAuth2PasswordRequestForm表单登陆
     """用户登陆."""
 
     # 查询数据库有无此用户

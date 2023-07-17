@@ -59,10 +59,10 @@ class UsersOut(BaseModel):
     """用户集res schema"""
 
     # List[User_Pydantic]
-    data:List[User_Pydantic]
-    page:int
-    limit:int
-    total:int
+    data: List[User_Pydantic]
+    page: int
+    limit: int
+    total: int
 
 
 class UserPy(User_Pydantic, extra=Extra.ignore):
@@ -88,29 +88,34 @@ class RoleTo(Role_Pydantic):
     pass
 
 
+class RolesTo(List[Role_Pydantic]):
+    """返回多角色res schema"""
+
+
+    pass
+
+
 class UserAddRoleIn(BaseModel):
     """用户添加角色req schema"""
 
     user_id: int
     role: str
 
+
 class UserAddRoleTo(BaseModel):
     """用户添加角色res schema"""
+
     pass
 
+
 class RolePermIn(BaseModel):
-    role: str = Field(..., description='角色')
-    model: str = Field(..., description='模块')
-    act: str = Field(..., description='权限行为')
+    role: str = Field(..., description="角色")
+    model: str = Field(..., description="模块")
+    act: str = Field(..., description="权限行为")
 
     class Config:
-        schema_extra = {
-            'example': {
-                'role': 'admin',
-                'model': 'admin',
-                'act': 'add'
-            }
-        }
+        schema_extra = {"example": {"role": "admin", "model": "admin", "act": "add"}}
+
 
 class Login(BaseModel):
     """登录res schema"""
@@ -123,8 +128,8 @@ class Login(BaseModel):
 class LoginIn(BaseModel):
     """登录req schema"""
 
-    username: str = Field(min_length=2,max_length=20) 
-    password: str = Field(min_length=6,max_length=20)
+    username: str = Field(min_length=2, max_length=20)
+    password: str = Field(min_length=6, max_length=20)
 
     class Config:
         """docs scheam添加example"""
