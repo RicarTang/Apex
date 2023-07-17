@@ -1,6 +1,6 @@
 from typing import Optional
 from fastapi import APIRouter, HTTPException, Depends
-from .. import schemas
+from ..schemas import schemas
 from src.db.models import Role, Users
 from ..crud import UsersCrud, RolePermCrud
 from ..utils.log_util import log

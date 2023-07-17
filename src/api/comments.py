@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, Request
 from src.db.models import Comments, Users
-from .. import schemas
+from ..schemas import schemas
 from ..utils.log_util import log
 from ..utils import exceptions_util as exception
 from ..core.security import check_jwt_auth

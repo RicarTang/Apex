@@ -1,7 +1,7 @@
 from typing import List, Optional, TypeVar, Generic
 from pydantic import BaseModel, Field, Extra, validator, ValidationError
 from pydantic.generics import GenericModel
-from .db.models import (
+from ..db.models import (
     User_Pydantic,
     Comment_Pydantic,
     # Login_pydantic,

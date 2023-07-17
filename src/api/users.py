@@ -5,7 +5,7 @@ from fastapi.encoders import jsonable_encoder
 from passlib.hash import md5_crypt
 from tortoise.contrib.fastapi import HTTPNotFoundError
 from src.db.models import User_Pydantic, Login_pydantic, Users, Role
-from .. import schemas
+from ..schemas import schemas
 from ..utils.log_util import log
 from ..core.security import create_access_token, check_jwt_auth
 from ..utils import exceptions_util as exception
