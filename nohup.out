@@ -1,18 +1,98 @@
-[2023-07-17 18:38:21 +0800] [451269] [INFO] Starting gunicorn 20.1.0
-[2023-07-17 18:38:21 +0800] [451269] [INFO] Listening at: http://0.0.0.0:4000 (451269)
-[2023-07-17 18:38:21 +0800] [451269] [INFO] Using worker: uvicorn.workers.UvicornWorker
-[2023-07-17 18:38:21 +0800] [451270] [INFO] Booting worker with pid: 451270
-INFO:     2023-07-17 18:38:22,227 - main.py - <module> - line: 66 - message: 暂无后台任务！
-[2023-07-17 18:38:22 +0800] [451270] [INFO] Started server process [451270]
-[2023-07-17 18:38:22 +0800] [451270] [INFO] Waiting for application startup.
-[2023-07-17 18:38:22 +0800] [451270] [INFO] Application startup complete.
-[2023-07-17 18:39:21 +0800] [451269] [WARNING] Worker with pid 451270 was terminated due to signal 1
-[2023-07-17 18:39:21 +0800] [455131] [INFO] Booting worker with pid: 455131
-[2023-07-17 18:39:21 +0800] [451269] [INFO] Handling signal: hup
-[2023-07-17 18:39:21 +0800] [451269] [INFO] Hang up: Master
-[2023-07-17 18:39:21 +0800] [451269] [WARNING] Worker with pid 455131 was terminated due to signal 15
-[2023-07-17 18:39:21 +0800] [455132] [INFO] Booting worker with pid: 455132
-INFO:     2023-07-17 18:39:21,705 - main.py - <module> - line: 66 - message: 暂无后台任务！
-[2023-07-17 18:39:21 +0800] [455132] [INFO] Started server process [455132]
-[2023-07-17 18:39:21 +0800] [455132] [INFO] Waiting for application startup.
-[2023-07-17 18:39:21 +0800] [455132] [INFO] Application startup complete.
+[2023-07-17 22:42:04 +0800] [1253670] [DEBUG] Current configuration:
+  config: gunicorn.conf.py
+  wsgi_app: None
+  bind: ['0.0.0.0:4000']
+  backlog: 2048
+  workers: 1
+  worker_class: uvicorn.workers.UvicornWorker
+  threads: 4
+  worker_connections: 2000
+  max_requests: 0
+  max_requests_jitter: 0
+  timeout: 30
+  graceful_timeout: 30
+  keepalive: 2
+  limit_request_line: 4094
+  limit_request_fields: 100
+  limit_request_field_size: 8190
+  reload: False
+  reload_engine: auto
+  reload_extra_files: []
+  spew: False
+  check_config: False
+  print_config: False
+  preload_app: True
+  sendfile: None
+  reuse_port: False
+  chdir: /data/Fastapi_tortoise
+  daemon: False
+  raw_env: []
+  pidfile: None
+  worker_tmp_dir: None
+  user: 0
+  group: 0
+  umask: 0
+  initgroups: False
+  tmp_upload_dir: None
+  secure_scheme_headers: {'X-FORWARDED-PROTOCOL': 'ssl', 'X-FORWARDED-PROTO': 'https', 'X-FORWARDED-SSL': 'on'}
+  forwarded_allow_ips: ['127.0.0.1']
+  accesslog: -
+  disable_redirect_access_to_syslog: False
+  access_log_format: %(h)s %(l)s %(u)s %(t)s "%(r)s" %(s)s %(b)s "%(f)s" "%(a)s"
+  errorlog: -
+  loglevel: debug
+  capture_output: False
+  logger_class: gunicorn.glogging.Logger
+  logconfig: None
+  logconfig_dict: {}
+  syslog_addr: udp://localhost:514
+  syslog: False
+  syslog_prefix: None
+  syslog_facility: user
+  enable_stdio_inheritance: False
+  statsd_host: None
+  dogstatsd_tags: 
+  statsd_prefix: 
+  proc_name: None
+  default_proc_name: main:app
+  pythonpath: None
+  paste: None
+  on_starting: <function OnStarting.on_starting at 0x7fa5f89b72e0>
+  on_reload: <function OnReload.on_reload at 0x7fa5f89b7400>
+  when_ready: <function WhenReady.when_ready at 0x7fa5f89b7520>
+  pre_fork: <function Prefork.pre_fork at 0x7fa5f89b7640>
+  post_fork: <function Postfork.post_fork at 0x7fa5f89b7760>
+  post_worker_init: <function PostWorkerInit.post_worker_init at 0x7fa5f89b7880>
+  worker_int: <function WorkerInt.worker_int at 0x7fa5f89b79a0>
+  worker_abort: <function WorkerAbort.worker_abort at 0x7fa5f89b7ac0>
+  pre_exec: <function PreExec.pre_exec at 0x7fa5f89b7be0>
+  pre_request: <function PreRequest.pre_request at 0x7fa5f89b7d00>
+  post_request: <function PostRequest.post_request at 0x7fa5f89b7d90>
+  child_exit: <function ChildExit.child_exit at 0x7fa5f89b7eb0>
+  worker_exit: <function WorkerExit.worker_exit at 0x7fa5f89d8040>
+  nworkers_changed: <function NumWorkersChanged.nworkers_changed at 0x7fa5f89d8160>
+  on_exit: <function OnExit.on_exit at 0x7fa5f89d8280>
+  proxy_protocol: False
+  proxy_allow_ips: ['127.0.0.1']
+  keyfile: None
+  certfile: None
+  ssl_version: 2
+  cert_reqs: 0
+  ca_certs: None
+  suppress_ragged_eofs: True
+  do_handshake_on_connect: False
+  ciphers: None
+  raw_paste_global_conf: []
+  strip_header_spaces: False
+INFO:     2023-07-17 22:42:05,384 - main.py - <module> - line: 66 - message: 暂无后台任务！
+[2023-07-17 22:42:05 +0800] [1253670] [INFO] Starting gunicorn 20.1.0
+[2023-07-17 22:42:05 +0800] [1253670] [DEBUG] Arbiter booted
+[2023-07-17 22:42:05 +0800] [1253670] [INFO] Listening at: http://0.0.0.0:4000 (1253670)
+[2023-07-17 22:42:05 +0800] [1253670] [INFO] Using worker: uvicorn.workers.UvicornWorker
+[2023-07-17 22:42:05 +0800] [1253845] [INFO] Booting worker with pid: 1253845
+[2023-07-17 22:42:05 +0800] [1253845] [INFO] Started server process [1253845]
+[2023-07-17 22:42:05 +0800] [1253845] [INFO] Waiting for application startup.
+[2023-07-17 22:42:05 +0800] [1253845] [INFO] Application startup complete.
+[2023-07-17 22:42:05 +0800] [1253670] [DEBUG] 1 workers
+120.36.214.60:23214 - "GET /docs HTTP/1.1" 200
+120.36.214.60:23214 - "GET /openapi.json HTTP/1.1" 200
