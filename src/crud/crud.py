@@ -8,6 +8,17 @@ class UsersCrud:
     """用户crud."""
 
     @staticmethod
+    async def create_superadmin(**kwargs):
+        """创建超级管理员
+
+        Returns:
+            _type_: _description_
+        """
+        kwargs["is_super"] = 1
+        return await Users.create(**kwargs)
+
+
+    @staticmethod
     async def get_user(**kwargs):
         """
         查询用户.

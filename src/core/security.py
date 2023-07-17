@@ -8,6 +8,7 @@ from tortoise.queryset import QuerySet
 from ..db.models import Users
 from ..utils.log_util import log
 import config
+from ..crud import UsersCrud
 
 
 oauth2_bearer = HTTPBearer(auto_error=False)
@@ -60,19 +61,23 @@ async def check_jwt_auth(
         detail="Not authenticated",
         headers={"WWW-Authenticate": "Bearer"},
     )
-
+    # 首次创建用户跳过认证
+    is_first_user = await Users.all().exists()
+    print(request.body)
+    if request.url.path == "/user/create" and (is_first_user is False):
+        # 创建第一个用户，直接放行
+        await UsersCrud.create_superadmin(request.body)
     try:
-        try:
-            # decode校验
-            payload = jwt.decode(
-                bearer.credentials, config.SECRET_KEY, algorithms=[config.ALGORITHM]
-            )
-        except AttributeError:
-            raise unauthorized_exception
-        username: str = payload.get("sub")
-        if username is None:
-            raise credentials_exception
+        # decode校验
+        payload = jwt.decode(
+            bearer.credentials, config.SECRET_KEY, algorithms=[config.ALGORITHM]
+        )
+    except AttributeError:
+        raise unauthorized_exception
     except JWTError:
+        raise credentials_exception
+    username: str = payload.get("sub")
+    if username is None:
         raise credentials_exception
 
     user = await Users.get(username=username)
