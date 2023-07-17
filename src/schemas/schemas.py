@@ -55,11 +55,14 @@ class UserOut(User_Pydantic):
     #     orm_mode = True
 
 
-class UsersOut(List[User_Pydantic]):
+class UsersOut(BaseModel):
     """用户集res schema"""
 
     # List[User_Pydantic]
-    pass
+    data:List[User_Pydantic]
+    page:int
+    limit:int
+    total:int
 
 
 class UserPy(User_Pydantic, extra=Extra.ignore):

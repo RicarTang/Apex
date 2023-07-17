@@ -23,14 +23,18 @@ router = APIRouter()
     dependencies=[Depends(check_jwt_auth)],
 )
 async def get_users(
-    pagesize: Optional[int] = Query(default=20, ge=10),
+    limit: Optional[int] = Query(default=20, ge=10),
     page: Optional[int] = Query(default=1, gt=0),
 ):
     """获取所有用户."""
     result = await User_Pydantic.from_queryset(
-        Users.all().offset(pagesize * (page - 1)).limit(pagesize)
+        Users.all().offset(limit * (page - 1)).limit(limit)
     )
-    return schemas.ResultResponse[schemas.UsersOut](result=result)
+    # 查询用户总数
+    total = await Users.all().count()
+    return schemas.ResultResponse[schemas.UsersOut](
+        result=schemas.UsersOut(data=result, page=page, limit=limit, total=total)
+    )
 
 
 @router.get(
