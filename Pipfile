@@ -4,8 +4,8 @@ verify_ssl = true
 name = "pip_conf_index_global"
 
 [packages]
-pydantic = "*"
-fastapi = "*"
+pydantic = "==1.10.11"
+fastapi = "==0.99.1"
 casbin = "*"
 passlib = "*"
 uvicorn = "*"
@@ -17,7 +17,7 @@ apscheduler = "*"
 pytz-deprecation-shim = "*"
 aerich = "*"
 casbin-tortoise-adapter = "*"
-
+gunicorn = "*"
 
 [dev-packages]
 black = "*"
