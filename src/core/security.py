@@ -66,7 +66,7 @@ async def check_jwt_auth(
     print(request.body)
     if request.url.path == "/user/create" and (is_first_user is False):
         # 创建第一个用户，直接放行
-        await UsersCrud.create_superadmin(request.body)
+        return await UsersCrud.create_superadmin(request.body)
     try:
         # decode校验
         payload = jwt.decode(
