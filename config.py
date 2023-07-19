@@ -10,8 +10,8 @@ FILE_LOG_LEVEL = 'INFO'
 LOG_FORMATTER = "%(levelname)s:     %(asctime)s - %(filename)s - %(funcName)s - line: %(lineno)d - message: %(message)s"
 
 # 数据库
-# DB_URL = "mysql://root:Mayday990812@127.0.0.1:3306/tortoise"
-DB_URL = "mysql://root:123456@127.0.0.1:3306/tortoise"
+DB_URL = "mysql://root:Mayday990812@127.0.0.1:3306/tortoise"
+# DB_URL = "mysql://root:123456@127.0.0.1:3306/tortoise"
 
 # models
 MODELS_PATH = "src.db.models"
