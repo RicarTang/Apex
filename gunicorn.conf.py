@@ -1,20 +1,20 @@
 #import multiprocessing
 
 #预加载资源
-preload_app = True
+#preload_app = True
 
 # 并行工作进程数
-#workers = 5
+workers = 1
 
 # 指定每个工作者的线程数
-threads = 4
+threads = 2
 
 worker_class = 'uvicorn.workers.UvicornWorker'
 
 # 绑定端口
 bind = '0.0.0.0:4000'
 
-# 设置守护进程,将进程交给supervisor管理
+# 设置守护进程,false将进程交给supervisor管理
 daemon = 'false'
 
 
@@ -24,12 +24,11 @@ daemon = 'false'
 worker_connections = 2000
 
 # 设置进程文件目录
-#pidfile = '/var/run/gunicorn.pid'
+pidfile = '/var/run/gunicorn.pid'
 
 # 日志标准输出
-accesslog = "-"
-errorlog = "-"
-loglevel = "debug"
+accesslog = "./src/log/gunicorn_access.log"
+errorlog = "./src/log/gunicorn_error.log"
 
 # 设置日志记录水平 
 loglevel = 'debug'
