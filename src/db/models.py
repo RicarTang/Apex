@@ -2,6 +2,8 @@ from tortoise import fields, models
 from tortoise.contrib.pydantic import pydantic_model_creator
 from enum import IntEnum
 from .base_models import TimeStampMixin, AbstractBaseModel
+from passlib.hash import md5_crypt
+from tortoise.signals import post_save
 
 
 class DisabledEnum(IntEnum):
@@ -37,6 +39,17 @@ class Users(AbstractBaseModel, TimeStampMixin):
 
     def __str__(self):
         return str(self.username)
+    
+    @classmethod
+    async def create_initial_users(cls):
+        # 在创建模型实例后执行的操作,创建superadmin
+        await cls.create(username="admin",descriptions="超级管理员",password=md5_crypt.hash(123456),is_super=1)
+
+@post_save(Users)
+async def create_initial_users(sender, instance: Users, created: bool, **kwargs):
+    # 只在创建模型实例时执行操作
+    if created:
+        await instance.create_initial_users()
 
 
 class Role(AbstractBaseModel, TimeStampMixin):
