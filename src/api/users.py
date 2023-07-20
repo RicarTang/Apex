@@ -1,14 +1,26 @@
-from typing import Optional, List
-from datetime import timedelta
-from fastapi import APIRouter, HTTPException, Depends, UploadFile, Request, Query
+from typing import Optional
+
+# from datetime import timedelta
+from fastapi import (
+    APIRouter,
+    HTTPException,
+    Depends,
+    UploadFile,
+    Request,
+    Query,
+    Response,
+    status,
+)
 from fastapi.encoders import jsonable_encoder
 from passlib.hash import md5_crypt
 from tortoise.contrib.fastapi import HTTPNotFoundError
+from tortoise.exceptions import DoesNotExist
 from src.db.models import User_Pydantic, Login_pydantic, Users, Role
 from ..schemas import schemas
 from ..utils.log_util import log
 from ..core.security import create_access_token, check_jwt_auth
-from ..utils import exceptions_util as exception
+
+# from ..utils import exceptions_util as exception
 from ..core.authentication import Authority
 from ..crud import UsersCrud
 
@@ -100,8 +112,10 @@ async def create_user(user: schemas.UserIn):
 async def get_user(user_id: int):
     """查询单个用户."""
     log.debug(f"{await Users.get(id=user_id).values()}")
-    # return await User_Pydantic.from_queryset_single(Users.get(id=user_id))
-    user = await Users.get(id=user_id)
+    try:
+        user = await Users.get(id=user_id)
+    except DoesNotExist:
+        return schemas.ResultResponse[str](message="user does not exist!")
     return schemas.ResultResponse[schemas.UserOut](result=user)
 
 
@@ -114,6 +128,10 @@ async def get_user(user_id: int):
 )
 async def update_user(user_id: int, user: schemas.UserIn):
     """更新用户信息."""
+    # 查询用户是否存在
+    if not await Users.filter(id=user_id).exists():
+        return schemas.ResultResponse[str](message="user does not exist!")
+    # 更新
     user.password = md5_crypt.hash(user.password)
     result = await Users.filter(id=user_id).update(**user.dict(exclude_unset=True))
     log.debug(f"update更新{result}条数据")
@@ -139,21 +157,27 @@ async def delete_user(user_id: int):
 @router.post(
     "/login", summary="登录", response_model=schemas.ResultResponse[schemas.Login]
 )
-async def login(user: schemas.LoginIn, request: Request):
+async def login(user: schemas.LoginIn, request: Request, response: Response):
     """用户登陆."""
 
     # 查询数据库有无此用户
-    query_user = await Login_pydantic.from_tortoise_orm(
-        await Users.get(username=user.username)
-    )
+    try:
+        query_user = await Login_pydantic.from_tortoise_orm(
+            await Users.get(username=user.username)
+        )
+    except DoesNotExist:
+        return schemas.ResultResponse[str](message="user does not exist!")
     # 序列化Pydantic对象
     db_user = jsonable_encoder(query_user)
     # 验证密码
     if not md5_crypt.verify(secret=user.password, hash=query_user.password):
         return schemas.ResultResponse[str](message="Password Error!")
+    # 用户为黑名单
     if not query_user.is_active:
-        # return schemas.ResultResponse[str](message="The user status is unavailable!")
-        raise HTTPException(status_code=403, detail="The user status is unavailable!")
+        response.status_code = status.HTTP_403_FORBIDDEN
+        return schemas.ResultResponse[str](
+            code=status.HTTP_403_FORBIDDEN, message="The user status is unavailable!"
+        )
     # 创建jwt
     access_token = create_access_token(data={"sub": query_user.username})
     # db_user["access_token"] = access_token

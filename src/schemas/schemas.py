@@ -44,7 +44,7 @@ class UserIn(User):
     """用户req schema"""
 
     password: str = Field(min_length=6, max_length=20)
-    user_role: str
+    # user_role: str
 
 
 class UserOut(User_Pydantic):
