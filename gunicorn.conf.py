@@ -31,6 +31,6 @@ accesslog = "./src/log/gunicorn_access.log"
 errorlog = "./src/log/gunicorn_error.log"
 
 # 设置日志记录水平 
-loglevel = 'debug'
+loglevel = 'info'
 
 
