@@ -4,7 +4,7 @@ from fastapi.exceptions import HTTPException
 import casbin
 import casbin_tortoise_adapter
 from tortoise.exceptions import DoesNotExist
-import config
+from config import config
 from ..utils.log_util import log
 from .util import Singleton
 

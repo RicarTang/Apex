@@ -1,6 +1,6 @@
 import logging
 import os
-import config
+from config import config
 import datetime
 
 
