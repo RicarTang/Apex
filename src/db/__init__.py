@@ -8,7 +8,7 @@ async def create_initial_users():
     # 查询数据库是否已经有数据
     has_data = await Users.all().exists()
     if not has_data:
-        log.info("初始化用户成功，超级管理员：superadmin,12346".center("-",100))
+        log.info("初始化用户成功，超级管理员：superadmin,12346".center(100,"-"))
         # 创建角色
         super_role = await Role.create(name="superadmin", description="超级管理员角色")
         admin_role = await Role.create(name="admin", description="管理员角色")
