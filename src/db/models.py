@@ -10,10 +10,13 @@ class DisabledEnum(IntEnum):
     ENABLE = 1
     DISABLE = 0
 
+
 class IsSuperEnum(IntEnum):
     """true / false"""
+
     TRUE = 1
     FALSE = 0
+
 
 class Users(AbstractBaseModel, TimeStampMixin):
     """用户模型"""
@@ -29,7 +32,7 @@ class Users(AbstractBaseModel, TimeStampMixin):
     is_super = fields.IntEnumField(
         enum_type=IsSuperEnum,
         default=IsSuperEnum.FALSE,
-        description="用户时候是超级管理员,1: True,0: False"
+        description="用户时候是超级管理员,1: True,0: False",
     )
     # 关联关系
     comments: fields.ReverseRelation["Comments"]
