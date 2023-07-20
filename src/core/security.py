@@ -7,7 +7,7 @@ from fastapi.exceptions import HTTPException
 from tortoise.queryset import QuerySet
 from ..db.models import Users
 from ..utils.log_util import log
-import config
+from config import config
 from ..crud import UsersCrud
 
 
