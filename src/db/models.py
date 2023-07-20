@@ -2,8 +2,6 @@ from tortoise import fields, models
 from tortoise.contrib.pydantic import pydantic_model_creator
 from enum import IntEnum
 from .base_models import TimeStampMixin, AbstractBaseModel
-from passlib.hash import md5_crypt
-from tortoise.signals import post_save
 
 
 class DisabledEnum(IntEnum):
@@ -12,10 +10,13 @@ class DisabledEnum(IntEnum):
     ENABLE = 1
     DISABLE = 0
 
+
 class IsSuperEnum(IntEnum):
     """true / false"""
+
     TRUE = 1
     FALSE = 0
+
 
 class Users(AbstractBaseModel, TimeStampMixin):
     """用户模型"""
@@ -31,7 +32,7 @@ class Users(AbstractBaseModel, TimeStampMixin):
     is_super = fields.IntEnumField(
         enum_type=IsSuperEnum,
         default=IsSuperEnum.FALSE,
-        description="用户时候是超级管理员,1: True,0: False"
+        description="用户时候是超级管理员,1: True,0: False",
     )
     # 关联关系
     comments: fields.ReverseRelation["Comments"]
@@ -39,17 +40,6 @@ class Users(AbstractBaseModel, TimeStampMixin):
 
     def __str__(self):
         return str(self.username)
-    
-    @classmethod
-    async def create_initial_users(cls):
-        # 在创建模型实例后执行的操作,创建superadmin
-        await cls.create(username="admin",descriptions="超级管理员",password=md5_crypt.hash(123456),is_super=1)
-
-@post_save(Users)
-async def create_initial_users(sender, instance: Users, created: bool, **kwargs):
-    # 只在创建模型实例时执行操作
-    if created:
-        await instance.create_initial_users()
 
 
 class Role(AbstractBaseModel, TimeStampMixin):
