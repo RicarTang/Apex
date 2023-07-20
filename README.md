@@ -12,6 +12,7 @@
 - 使用gunicorn+uvicorn守护程序运行
 - 因为pydanticV2版本改动过大,Fastapi与pydantic锁定版本
 ## 使用
+默认超级管理员账号：superadmin,123456;
 1. 安装依赖
 ```Bash
 pipenv install
