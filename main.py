@@ -33,7 +33,7 @@ def use_local_swagger_static():
         "swagger_css_url"
     ] = "/static/swagger-ui/swagger-ui.css"
 
-
+# 注册CORS中间件
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -65,7 +65,10 @@ app.include_router(
     dependencies=[Depends(check_jwt_auth)],
 )
 app.include_router(
-    admin_api, tags=["Admin"], prefix="/admin", dependencies=[Depends(check_jwt_auth)]
+    admin_api,
+    tags=["Admin"],
+    prefix="/admin",
+    dependencies=[Depends(check_jwt_auth)],
 )
 
 # 注册exception

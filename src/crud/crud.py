@@ -47,8 +47,19 @@ class UsersCrud:
         :return:
         """
         user = await Users.filter(**kwargs).first().prefetch_related("roles")
-        user_role = await user.roles.all()
-        return user_role
+        user_role_list = await user.roles.all()
+        # total = await user.roles.all().count()
+        return user_role_list,total
+
+    @staticmethod
+    async def query_user_role_total(**kwargs):
+        """查询用户角色total
+
+        Returns:
+            _type_: _description_
+        """
+        user = await Users.filter(**kwargs).first().prefetch_related("roles")
+
 
 
 class RolePermCrud:

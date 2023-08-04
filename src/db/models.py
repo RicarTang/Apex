@@ -78,4 +78,4 @@ UserIn_Pydantic = pydantic_model_creator(
 # 评论schema
 Comment_Pydantic = pydantic_model_creator(Comments, name="CommentTo")
 # 角色schema
-Role_Pydantic = pydantic_model_creator(Role, name="RoleTo", exclude_readonly=True)
+Role_Pydantic = pydantic_model_creator(Role, name="RoleTo")
