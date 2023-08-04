@@ -104,10 +104,10 @@ class UserAddRoleIn(BaseModel):
     role: str
 
 
-class UserAddRoleTo(BaseModel):
-    """用户添加角色res schema"""
+# class UserAddRoleTo(BaseModel):
+#     """用户添加角色res schema"""
 
-    pass
+#     pass
 
 
 class RolePermIn(BaseModel):

@@ -49,7 +49,7 @@ class UsersCrud:
         user = await Users.filter(**kwargs).first().prefetch_related("roles")
         user_role_list = await user.roles.all()
         # total = await user.roles.all().count()
-        return user_role_list,total
+        return user_role_list
 
     @staticmethod
     async def query_user_role_total(**kwargs):

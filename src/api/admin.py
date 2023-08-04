@@ -115,13 +115,22 @@ async def query_role(
 @router.post(
     "/user/role",
     summary="新增用户角色",
-    # response_model=schemas.ResultResponse[schemas.UserAddRoleTo],
+    response_model=schemas.ResultResponse[None],
 )
-async def add_user_role(res: schemas.UserAddRoleIn):
-    user = await Users.filter(id=res.user_id).first().prefetch_related("roles")
-    role = await Role.filter(name=res.role).first()
-    if not role:
-        return schemas.ResultResponse[str](message=f"role: {res.role} is not exist!")
+async def add_user_role(req: schemas.UserAddRoleIn):
+    try:
+        user = await Users.get(id=req.user_id).prefetch_related("roles")
+    except DoesNotExist:
+        return schemas.ResultResponse[str](
+            code=status.HTTP_400_BAD_REQUEST,
+            message=f"user: {req.user_id} is not exist!",
+        )
+    try:
+        role = await Role.get(name=req.role)
+    except DoesNotExist:
+        return schemas.ResultResponse[str](
+            code=status.HTTP_400_BAD_REQUEST, message=f"role: {req.role} is not exist!"
+        )
     await user.roles.add(role)
     return schemas.ResultResponse[str]()
 
