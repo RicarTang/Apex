@@ -12,6 +12,7 @@ from src.utils.log_util import log
 from src.db.settings import TORTOISE_ORM
 from src.core.security import check_jwt_auth
 from src.db import create_initial_users
+from src.core.cache import init_redis_pool
 
 app = FastAPI(
     title="api swagger",
@@ -32,6 +33,11 @@ def use_local_swagger_static():
     sys.modules["fastapi.applications"].get_swagger_ui_html.__kwdefaults__[
         "swagger_css_url"
     ] = "/static/swagger-ui/swagger-ui.css"
+
+@app.on_event("startup")
+async def redis_pool():
+    """初始化cache"""
+    await init_redis_pool()
 
 # 注册CORS中间件
 app.add_middleware(

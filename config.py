@@ -14,6 +14,8 @@ class BaseConfig(BaseSettings):
     # 数据库
     # DB_URL = "mysql://root:Mayday990812@127.0.0.1:3306/tortoise"
     DB_URL: str
+    # redis
+    REDIS_URL:str
     # models
     MODELS_PATH = "src.db.models"
     # jwt相关
