@@ -8,4 +8,4 @@ from config import config
 async def init_redis_pool():
     """初始化redis连接池"""
     redis = Redis.from_url(config.REDIS_URL)
-    FastAPICache.init(RedisBackend(redis), prefix="fastapi-cache")
+    FastAPICache.init(RedisBackend(redis), prefix="fastapi-cache",expire=60)

@@ -35,7 +35,6 @@ router = APIRouter()
     response_model=schemas.ResultResponse[schemas.UsersOut],
     dependencies=[Depends(check_jwt_auth)],
 )
-@cache(expire=60)
 async def get_users(
     limit: Optional[int] = Query(default=20, ge=10),
     page: Optional[int] = Query(default=1, gt=0),
