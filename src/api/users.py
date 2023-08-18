@@ -1,11 +1,7 @@
 from typing import Optional
-
-# from datetime import timedelta
 from fastapi import (
     APIRouter,
-    HTTPException,
     Depends,
-    UploadFile,
     Request,
     Query,
     Response,
@@ -20,8 +16,6 @@ from src.db.models import User_Pydantic, Login_pydantic, Users, Role
 from ..schemas import schemas
 from ..utils.log_util import log
 from ..core.security import create_access_token, check_jwt_auth
-
-# from ..utils import exceptions_util as exception
 from ..core.authentication import Authority
 from ..crud import UsersCrud
 
@@ -198,9 +192,3 @@ async def login(user: schemas.LoginIn, request: Request, response: Response):
     )
 
 
-@router.post("/uploadfile", deprecated=True)
-async def uploadfile(file: UploadFile):
-    with open(f"./src/static/{file.filename}", "wb") as f:
-        f.write(await file.read())
-
-    return {"filename": file.filename}

@@ -5,7 +5,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from tortoise.contrib.fastapi import register_tortoise
-from src.api import user_api, comment_api, admin_api
+from src.api import user_api, comment_api, admin_api, testcase_api
 from src.utils.exceptions_util import ResponseException, response_exception
 from src.utils.background_task_util import scheduler
 from src.utils.log_util import log
@@ -34,10 +34,12 @@ def use_local_swagger_static():
         "swagger_css_url"
     ] = "/static/swagger-ui/swagger-ui.css"
 
+
 @app.on_event("startup")
 async def redis_pool():
     """初始化cache"""
     await init_redis_pool()
+
 
 # 注册CORS中间件
 app.add_middleware(
@@ -76,6 +78,13 @@ app.include_router(
     prefix="/admin",
     dependencies=[Depends(check_jwt_auth)],
 )
+app.include_router(
+    testcase_api,
+    tags=["Testcase"],
+    prefix="/testcase",
+    # dependencies=[Depends(check_jwt_auth)],
+)
+
 
 # 注册exception
 app.add_exception_handler(ResponseException, response_exception)
