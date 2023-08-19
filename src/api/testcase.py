@@ -1,3 +1,5 @@
+# import time
+from datetime import datetime
 from pathlib import Path
 from typing import Optional
 from fastapi import (
@@ -12,10 +14,10 @@ from fastapi import (
 )
 from fastapi.responses import FileResponse
 from tortoise.exceptions import DoesNotExist
-from src.db.models import Users, Role
+from config import config
 from ..schemas import schemas
 from ..utils.log_util import log
-from config import config
+from ..utils.excel_util import ExcelUtil, save_file
 
 router = APIRouter()
 
@@ -25,7 +27,7 @@ router = APIRouter()
     summary="导入测试用例",
     response_model=schemas.ResultResponse[str],
 )
-async def add_testcases(excel: UploadFile):
+async def add_testcases(response: Response, excel: UploadFile):
     """导入测试用例
 
     Args:
@@ -35,10 +37,25 @@ async def add_testcases(excel: UploadFile):
         _type_: _description_
     """
     if excel.filename.endswith(("xlsx", "csv", "xls")):
-        log.debug("格式正确")
-    else:
-        log.debug("格式错误")
+        # 保存路径
+        save_path = (
+            config.STATIC_PATH
+            / "testcase"
+            / "upload"
+            / f"{str(datetime.now().strftime('%Y-%m-%d-%H-%M-%S')) + excel.filename}"
+        )
+        # 保存上传的文件
+        save_file(
+            file=excel,
+            save_path=save_path,
+        )
+        # 读取表格数据
+        wb = ExcelUtil(save_path)
+        # 保存testcase到数据库
 
+    else:
+        response.status_code = status.HTTP_400_BAD_REQUEST
+        schemas.ResultResponse[str](result="template suffix is error!")
     return schemas.ResultResponse[str](result=excel.filename)
 
 
