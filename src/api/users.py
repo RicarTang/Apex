@@ -7,17 +7,19 @@ from fastapi import (
     Response,
     status,
 )
-from fastapi.encoders import jsonable_encoder
 from passlib.hash import md5_crypt
-from fastapi_cache.decorator import cache
 from tortoise.contrib.fastapi import HTTPNotFoundError
 from tortoise.exceptions import DoesNotExist
-from src.db.models import User_Pydantic, Login_pydantic, Users, Role
-from ..schemas import schemas
-from ..utils.log_util import log
 from ..core.security import create_access_token, check_jwt_auth
 from ..core.authentication import Authority
-from ..crud import UsersCrud
+from src.db.models import User_Pydantic, Users, Role
+from ..schemas import schemas
+from ..utils.log_util import log
+from ..utils.exception_util import (
+    UserUnavailableException,
+    PasswordValidateErrorException,
+    UserNotExistException,
+)
 
 
 router = APIRouter()
@@ -159,36 +161,38 @@ async def delete_user(user_id: int, response: Response):
 
 
 @router.post(
-    "/login", summary="登录", response_model=schemas.ResultResponse[schemas.Login]
+    "/login",
+    summary="登录",
+    response_model=schemas.ResultResponse[schemas.Login],
 )
-async def login(user: schemas.LoginIn, request: Request, response: Response):
+async def login(user: schemas.LoginIn):
     """用户登陆."""
-
     # 查询数据库有无此用户
     try:
-        query_user = await Login_pydantic.from_tortoise_orm(
-            await Users.get(username=user.username)
-        )
+        query_user = await Users.get(username=user.username)
     except DoesNotExist:
-        return schemas.ResultResponse[str](message="user does not exist!")
-    # 序列化Pydantic对象
-    db_user = jsonable_encoder(query_user)
+        raise UserNotExistException
     # 验证密码
     if not md5_crypt.verify(secret=user.password, hash=query_user.password):
-        return schemas.ResultResponse[str](message="Password Error!")
+        raise PasswordValidateErrorException
     # 用户为黑名单
     if not query_user.is_active:
-        response.status_code = status.HTTP_403_FORBIDDEN
-        return schemas.ResultResponse[str](
-            code=status.HTTP_403_FORBIDDEN, message="The user status is unavailable!"
-        )
+        raise UserUnavailableException
     # 创建jwt
     access_token = create_access_token(data={"sub": query_user.username})
-    # db_user["access_token"] = access_token
     return schemas.ResultResponse[schemas.Login](
         result=schemas.Login(
-            data=db_user, access_token=access_token, token_type="bearer"
+            data=query_user,
+            access_token=access_token,
+            token_type="bearer",
         )
     )
 
 
+@router.post(
+    "/logout",
+    summary="退出登录",
+    response_model=schemas.ResultResponse[str],
+)
+async def logout():
+    pass

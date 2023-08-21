@@ -1,24 +1,10 @@
-from tortoise import fields, models
+from tortoise import fields
 from tortoise.contrib.pydantic import pydantic_model_creator
-from enum import IntEnum
-from .base_models import TimeStampMixin, AbstractBaseModel
+from .base_models import AbstractBaseModel
+from .enum import DisabledEnum, IsSuperEnum
 
 
-class DisabledEnum(IntEnum):
-    """用户disabled枚举"""
-
-    ENABLE = 1
-    DISABLE = 0
-
-
-class IsSuperEnum(IntEnum):
-    """true / false"""
-
-    TRUE = 1
-    FALSE = 0
-
-
-class Users(AbstractBaseModel, TimeStampMixin):
+class Users(AbstractBaseModel):
     """用户模型"""
 
     username = fields.CharField(max_length=20, unique=True, description="用户名")
@@ -42,7 +28,7 @@ class Users(AbstractBaseModel, TimeStampMixin):
         return str(self.username)
 
 
-class Role(AbstractBaseModel, TimeStampMixin):
+class Role(AbstractBaseModel):
     """角色表"""
 
     name = fields.CharField(max_length=20, unique=True, description="角色名称")
@@ -54,7 +40,7 @@ class Role(AbstractBaseModel, TimeStampMixin):
     )
 
 
-class Comments(AbstractBaseModel, TimeStampMixin):
+class Comments(AbstractBaseModel):
     """用户评论模型"""
 
     comment = fields.TextField(description="用户评论")

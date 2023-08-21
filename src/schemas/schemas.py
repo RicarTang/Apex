@@ -6,8 +6,8 @@ from ..db.models import (
     Comment_Pydantic,
     # Login_pydantic,
     Role_Pydantic,
-    DisabledEnum,
 )
+from ..db.enum import DisabledEnum
 
 
 DataT = TypeVar("DataT")
