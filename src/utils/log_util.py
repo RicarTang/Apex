@@ -1,6 +1,6 @@
 import logging
-import os
-import config
+from pathlib import Path
+from config import config
 import datetime
 
 
@@ -8,12 +8,12 @@ def set_log():
     logger = logging.getLogger(__name__)
     logger.setLevel(config.STREAM_LOG_LEVEL)
     # 判断log文件夹是否存在，不存在创建log目录
-    is_exists = os.path.exists(os.path.join(os.path.dirname(__file__), "../log"))
-    if not is_exists:
-        os.makedirs(os.path.join(os.path.dirname(__file__), "../log"))
+    log_directory: Path = Path(__file__).parent.parent / "log"
+    if not log_directory.exists():
+        os.makedirs(log_directory)
     # 文件日志处理器
     file_handler = logging.FileHandler(
-        os.path.join(os.path.dirname(__file__), f"../log/{datetime.date.today()}.log"),
+        log_directory / f"{datetime.date.today()}.log",
         encoding="utf-8",
     )
     file_handler.setLevel(config.FILE_LOG_LEVEL)

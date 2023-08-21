@@ -18,6 +18,10 @@ pytz-deprecation-shim = "*"
 aerich = "*"
 casbin-tortoise-adapter = "*"
 gunicorn = "*"
+aioredis = "*"
+hiredis = "*"
+fastapi-cache2 = {extras = ["redis"], version = "*"}
+openpyxl = "*"
 
 [dev-packages]
 black = "*"

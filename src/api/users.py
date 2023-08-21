@@ -1,11 +1,7 @@
 from typing import Optional
-
-# from datetime import timedelta
 from fastapi import (
     APIRouter,
-    HTTPException,
     Depends,
-    UploadFile,
     Request,
     Query,
     Response,
@@ -13,14 +9,13 @@ from fastapi import (
 )
 from fastapi.encoders import jsonable_encoder
 from passlib.hash import md5_crypt
+from fastapi_cache.decorator import cache
 from tortoise.contrib.fastapi import HTTPNotFoundError
 from tortoise.exceptions import DoesNotExist
 from src.db.models import User_Pydantic, Login_pydantic, Users, Role
 from ..schemas import schemas
 from ..utils.log_util import log
 from ..core.security import create_access_token, check_jwt_auth
-
-# from ..utils import exceptions_util as exception
 from ..core.authentication import Authority
 from ..crud import UsersCrud
 
@@ -55,15 +50,20 @@ async def get_users(
     response_model=schemas.ResultResponse[schemas.RolesTo],
     dependencies=[Depends(check_jwt_auth)],
 )
-async def query_user_role(request: Request):
-    """查询当前用户角色
-
-    Args:
-        user_id (int): 用户id
-    """
-    log.debug(f"state用户：{request.state.user.id}")
-    user_role = await UsersCrud.query_user_role(id=request.state.user.id)
-    return schemas.ResultResponse[schemas.RolesTo](result=schemas.RolesTo(user_role))
+async def query_user_role(
+    request: Request,
+    limit: Optional[int] = Query(default=20, ge=10),
+    page: Optional[int] = Query(default=1, gt=0),
+):
+    """查询当前用户角色"""
+    user = (
+        await Users.filter(id=request.state.user.id).first().prefetch_related("roles")
+    )
+    user_role_list = await user.roles.all().offset(limit * (page - 1)).limit(limit)
+    total = await user.roles.all().count()
+    return schemas.ResultResponse[schemas.RolesTo](
+        result=schemas.RolesTo(data=user_role_list, page=page, limit=limit, total=total)
+    )
 
 
 @router.get(
@@ -145,13 +145,17 @@ async def update_user(user_id: int, user: schemas.UserIn):
     responses={404: {"model": HTTPNotFoundError}},
     dependencies=[Depends(check_jwt_auth), Depends(Authority("user,delete"))],
 )
-async def delete_user(user_id: int):
+async def delete_user(user_id: int, response: Response):
     """删除用户."""
     deleted_count = await Users.filter(id=user_id).delete()
-    log.debug("")
     if not deleted_count:
-        raise HTTPException(status_code=404, detail=f"User {user_id} not found")
-    return schemas.ResultResponse[str](message=f"Deleted user {user_id}")
+        response.status_code = status.HTTP_404_NOT_FOUND
+        return schemas.ResultResponse[str](
+            code=status.HTTP_404_NOT_FOUND, message=f"User {user_id} not found"
+        )
+    return schemas.ResultResponse[str](
+        message=f"Deleted user {user_id}", result={"deleted": deleted_count}
+    )
 
 
 @router.post(
@@ -188,9 +192,3 @@ async def login(user: schemas.LoginIn, request: Request, response: Response):
     )
 
 
-@router.post("/uploadfile", deprecated=True)
-async def uploadfile(file: UploadFile):
-    with open(f"./src/static/{file.filename}", "wb") as f:
-        f.write(await file.read())
-
-    return {"filename": file.filename}

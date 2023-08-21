@@ -1,13 +1,13 @@
 from typing import Union
 from datetime import timedelta, datetime
 from jose import JWTError, jwt
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.security import HTTPBearer
 from fastapi import Depends, Request
 from fastapi.exceptions import HTTPException
 from tortoise.queryset import QuerySet
 from ..db.models import Users
 from ..utils.log_util import log
-import config
+from config import config
 from ..crud import UsersCrud
 
 
@@ -35,13 +35,13 @@ def create_access_token(data: dict, expires_delta: Union[timedelta, None] = None
 
 
 async def check_jwt_auth(
-    request: Request, bearer: HTTPAuthorizationCredentials = Depends(oauth2_bearer)
+    request: Request, bearer: HTTPBearer = Depends(oauth2_bearer)
 ) -> QuerySet:
     """校验JWT,return当前用户
 
     Args:
         request (Request): Request对象
-        bearer (HTTPAuthorizationCredentials, optional): _description_. Defaults to Depends(oauth2_bearer).
+        bearer (HTTPBearer, optional): _description_. Defaults to Depends(oauth2_bearer).
 
     Raises:
         unauthorized_exception: _description_

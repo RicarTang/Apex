@@ -138,8 +138,6 @@ dmypy.json
 /migrations/*
 # 忽略.idea目录
 .idea/
-<<<<<<< HEAD
-.out
-=======
-.out
->>>>>>> 4092d0e497e2b6525faf08d1a3cd0fea096791df
+
+# upload
+upload/

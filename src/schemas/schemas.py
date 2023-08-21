@@ -21,7 +21,7 @@ class ResultResponse(GenericModel, Generic[DataT]):
     {
         code: 200,
         message: 'success',
-        data: None
+        result: None
     }
     """
 
@@ -88,11 +88,13 @@ class RoleTo(Role_Pydantic):
     pass
 
 
-class RolesTo(List[Role_Pydantic]):
+class RolesTo(BaseModel):
     """返回多角色res schema"""
 
-
-    pass
+    data: List[Role_Pydantic]
+    page: int
+    limit: int
+    total: int
 
 
 class UserAddRoleIn(BaseModel):
@@ -102,10 +104,10 @@ class UserAddRoleIn(BaseModel):
     role: str
 
 
-class UserAddRoleTo(BaseModel):
-    """用户添加角色res schema"""
+# class UserAddRoleTo(BaseModel):
+#     """用户添加角色res schema"""
 
-    pass
+#     pass
 
 
 class RolePermIn(BaseModel):
