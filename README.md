@@ -14,7 +14,7 @@
 ## 使用
 默认超级管理员账号：superadmin,123456;
 > Tips💡：需要在项目根目录新建一个.env文件,添加字段如下:
->   DB_URL: str   # 数据库地址，example： "mysql://root:Mayday990812@127.0.0.1:3306/tortoise"
+>   DB_URL: str   # 数据库地址，example： "mysql://root:123456@127.0.0.1:3306/tortoise"
 >   REDIS_URL: str  # redis地址，example："redis://[[name]:[pwd]]127.0.0.1:6379/0"
 >   SECRET_KEY: str  # jwt私钥，使用openssl rand -hex 32快捷生成
 1. 安装依赖
