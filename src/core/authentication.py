@@ -9,7 +9,7 @@ from ..utils.log_util import log
 from .util import Singleton
 
 # from ..db.models import Role,Users
-from ..crud import UsersCrud
+from ..crud import UsersDao
 
 
 class TortoiseCasbin(metaclass=Singleton):
@@ -29,7 +29,7 @@ class TortoiseCasbin(metaclass=Singleton):
         #     return False
         # else:
         #     roles = user.roles.all()
-        roles = await UsersCrud.query_user_role(username=user)
+        roles = await UsersDao.query_user_role(username=user)
         if not roles:
             return False
         # 使用filter遍历判断所有角色

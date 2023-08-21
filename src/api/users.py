@@ -10,7 +10,11 @@ from fastapi import (
 from passlib.hash import md5_crypt
 from tortoise.contrib.fastapi import HTTPNotFoundError
 from tortoise.exceptions import DoesNotExist
-from ..core.security import create_access_token, check_jwt_auth
+from ..core.security import (
+    create_access_token,
+    check_jwt_auth,
+    get_current_user as current_user,
+)
 from ..core.authentication import Authority
 from src.db.models import User_Pydantic, Users, Role
 from ..schemas import schemas
@@ -20,6 +24,7 @@ from ..utils.exception_util import (
     PasswordValidateErrorException,
     UserNotExistException,
 )
+from ..crud import UserTokenDao
 
 
 router = APIRouter()
@@ -165,7 +170,9 @@ async def delete_user(user_id: int, response: Response):
     summary="登录",
     response_model=schemas.ResultResponse[schemas.Login],
 )
-async def login(user: schemas.LoginIn):
+async def login(
+    user: schemas.LoginIn,
+):
     """用户登陆."""
     # 查询数据库有无此用户
     try:
@@ -180,6 +187,8 @@ async def login(user: schemas.LoginIn):
         raise UserUnavailableException
     # 创建jwt
     access_token = create_access_token(data={"sub": query_user.username})
+    # 保存jwt
+    await UserTokenDao.add_jwt(current_user_id=query_user.id, token=access_token)
     return schemas.ResultResponse[schemas.Login](
         result=schemas.Login(
             data=query_user,

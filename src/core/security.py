@@ -11,7 +11,7 @@ from ..utils.exception_util import (
     TokenExpiredException,
     TokenInvalidException,
 )
-from ..crud import UsersCrud
+from ..crud import UserTokenDao,UsersDao
 
 
 oauth2_bearer = HTTPBearer(auto_error=False)
@@ -43,8 +43,8 @@ def create_access_token(data: dict, expires_delta: Union[timedelta, None] = None
 
 async def check_jwt_auth(
     request: Request, bearer: HTTPBearer = Depends(oauth2_bearer)
-) -> Users:
-    """校验JWT,return当前用户
+) -> dict:
+    """校验JWT
 
     Args:
         request (Request): Request对象
@@ -53,9 +53,10 @@ async def check_jwt_auth(
     Raises:
         TokenUnauthorizedException: token未认证
         TokenExpiredException: token已过期
+        TokenInvalidException: 无效token
 
     Returns:
-        Users: 用户对象
+        dict : payload 
     """
     try:
         # jwt decode,验证jwt
@@ -66,12 +67,34 @@ async def check_jwt_auth(
         raise TokenUnauthorizedException
     except JWTError:
         raise TokenExpiredException
+    
+    return payload
+    # 检查token状态
+    # if not await UserTokenDao.query_jwt_state(bearer.credentials):
+    #     raise TokenInvalidException
+    
+
+async def get_current_user(request: Request,payload: dict = Depends(check_jwt_auth)) -> Users:
+    """获取当前登录用户
+
+    Args:
+        request (Request): _description_
+        payload (dict): 一个字典 
+            example:{"sub":"tang","exp":30}
+
+    Raises:
+        TokenInvalidException: _description_
+
+    Returns:
+        Users: _description_
+    """
     username: str = payload.get("sub")
     # 严格规定login接口传递的sub
     if not username:
         raise TokenInvalidException
-    user = await Users.get(username=username)
-    # 保存用户到request
+    # 查询用户
+    user = await UsersDao.query_user(username=username)
+    # 保存用户到全局request
     request.state.user = user
     log.debug(f"当前用户：{user}")
     return user

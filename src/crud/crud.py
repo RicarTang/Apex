@@ -1,10 +1,11 @@
 """暂时丢弃此模块。"""
 from tortoise.exceptions import DoesNotExist
-from ..db.models import Users, Role, Comments
+from ..db.models import Users, Role, Comments, UserToken
 from ..utils.log_util import log
+from ..utils.exception_util import TokenInvalidException
 
 
-class UsersCrud:
+class UsersDao:
     """用户crud."""
 
     @staticmethod
@@ -19,7 +20,7 @@ class UsersCrud:
 
 
     @staticmethod
-    async def get_user(**kwargs):
+    async def query_user(**kwargs):
         """
         查询用户.
         :param kwargs:
@@ -62,7 +63,7 @@ class UsersCrud:
 
 
 
-class RolePermCrud:
+class RolePermDao:
     """角色权限crud"""
 
     @staticmethod
@@ -79,3 +80,44 @@ class RolePermCrud:
         """新增角色权限(casbin_rule)"""
         # 查询role是否存在
         # 保存casbin policy
+        pass
+
+
+class UserTokenDao:
+    """用户token crud"""
+
+    @staticmethod
+    async def add_jwt(current_user_id: int,token: str) -> UserToken:
+        """添加UserToken表数据
+
+        Args:
+            current_user_id (int): 当前用户id
+            token (str): jwt
+
+        Returns:
+            UserToken: _description_
+        """
+        try:
+            result = await UserToken.create(token=token,user_id=current_user_id)
+        except:
+            pass
+        return result
+
+    @staticmethod
+    async def query_jwt_state(token: str) -> bool:
+        """查询token状态
+
+        Args:
+            token (str): jwt
+
+        Raises:
+            TokenInvalidException: token无效
+
+        Returns:
+            bool: _description_
+        """
+        # 数据库查询状态
+        if result := await UserToken.filter(token=token):
+            return result.is_active
+        else:
+            raise TokenInvalidException

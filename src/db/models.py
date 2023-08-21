@@ -9,7 +9,7 @@ class Users(AbstractBaseModel):
 
     username = fields.CharField(max_length=20, unique=True, description="用户名")
     descriptions = fields.CharField(max_length=30, null=True, description="个人描述")
-    password = fields.CharField(max_length=128, description="密码")
+    password = fields.CharField(max_length=128, index=True, description="密码")
     is_active = fields.IntEnumField(
         enum_type=DisabledEnum,
         default=DisabledEnum.ENABLE,
@@ -23,6 +23,7 @@ class Users(AbstractBaseModel):
     # 关联关系
     comments: fields.ReverseRelation["Comments"]
     roles: fields.ManyToManyRelation["Role"]
+    tokens: fields.ReverseRelation["UserToken"]
 
     def __str__(self):
         return str(self.username)
@@ -36,7 +37,7 @@ class Role(AbstractBaseModel):
 
     # 与用户多对多关系
     users: fields.ManyToManyRelation[Users] = fields.ManyToManyField(
-        "models.Users", related_name="roles"
+        model_name="models.Users", related_name="roles"
     )
 
 
@@ -51,6 +52,20 @@ class Comments(AbstractBaseModel):
 
     def __str__(self):
         return str(self.id)
+
+
+class UserToken(AbstractBaseModel):
+    """用户token模型"""
+
+    token = fields.CharField(max_length=255,index=True, description="用户token令牌")
+    user: fields.ForeignKeyRelation[Users] = fields.ForeignKeyField(
+        model_name="models.Users", related_name="tokens"
+    )
+    is_active = fields.IntEnumField(
+        enum_type=DisabledEnum,
+        default=DisabledEnum.ENABLE,
+        description="令牌状态,0:disable,1:enabled",
+    )
 
 
 # 用户schema
