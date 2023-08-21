@@ -27,6 +27,7 @@ class BaseConfig(BaseSettings):
     DB_URL: str
     # redis  example：redis://[[name]:[pwd]]127.0.0.1:6379/0
     REDIS_URL: str
+
     # jwt相关
     SECRET_KEY: str
     ALGORITHM = "HS256"
