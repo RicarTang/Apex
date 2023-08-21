@@ -1,20 +1,23 @@
-from fastapi import Request
+from fastapi import Request,HTTPException
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
 
 
-# exception_handler
-class ResponseException(Exception):
-    def __init__(self, content: str):
-        self.content = content
 
-# 不使用此exception，返回同时使用pydantic通用模型
-# @app.exception_handler(ResponseException)
-async def response_exception(request: Request, exc: ResponseException):
+async def custom_http_exception_handler(request: Request, exc: HTTPException):
+    """自定义的HTTPException
+
+    Args:
+        request (Request): _description_
+        exc (HTTPException): _description_
+
+    Returns:
+        _type_: _description_
+    """
     return JSONResponse(
-        status_code=200,
+        status_code=exc.status_code,
         content={
-            "success": False,
-            "detail": f"{exc.content}"
+            "code": exc.status_code,
+            "message": f"{exc.detail}"
         }
     )

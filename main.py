@@ -1,12 +1,12 @@
 import sys
-from fastapi import FastAPI, Request, Depends
+from fastapi import FastAPI, Request, Depends, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from tortoise.contrib.fastapi import register_tortoise
 from src.api import user_api, comment_api, admin_api, testcase_api
-from src.utils.exceptions_util import ResponseException, response_exception
+from src.utils.exceptions_util import custom_http_exception_handler
 from src.utils.background_task_util import scheduler
 from src.utils.log_util import log
 from src.db.settings import TORTOISE_ORM
@@ -86,12 +86,11 @@ app.include_router(
 )
 
 
-# 注册exception
-app.add_exception_handler(ResponseException, response_exception)
-
-
+# 注册自定义的exception(方式一)
+app.add_exception_handler(HTTPException, custom_http_exception_handler)
+# 注册自定义的exception(方式二)
 @app.exception_handler(RequestValidationError)
-async def validation_exception_handler(request: Request, exc: RequestValidationError):
+async def custom_validation_exception_handler(request: Request, exc: RequestValidationError):
     """修改默认的请求验证错误模型"""
     return JSONResponse(status_code=422, content={"code": 400, "message": exc.errors()})
 

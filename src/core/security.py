@@ -46,7 +46,6 @@ async def check_jwt_auth(
     Raises:
         unauthorized_exception: _description_
         credentials_exception: _description_
-        credentials_exception: _description_
 
     Returns:
         QuerySet: tortoise QuerySet对象
@@ -62,7 +61,7 @@ async def check_jwt_auth(
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
-        # decode校验
+        # jwt decode
         payload = jwt.decode(
             bearer.credentials, config.SECRET_KEY, algorithms=[config.ALGORITHM]
         )

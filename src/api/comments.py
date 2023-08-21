@@ -1,8 +1,7 @@
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Request,HTTPException
 from src.db.models import Comments, Users
 from ..schemas import schemas
 from ..utils.log_util import log
-from ..utils import exceptions_util as exception
 from ..core.security import check_jwt_auth
 
 router = APIRouter()
@@ -32,7 +31,7 @@ async def get_user_comment(
         coms = await user.comments.all()
         log.debug(f"用户{user}的所有评论：{coms}")
     except AttributeError:
-        raise exception.ResponseException(content="用户不存在！")
+        raise HTTPException(detail="User is not exist!")
     return schemas.ResultResponse[schemas.CommentsTo](result=coms)
 
 
