@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, Request,HTTPException
 from src.db.models import Comments, Users
 from ..schemas import schemas
 from ..utils.log_util import log
-from ..core.security import check_jwt_auth
+from ..core.security import check_jwt_auth,get_current_user
 
 router = APIRouter()
 
@@ -10,7 +10,7 @@ router = APIRouter()
 @router.post("/create", summary="发表评论", response_model=schemas.ResultResponse[schemas.CommentTo])
 async def create_comment(
     comment: schemas.CommentIn,
-    current_user: schemas.UserPy = Depends(check_jwt_auth),
+    current_user: Users = Depends(get_current_user),
 ):
     """创建comment"""
     # com = await Comments.create(**comment.dict(exclude_unset=True))
@@ -36,7 +36,7 @@ async def get_user_comment(
 
 
 @router.get("/me", summary="获取我的评论", response_model=schemas.ResultResponse[schemas.CommentsTo])
-async def get_comments_me(current_user: schemas.UserPy = Depends(check_jwt_auth)):
+async def get_comments_me(current_user: Users = Depends(get_current_user)):
     """当前用户的所有评论"""
     user = (
         await Users.filter(username=current_user.username)

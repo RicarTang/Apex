@@ -1,6 +1,7 @@
 """暂时丢弃此模块。"""
 from tortoise.exceptions import DoesNotExist
 from ..db.models import Users, Role, Comments, UserToken
+from ..db.enum import DisabledEnum
 from ..utils.log_util import log
 from ..utils.exception_util import TokenInvalidException
 
@@ -120,3 +121,16 @@ class UserTokenDao:
             return result.is_active
         else:
             raise TokenInvalidException
+        
+    @staticmethod
+    async def update_token_state(token: str) -> int:
+        """更新token状态is_active
+
+        Args:
+            token (str): _description_
+
+        Returns:
+            int: _description_
+        """
+        result = await UserToken.filter(token=token).update(is_active=DisabledEnum.DISABLE)
+        return result

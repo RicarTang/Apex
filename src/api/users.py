@@ -6,6 +6,7 @@ from fastapi import (
     Query,
     Response,
     status,
+    Header,
 )
 from passlib.hash import md5_crypt
 from tortoise.contrib.fastapi import HTTPNotFoundError
@@ -23,6 +24,7 @@ from ..utils.exception_util import (
     UserUnavailableException,
     PasswordValidateErrorException,
     UserNotExistException,
+    TokenInvalidException,
 )
 from ..crud import UserTokenDao
 
@@ -60,12 +62,10 @@ async def query_user_role(
     request: Request,
     limit: Optional[int] = Query(default=20, ge=10),
     page: Optional[int] = Query(default=1, gt=0),
-    current_user: Users = Depends(current_user)
+    current_user: Users = Depends(current_user),
 ):
     """查询当前用户角色"""
-    user = (
-        await Users.filter(id=current_user.id).first().prefetch_related("roles")
-    )
+    user = await Users.filter(id=current_user.id).first().prefetch_related("roles")
     user_role_list = await user.roles.all().offset(limit * (page - 1)).limit(limit)
     total = await user.roles.all().count()
     return schemas.ResultResponse[schemas.RolesTo](
@@ -80,8 +80,7 @@ async def query_user_role(
     dependencies=[Depends(Authority("user,read"))],
 )
 async def get_current_user(
-    request: Request,
-    current_user:Users = Depends(current_user)
+    request: Request, current_user: Users = Depends(current_user)
 ):
     """获取当前用户"""
     return schemas.ResultResponse[schemas.UserPy](result=current_user)
@@ -202,8 +201,11 @@ async def login(
     "/logout",
     summary="退出登录",
     response_model=schemas.ResultResponse[str],
+    dependencies=[Depends(check_jwt_auth)],
 )
-async def logout():
+async def logout(request: Request):
     # 修改当前用户数据库token状态为0
-
-    pass
+    access_type, access_token = request.headers["authorization"].split(" ")
+    if not await UserTokenDao.update_token_state(token=access_token):
+        raise TokenInvalidException
+    return schemas.ResultResponse[str](result="Successfully logged out!")
