@@ -10,8 +10,9 @@ from ..utils.exception_util import (
     TokenUnauthorizedException,
     TokenExpiredException,
     TokenInvalidException,
+    UserLoggedOutException,
 )
-from ..crud import UserTokenDao,UsersDao
+from ..crud import UserTokenDao, UsersDao
 
 
 oauth2_bearer = HTTPBearer(auto_error=False)
@@ -54,9 +55,10 @@ async def check_jwt_auth(
         TokenUnauthorizedException: token未认证
         TokenExpiredException: token已过期
         TokenInvalidException: 无效token
+        UserLoggedOutException: 用户退出登录
 
     Returns:
-        dict : payload 
+        dict : payload
     """
     try:
         # jwt decode,验证jwt
@@ -67,19 +69,20 @@ async def check_jwt_auth(
         raise TokenUnauthorizedException
     except JWTError:
         raise TokenExpiredException
-    
-    return payload
     # 检查token状态
-    # if not await UserTokenDao.query_jwt_state(bearer.credentials):
-    #     raise TokenInvalidException
-    
+    if not await UserTokenDao.query_jwt_state(bearer.credentials):
+        raise UserLoggedOutException
+    return payload
 
-async def get_current_user(request: Request,payload: dict = Depends(check_jwt_auth)) -> Users:
+
+async def get_current_user(
+    request: Request, payload: dict = Depends(check_jwt_auth)
+) -> Users:
     """获取当前登录用户
 
     Args:
         request (Request): _description_
-        payload (dict): 一个字典 
+        payload (dict): 一个字典
             example:{"sub":"tang","exp":30}
 
     Raises:
@@ -94,7 +97,5 @@ async def get_current_user(request: Request,payload: dict = Depends(check_jwt_au
         raise TokenInvalidException
     # 查询用户
     user = await UsersDao.query_user(username=username)
-    # 保存用户到全局request
-    request.state.user = user
     log.debug(f"当前用户：{user}")
     return user

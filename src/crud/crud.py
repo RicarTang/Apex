@@ -30,7 +30,7 @@ class UsersDao:
                 username = "jack"
         :return: QuerySetSingle Type
         """
-        return Users.get(**kwargs)
+        return await Users.get(**kwargs)
 
     @staticmethod
     async def create_user(**kwargs):
@@ -49,7 +49,6 @@ class UsersDao:
         """
         user = await Users.filter(**kwargs).first().prefetch_related("roles")
         user_role_list = await user.roles.all()
-        # total = await user.roles.all().count()
         return user_role_list
 
     @staticmethod
@@ -117,7 +116,7 @@ class UserTokenDao:
             bool: _description_
         """
         # 数据库查询状态
-        if result := await UserToken.filter(token=token):
+        if result := await UserToken.filter(token=token).first():
             return result.is_active
         else:
             raise TokenInvalidException

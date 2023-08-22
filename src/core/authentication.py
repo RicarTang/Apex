@@ -1,10 +1,12 @@
 from typing import Any
-from fastapi import Request
+from fastapi import Request, Depends
 from fastapi.exceptions import HTTPException
 import casbin
 import casbin_tortoise_adapter
 from tortoise.exceptions import DoesNotExist
 from config import config
+from ..core.security import get_current_user
+from ..db.models import Users
 from ..utils.log_util import log
 from .util import Singleton
 
@@ -23,12 +25,6 @@ class TortoiseCasbin(metaclass=Singleton):
         判断是否拥有权限
         """
         # 获取用户角色，判断角色是否有权限
-        # try:
-        #     user = Users.get(username=user).prefetch_related("roles")
-        # except DoesNotExist:
-        #     return False
-        # else:
-        #     roles = user.roles.all()
         roles = await UsersDao.query_user_role(username=user)
         if not roles:
             return False
@@ -49,6 +45,16 @@ class TortoiseCasbin(metaclass=Singleton):
         return await self.enforce.add_policy(role, model, act)
 
     async def remove_permission_for_role(self, role: str, model: str, act: str):
+        """移除角色权限
+
+        Args:
+            role (str): _description_
+            model (str): _description_
+            act (str): _description_
+
+        Returns:
+            _type_: _description_
+        """
         return await self.enforce.remove_policy(role, model, act)
 
     def __getattr__(self, attr: str) -> Any:
@@ -64,7 +70,9 @@ class Authority:
         """
         self.policy = policy
 
-    async def __call__(self, request: Request):
+    async def __call__(
+        self, request: Request, current_user: Users = Depends(get_current_user)
+    ):
         """
         超级管理员不需要进行权限认证
         :param request:
@@ -74,17 +82,17 @@ class Authority:
         e = await get_casbin()
 
         # 超级用户拥有所有权限
-        if request.state.user.is_super:
+        if current_user.is_super:
             return
 
-        if not await e.has_permission(request.state.user.username, model, act):
+        if not await e.has_permission(current_user.username, model, act):
             raise HTTPException(status_code=403, detail="The user has no permission!")
 
 
 async def check_authority(policy):
     """
     进行权限认证
-    :param policy: 字符串，以 user,model,act拼接而成，例如"user,auth,add"
+    :param policy: 字符串，以 user,model,act拼接而成,例如"user,auth,add"
     :return:
     """
     user, model, act = policy.split(",")

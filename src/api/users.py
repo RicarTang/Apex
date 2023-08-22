@@ -55,16 +55,16 @@ async def get_users(
     "/role",
     summary="获取当前用户角色",
     response_model=schemas.ResultResponse[schemas.RolesTo],
-    dependencies=[Depends(check_jwt_auth)],
 )
 async def query_user_role(
     request: Request,
     limit: Optional[int] = Query(default=20, ge=10),
     page: Optional[int] = Query(default=1, gt=0),
+    current_user: Users = Depends(current_user)
 ):
     """查询当前用户角色"""
     user = (
-        await Users.filter(id=request.state.user.id).first().prefetch_related("roles")
+        await Users.filter(id=current_user.id).first().prefetch_related("roles")
     )
     user_role_list = await user.roles.all().offset(limit * (page - 1)).limit(limit)
     total = await user.roles.all().count()
@@ -77,14 +77,14 @@ async def query_user_role(
     "/me",
     summary="获取当前用户",
     response_model=schemas.ResultResponse[schemas.UserPy],
-    dependencies=[Depends(check_jwt_auth), Depends(Authority("user,read"))],
+    dependencies=[Depends(Authority("user,read"))],
 )
 async def get_current_user(
     request: Request,
-    # current_user: schemas.UserPy =
+    current_user:Users = Depends(current_user)
 ):
     """获取当前用户"""
-    return schemas.ResultResponse[schemas.UserPy](result=request.state.user)
+    return schemas.ResultResponse[schemas.UserPy](result=current_user)
 
 
 @router.post(
@@ -204,4 +204,6 @@ async def login(
     response_model=schemas.ResultResponse[str],
 )
 async def logout():
+    # 修改当前用户数据库token状态为0
+
     pass

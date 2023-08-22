@@ -34,6 +34,17 @@ class TokenInvalidException(HTTPException):
         )
 
 
+class UserLoggedOutException(HTTPException):
+    """用户退出登录"""
+
+    def __init__(self):
+        super().__init__(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="User logged out, please log in again!",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+
 class UserNotExistException(HTTPException):
     """用户不存在"""
 
