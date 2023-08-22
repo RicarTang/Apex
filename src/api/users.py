@@ -43,10 +43,8 @@ async def get_users(
     page: Optional[int] = Query(default=1, gt=0),
 ):
     """获取所有用户."""
-    result = await User_Pydantic.from_queryset(
-        Users.all().offset(limit * (page - 1)).limit(limit)
-    )
-    # 查询用户总数
+    result = await Users.all().offset(limit * (page - 1)).limit(limit)
+    # total
     total = await Users.all().count()
     return schemas.ResultResponse[schemas.UsersOut](
         result=schemas.UsersOut(data=result, page=page, limit=limit, total=total)
