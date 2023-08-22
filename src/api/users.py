@@ -96,17 +96,17 @@ async def get_current_user(
     "/create",
     summary="创建用户",
     response_model=schemas.ResultResponse[schemas.UserOut],
-    dependencies=[Depends(check_jwt_auth), Depends(Authority("user,create"))],
+    dependencies=[Depends(check_jwt_auth), Depends(Authority("user,add"))],
 )
 async def create_user(user: schemas.UserIn):
     """创建用户."""
     user.password = md5_crypt.hash(user.password)
     user_obj = await Users(**user.dict(exclude_unset=True))
     # 添加用户角色
-    role = await Role.filter(name=user.user_role).first()
+    role = await Role.filter(name="member").first()
     if not role:
         return schemas.ResultResponse[str](
-            message=f"role: {user.user_role} is not exist!"
+            message=f"role: member is not exist,Please add!"
         )
     await user_obj.save()
     await user_obj.roles.add(role)
