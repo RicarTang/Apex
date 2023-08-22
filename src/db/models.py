@@ -7,7 +7,9 @@ from .enum import DisabledEnum, IsSuperEnum
 class Users(AbstractBaseModel):
     """用户模型"""
 
-    username = fields.CharField(max_length=20, unique=True, description="用户名")
+    username = fields.CharField(
+        max_length=20, unique=True, description="用户名"
+    )
     descriptions = fields.CharField(max_length=30, null=True, description="个人描述")
     password = fields.CharField(max_length=128, index=True, description="密码")
     is_active = fields.IntEnumField(
@@ -57,14 +59,15 @@ class Comments(AbstractBaseModel):
 class UserToken(AbstractBaseModel):
     """用户token模型"""
 
-    token = fields.CharField(max_length=255,index=True, description="用户token令牌")
-    user: fields.ForeignKeyRelation[Users] = fields.ForeignKeyField(
-        model_name="models.Users", related_name="tokens"
-    )
+    token = fields.CharField(max_length=255, index=True, description="用户token令牌")
     is_active = fields.IntEnumField(
         enum_type=DisabledEnum,
         default=DisabledEnum.ENABLE,
         description="令牌状态,0:disable,1:enabled",
+    )
+    client_ip = fields.CharField(max_length=45, index=True, description="登录客户端IP")
+    user: fields.ForeignKeyRelation[Users] = fields.ForeignKeyField(
+        model_name="models.Users", related_name="tokens"
     )
 
 

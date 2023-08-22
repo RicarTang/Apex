@@ -117,11 +117,10 @@ async def create_user(user: schemas.UserIn):
 )
 async def get_user(user_id: int):
     """查询单个用户."""
-    log.debug(f"{await Users.get(id=user_id).values()}")
     try:
         user = await Users.get(id=user_id)
     except DoesNotExist:
-        return schemas.ResultResponse[str](message="user does not exist!")
+        raise UserNotExistException
     return schemas.ResultResponse[schemas.UserOut](result=user)
 
 
@@ -136,7 +135,7 @@ async def update_user(user_id: int, user: schemas.UserIn):
     """更新用户信息."""
     # 查询用户是否存在
     if not await Users.filter(id=user_id).exists():
-        return schemas.ResultResponse[str](message="user does not exist!")
+        raise UserNotExistException
     # 更新
     user.password = md5_crypt.hash(user.password)
     result = await Users.filter(id=user_id).update(**user.dict(exclude_unset=True))
@@ -170,6 +169,7 @@ async def delete_user(user_id: int, response: Response):
     response_model=schemas.ResultResponse[schemas.Login],
 )
 async def login(
+    request: Request,
     user: schemas.LoginIn,
 ):
     """用户登陆."""
@@ -186,8 +186,10 @@ async def login(
         raise UserUnavailableException
     # 创建jwt
     access_token = create_access_token(data={"sub": query_user.username})
-    # 保存jwt
-    await UserTokenDao.add_jwt(current_user_id=query_user.id, token=access_token)
+    # 更新用户jwt
+    await UserTokenDao.add_jwt(
+        current_user_id=query_user.id, token=access_token, client_ip=request.client.host
+    )
     return schemas.ResultResponse[schemas.Login](
         result=schemas.Login(
             data=query_user,

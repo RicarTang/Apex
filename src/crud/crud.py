@@ -1,4 +1,5 @@
 """暂时丢弃此模块。"""
+from typing import Union
 from tortoise.exceptions import DoesNotExist
 from ..db.models import Users, Role, Comments, UserToken
 from ..db.enum import DisabledEnum
@@ -18,7 +19,6 @@ class UsersDao:
         """
         kwargs["is_super"] = 1
         return await Users.create(**kwargs)
-
 
     @staticmethod
     async def query_user(**kwargs):
@@ -62,7 +62,6 @@ class UsersDao:
         user = await Users.filter(**kwargs).first().prefetch_related("roles")
 
 
-
 class RolePermDao:
     """角色权限crud"""
 
@@ -87,21 +86,29 @@ class UserTokenDao:
     """用户token crud"""
 
     @staticmethod
-    async def add_jwt(current_user_id: int,token: str) -> UserToken:
-        """添加UserToken表数据
+    async def add_jwt(
+        current_user_id: int, token: str, client_ip: str
+    ) -> Union[UserToken, int]:
+        """添加/更新UserToken表数据
 
         Args:
             current_user_id (int): 当前用户id
             token (str): jwt
+            client_ip (str): 客户端ip
 
         Returns:
-            UserToken: _description_
+            Union[UserToken, int]: 更新返回int,创建返回UserToken对象
         """
-        try:
-            result = await UserToken.create(token=token,user_id=current_user_id)
-        except:
-            pass
-        return result
+        # 查询用户id与客户端ip的记录，有记录update token，没有记录添加
+        if is_one_ip := await UserToken.filter(
+            user_id=current_user_id, client_ip=client_ip
+        ).update(token=token):
+            return is_one_ip
+        else:
+            result = await UserToken.create(
+                token=token, user_id=current_user_id, client_ip=client_ip
+            )
+            return result
 
     @staticmethod
     async def query_jwt_state(token: str) -> bool:
@@ -121,7 +128,7 @@ class UserTokenDao:
             return result.is_active
         else:
             raise TokenInvalidException
-        
+
     @staticmethod
     async def update_token_state(token: str) -> int:
         """更新token状态is_active
@@ -132,5 +139,7 @@ class UserTokenDao:
         Returns:
             int: _description_
         """
-        result = await UserToken.filter(token=token).update(is_active=DisabledEnum.DISABLE)
+        result = await UserToken.filter(token=token).update(
+            is_active=DisabledEnum.DISABLE
+        )
         return result
