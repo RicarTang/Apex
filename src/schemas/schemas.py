@@ -136,7 +136,7 @@ class LoginIn(BaseModel):
     class Config:
         """docs scheam添加example"""
 
-        schema_extra = {"example": {"username": "tang", "password": "123456"}}
+        schema_extra = {"example": {"username": "admin", "password": "123456"}}
 
 
 # class LoginOut(BaseSchema):
