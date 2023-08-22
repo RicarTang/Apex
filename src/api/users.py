@@ -17,7 +17,7 @@ from ..core.security import (
     get_current_user as current_user,
 )
 from ..core.authentication import Authority
-from src.db.models import User_Pydantic, Users, Role
+from src.db.models import Users, Role
 from ..schemas import schemas
 from ..utils.log_util import log
 from ..utils.exception_util import (
@@ -42,7 +42,15 @@ async def get_users(
     limit: Optional[int] = Query(default=20, ge=10),
     page: Optional[int] = Query(default=1, gt=0),
 ):
-    """获取所有用户."""
+    """获取所有用户.
+
+    Args:
+        limit (Optional[int], optional): pagesize. Defaults to Query(default=20, ge=10).
+        page (Optional[int], optional): page. Defaults to Query(default=1, gt=0).
+
+    Returns:
+        _type_: _description_
+    """
     result = await Users.all().offset(limit * (page - 1)).limit(limit)
     # total
     total = await Users.all().count()
