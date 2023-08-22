@@ -88,7 +88,7 @@ class UserTokenDao:
     @staticmethod
     async def add_jwt(
         current_user_id: int, token: str, client_ip: str
-    ) -> Union[UserToken, int]:
+    ) -> None:
         """添加/更新UserToken表数据
 
         Args:
@@ -97,18 +97,17 @@ class UserTokenDao:
             client_ip (str): 客户端ip
 
         Returns:
-            Union[UserToken, int]: 更新返回int,创建返回UserToken对象
+            None
         """
-        # 查询用户id与客户端ip的记录，有记录update token，没有记录添加
-        if is_one_ip := await UserToken.filter(
-            user_id=current_user_id, client_ip=client_ip
+        # 查询用户id与客户端ip并且is_active=1的记录，有记录update token，没有记录添加
+        if await UserToken.filter(
+            user_id=current_user_id, client_ip=client_ip, is_active=DisabledEnum.ENABLE
         ).update(token=token):
-            return is_one_ip
+            return
         else:
-            result = await UserToken.create(
+            await UserToken.create(
                 token=token, user_id=current_user_id, client_ip=client_ip
             )
-            return result
 
     @staticmethod
     async def query_jwt_state(token: str) -> bool:
