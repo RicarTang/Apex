@@ -54,8 +54,10 @@ async def add_testcases(response: Response, excel: UploadFile):
         # 保存testcase到数据库
 
     else:
-        response.status_code = status.HTTP_400_BAD_REQUEST
-        schemas.ResultResponse[str](result="template suffix is error!")
+        # 上传文件格式错误
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="template suffix is error!"
+        )
     return schemas.ResultResponse[str](result=excel.filename)
 
 

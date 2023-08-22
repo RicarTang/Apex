@@ -3,12 +3,16 @@ from datetime import timedelta, datetime
 from jose import JWTError, jwt
 from fastapi.security import HTTPBearer
 from fastapi import Depends, Request
-from fastapi.exceptions import HTTPException
-from tortoise.queryset import QuerySet
+from config import config
 from ..db.models import Users
 from ..utils.log_util import log
-from config import config
-from ..crud import UsersCrud
+from ..utils.exception_util import (
+    TokenUnauthorizedException,
+    TokenExpiredException,
+    TokenInvalidException,
+    UserLoggedOutException,
+)
+from ..crud import UserTokenDao, UsersDao
 
 
 oauth2_bearer = HTTPBearer(auto_error=False)
@@ -16,10 +20,14 @@ oauth2_bearer = HTTPBearer(auto_error=False)
 
 def create_access_token(data: dict, expires_delta: Union[timedelta, None] = None):
     """
-    创建token Depends
-    :param data:带有用户标识的键值对，sub为JWT的规范
-    :param expires_delta:过期时间
-    :return: jwt
+    创建token
+
+    Args:
+        data (dict): 带有用户标识的键值对,sub为JWT的规范
+        expires_delta (Union[timedelta, None], optional): 过期时间
+
+    Returns:
+        _type_: jwt token
     """
     to_encode = data.copy()
     if expires_delta:
@@ -29,53 +37,65 @@ def create_access_token(data: dict, expires_delta: Union[timedelta, None] = None
             minutes=config.ACCESS_TOKEN_EXPIRE_MINUTES
         )
     to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, config.SECRET_KEY, algorithm=config.ALGORITHM)
-    log.debug(f"encoded_jwt:{encoded_jwt}")
-    return encoded_jwt
+    jwt_token = jwt.encode(to_encode, config.SECRET_KEY, algorithm=config.ALGORITHM)
+    log.debug(f"encoded_jwt:{jwt_token}")
+    return jwt_token
 
 
 async def check_jwt_auth(
     request: Request, bearer: HTTPBearer = Depends(oauth2_bearer)
-) -> QuerySet:
-    """校验JWT,return当前用户
+) -> dict:
+    """校验JWT
 
     Args:
         request (Request): Request对象
-        bearer (HTTPBearer, optional): _description_. Defaults to Depends(oauth2_bearer).
+        bearer (HTTPBearer): HTTPBearer
 
     Raises:
-        unauthorized_exception: _description_
-        credentials_exception: _description_
-        credentials_exception: _description_
+        TokenUnauthorizedException: token未认证
+        TokenExpiredException: token已过期
+        TokenInvalidException: 无效token
+        UserLoggedOutException: 用户退出登录
 
     Returns:
-        QuerySet: tortoise QuerySet对象
+        dict : payload
     """
-    credentials_exception = HTTPException(
-        status_code=401,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
-    unauthorized_exception = HTTPException(
-        status_code=401,
-        detail="Not authenticated",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
     try:
-        # decode校验
+        # jwt decode,验证jwt
         payload = jwt.decode(
             bearer.credentials, config.SECRET_KEY, algorithms=[config.ALGORITHM]
         )
     except AttributeError:
-        raise unauthorized_exception
+        raise TokenUnauthorizedException
     except JWTError:
-        raise credentials_exception
-    username: str = payload.get("sub")
-    if username is None:
-        raise credentials_exception
+        raise TokenExpiredException
+    # 检查token状态
+    if not await UserTokenDao.query_jwt_state(bearer.credentials):
+        raise UserLoggedOutException
+    return payload
 
-    user = await Users.get(username=username)
-    # 保存用户到request
-    request.state.user = user
+
+async def get_current_user(
+    request: Request, payload: dict = Depends(check_jwt_auth)
+) -> Users:
+    """获取当前登录用户
+
+    Args:
+        request (Request): _description_
+        payload (dict): 一个字典
+            example:{"sub":"tang","exp":30}
+
+    Raises:
+        TokenInvalidException: _description_
+
+    Returns:
+        Users: _description_
+    """
+    username: str = payload.get("sub")
+    # 严格规定login接口传递的sub
+    if not username:
+        raise TokenInvalidException
+    # 查询用户
+    user = await UsersDao.query_user(username=username)
     log.debug(f"当前用户：{user}")
     return user

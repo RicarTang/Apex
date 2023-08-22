@@ -17,7 +17,7 @@ class BaseConfig(BaseSettings):
         ROOT_PATH / "src" / "utils" / "casbin" / "rbac_model.conf"
     )
     # models
-    MODELS_PATH = "src.db.models"
+    MODELS_PATH: str = "src.db.models"
     # 日志配置
     STREAM_LOG_LEVEL = "DEBUG"  # log级别：'CRITICAL': CRITICAL,'FATAL': FATAL,'ERROR': ERROR,'WARN': WARNING,'WARNING': WARNING,'INFO': INFO,'DEBUG': DEBUG,'NOTSET': NOTSET
     FILE_LOG_LEVEL = "INFO"

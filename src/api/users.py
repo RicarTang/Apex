@@ -6,18 +6,27 @@ from fastapi import (
     Query,
     Response,
     status,
+    Header,
 )
-from fastapi.encoders import jsonable_encoder
 from passlib.hash import md5_crypt
-from fastapi_cache.decorator import cache
 from tortoise.contrib.fastapi import HTTPNotFoundError
 from tortoise.exceptions import DoesNotExist
-from src.db.models import User_Pydantic, Login_pydantic, Users, Role
+from ..core.security import (
+    create_access_token,
+    check_jwt_auth,
+    get_current_user as current_user,
+)
+from ..core.authentication import Authority
+from src.db.models import Users, Role
 from ..schemas import schemas
 from ..utils.log_util import log
-from ..core.security import create_access_token, check_jwt_auth
-from ..core.authentication import Authority
-from ..crud import UsersCrud
+from ..utils.exception_util import (
+    UserUnavailableException,
+    PasswordValidateErrorException,
+    UserNotExistException,
+    TokenInvalidException,
+)
+from ..crud import UserTokenDao
 
 
 router = APIRouter()
@@ -33,11 +42,17 @@ async def get_users(
     limit: Optional[int] = Query(default=20, ge=10),
     page: Optional[int] = Query(default=1, gt=0),
 ):
-    """获取所有用户."""
-    result = await User_Pydantic.from_queryset(
-        Users.all().offset(limit * (page - 1)).limit(limit)
-    )
-    # 查询用户总数
+    """获取所有用户.
+
+    Args:
+        limit (Optional[int], optional): pagesize. Defaults to Query(default=20, ge=10).
+        page (Optional[int], optional): page. Defaults to Query(default=1, gt=0).
+
+    Returns:
+        _type_: _description_
+    """
+    result = await Users.all().offset(limit * (page - 1)).limit(limit)
+    # total
     total = await Users.all().count()
     return schemas.ResultResponse[schemas.UsersOut](
         result=schemas.UsersOut(data=result, page=page, limit=limit, total=total)
@@ -48,17 +63,15 @@ async def get_users(
     "/role",
     summary="获取当前用户角色",
     response_model=schemas.ResultResponse[schemas.RolesTo],
-    dependencies=[Depends(check_jwt_auth)],
 )
 async def query_user_role(
     request: Request,
     limit: Optional[int] = Query(default=20, ge=10),
     page: Optional[int] = Query(default=1, gt=0),
+    current_user: Users = Depends(current_user),
 ):
     """查询当前用户角色"""
-    user = (
-        await Users.filter(id=request.state.user.id).first().prefetch_related("roles")
-    )
+    user = await Users.filter(id=current_user.id).first().prefetch_related("roles")
     user_role_list = await user.roles.all().offset(limit * (page - 1)).limit(limit)
     total = await user.roles.all().count()
     return schemas.ResultResponse[schemas.RolesTo](
@@ -70,14 +83,13 @@ async def query_user_role(
     "/me",
     summary="获取当前用户",
     response_model=schemas.ResultResponse[schemas.UserPy],
-    dependencies=[Depends(check_jwt_auth), Depends(Authority("user,read"))],
+    dependencies=[Depends(Authority("user,read"))],
 )
 async def get_current_user(
-    request: Request,
-    # current_user: schemas.UserPy =
+    request: Request, current_user: Users = Depends(current_user)
 ):
     """获取当前用户"""
-    return schemas.ResultResponse[schemas.UserPy](result=request.state.user)
+    return schemas.ResultResponse[schemas.UserPy](result=current_user)
 
 
 @router.post(
@@ -111,11 +123,10 @@ async def create_user(user: schemas.UserIn):
 )
 async def get_user(user_id: int):
     """查询单个用户."""
-    log.debug(f"{await Users.get(id=user_id).values()}")
     try:
         user = await Users.get(id=user_id)
     except DoesNotExist:
-        return schemas.ResultResponse[str](message="user does not exist!")
+        raise UserNotExistException
     return schemas.ResultResponse[schemas.UserOut](result=user)
 
 
@@ -130,7 +141,7 @@ async def update_user(user_id: int, user: schemas.UserIn):
     """更新用户信息."""
     # 查询用户是否存在
     if not await Users.filter(id=user_id).exists():
-        return schemas.ResultResponse[str](message="user does not exist!")
+        raise UserNotExistException
     # 更新
     user.password = md5_crypt.hash(user.password)
     result = await Users.filter(id=user_id).update(**user.dict(exclude_unset=True))
@@ -159,36 +170,50 @@ async def delete_user(user_id: int, response: Response):
 
 
 @router.post(
-    "/login", summary="登录", response_model=schemas.ResultResponse[schemas.Login]
+    "/login",
+    summary="登录",
+    response_model=schemas.ResultResponse[schemas.Login],
 )
-async def login(user: schemas.LoginIn, request: Request, response: Response):
+async def login(
+    request: Request,
+    user: schemas.LoginIn,
+):
     """用户登陆."""
-
     # 查询数据库有无此用户
     try:
-        query_user = await Login_pydantic.from_tortoise_orm(
-            await Users.get(username=user.username)
-        )
+        query_user = await Users.get(username=user.username)
     except DoesNotExist:
-        return schemas.ResultResponse[str](message="user does not exist!")
-    # 序列化Pydantic对象
-    db_user = jsonable_encoder(query_user)
+        raise UserNotExistException
     # 验证密码
     if not md5_crypt.verify(secret=user.password, hash=query_user.password):
-        return schemas.ResultResponse[str](message="Password Error!")
+        raise PasswordValidateErrorException
     # 用户为黑名单
     if not query_user.is_active:
-        response.status_code = status.HTTP_403_FORBIDDEN
-        return schemas.ResultResponse[str](
-            code=status.HTTP_403_FORBIDDEN, message="The user status is unavailable!"
-        )
+        raise UserUnavailableException
     # 创建jwt
     access_token = create_access_token(data={"sub": query_user.username})
-    # db_user["access_token"] = access_token
+    # 更新用户jwt
+    await UserTokenDao.add_jwt(
+        current_user_id=query_user.id, token=access_token, client_ip=request.client.host
+    )
     return schemas.ResultResponse[schemas.Login](
         result=schemas.Login(
-            data=db_user, access_token=access_token, token_type="bearer"
+            data=query_user,
+            access_token=access_token,
+            token_type="bearer",
         )
     )
 
 
+@router.post(
+    "/logout",
+    summary="退出登录",
+    response_model=schemas.ResultResponse[str],
+    dependencies=[Depends(check_jwt_auth)],
+)
+async def logout(request: Request):
+    # 修改当前用户数据库token状态为0
+    access_type, access_token = request.headers["authorization"].split(" ")
+    if not await UserTokenDao.update_token_state(token=access_token):
+        raise TokenInvalidException
+    return schemas.ResultResponse[str](result="Successfully logged out!")

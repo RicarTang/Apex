@@ -1,29 +1,17 @@
-from tortoise import fields, models
+from tortoise import fields
 from tortoise.contrib.pydantic import pydantic_model_creator
-from enum import IntEnum
-from .base_models import TimeStampMixin, AbstractBaseModel
+from .base_models import AbstractBaseModel
+from .enum import DisabledEnum, IsSuperEnum
 
 
-class DisabledEnum(IntEnum):
-    """用户disabled枚举"""
-
-    ENABLE = 1
-    DISABLE = 0
-
-
-class IsSuperEnum(IntEnum):
-    """true / false"""
-
-    TRUE = 1
-    FALSE = 0
-
-
-class Users(AbstractBaseModel, TimeStampMixin):
+class Users(AbstractBaseModel):
     """用户模型"""
 
-    username = fields.CharField(max_length=20, unique=True, description="用户名")
+    username = fields.CharField(
+        max_length=20, unique=True, description="用户名"
+    )
     descriptions = fields.CharField(max_length=30, null=True, description="个人描述")
-    password = fields.CharField(max_length=128, description="密码")
+    password = fields.CharField(max_length=128, index=True, description="密码")
     is_active = fields.IntEnumField(
         enum_type=DisabledEnum,
         default=DisabledEnum.ENABLE,
@@ -37,12 +25,13 @@ class Users(AbstractBaseModel, TimeStampMixin):
     # 关联关系
     comments: fields.ReverseRelation["Comments"]
     roles: fields.ManyToManyRelation["Role"]
+    tokens: fields.ReverseRelation["UserToken"]
 
     def __str__(self):
         return str(self.username)
 
 
-class Role(AbstractBaseModel, TimeStampMixin):
+class Role(AbstractBaseModel):
     """角色表"""
 
     name = fields.CharField(max_length=20, unique=True, description="角色名称")
@@ -50,11 +39,11 @@ class Role(AbstractBaseModel, TimeStampMixin):
 
     # 与用户多对多关系
     users: fields.ManyToManyRelation[Users] = fields.ManyToManyField(
-        "models.Users", related_name="roles"
+        model_name="models.Users", related_name="roles"
     )
 
 
-class Comments(AbstractBaseModel, TimeStampMixin):
+class Comments(AbstractBaseModel):
     """用户评论模型"""
 
     comment = fields.TextField(description="用户评论")
@@ -65,6 +54,21 @@ class Comments(AbstractBaseModel, TimeStampMixin):
 
     def __str__(self):
         return str(self.id)
+
+
+class UserToken(AbstractBaseModel):
+    """用户token模型"""
+
+    token = fields.CharField(max_length=255, index=True, description="用户token令牌")
+    is_active = fields.IntEnumField(
+        enum_type=DisabledEnum,
+        default=DisabledEnum.ENABLE,
+        description="令牌状态,0:disable,1:enabled",
+    )
+    client_ip = fields.CharField(max_length=45, index=True, description="登录客户端IP")
+    user: fields.ForeignKeyRelation[Users] = fields.ForeignKeyField(
+        model_name="models.Users", related_name="tokens"
+    )
 
 
 # 用户schema

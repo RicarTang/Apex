@@ -3,7 +3,7 @@ from fastapi import APIRouter, HTTPException, Depends, Response, status, Query
 from tortoise.exceptions import DoesNotExist
 from ..schemas import schemas
 from src.db.models import Role, Users
-from ..crud import UsersCrud, RolePermCrud
+from ..crud import UsersDao, RolePermDao
 from ..utils.log_util import log
 from ..core.authentication import get_casbin, Authority
 
@@ -144,7 +144,7 @@ async def add_user_role(req: schemas.UserAddRoleIn):
 async def set_role_permission(req: schemas.RolePermIn):
     """设置角色权限"""
     # 查询角色
-    role = await RolePermCrud.query_role(name=req.role)
+    role = await RolePermDao.query_role(name=req.role)
     if not role:
         return schemas.ResultResponse[str](
             code=404, message=f"Role:{req.role} does not exist!"
