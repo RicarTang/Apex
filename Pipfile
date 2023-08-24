@@ -29,10 +29,11 @@ black = "*"
 pyjwt = "*"
 
 [requires]
-python_version = "3.10"
+python_version = "3.9"
 
 [scripts]
 dev = "uvicorn main:app --reload --host 0.0.0.0 --port 4000"
+pro = "uvicorn main:app --host 0.0.0.0 --port 4000"
 aerich_init = "aerich init -t src.db.settings.TORTOISE_ORM"
 init_db = "aerich init-db"
 migrate_db = "aerich migrate"
