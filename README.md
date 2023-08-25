@@ -23,6 +23,7 @@
 ```Bash
 pipenv install
 ```
+> Tips💡：迁移数据库前需要先在mysql中创建好数据库,orm不会自动创建。
 2. 初始化aerich
 ```Bash
 pipenv run aerich_init # 需要在根目录
