@@ -37,13 +37,10 @@ async def add_testcases(response: Response, excel: UploadFile):
         _type_: _description_
     """
     if excel.filename.endswith(("xlsx", "csv", "xls")):
+        # 保存文件名
+        save_name = str(datetime.now().strftime("%Y-%m-%d-%H-%M-%S")) + excel.filename
         # 保存路径
-        save_path = (
-            config.STATIC_PATH
-            / "testcase"
-            / "upload"
-            / f"{str(datetime.now().strftime('%Y-%m-%d-%H-%M-%S')) + excel.filename}"
-        )
+        save_path = config.STATIC_PATH / "testcase" / "upload" / save_name
         # 保存上传的文件
         await save_file(
             file=excel,
@@ -59,7 +56,7 @@ async def add_testcases(response: Response, excel: UploadFile):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="template suffix is error!"
         )
-    return schemas.ResultResponse[str](result=excel.filename)
+    return schemas.ResultResponse[str](result=f"Successful import {excel.filename}!")
 
 
 @router.get(
@@ -69,12 +66,11 @@ async def add_testcases(response: Response, excel: UploadFile):
 async def get_testcase_template():
     """下载测试用例excel模板"""
     template: Path = config.STATIC_PATH / "testcase" / "测试用例模板.xlsx"
-    if template.exists():
-        return FileResponse(template, filename="测试用例模板.xlsx")
-    else:
+    if not template.exists():
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="template is not exise!"
         )
+    return FileResponse(template, filename="测试用例模板.xlsx")
 
 
 # @router.get("/getAll")
