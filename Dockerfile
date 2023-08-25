@@ -9,6 +9,9 @@ RUN pip install pipenv
 # 定义环境变量,使pipenv安装的依赖保存在项目文件夹的.venv中
 ENV PIPENV_VENV_IN_PROJECT=1
 # 安装项目Pipfile.lock依赖
-RUN python3 -m pipenv install --deploy --ignore-pipfile
+# 迁移数据库表结构
+RUN pipenv install --deploy --ignore-pipfile \
+    && pipenv run aerich_init \
+    && pipenv run init_db
 # 启动应用程序
 CMD ["pipenv", "run", "pro"]

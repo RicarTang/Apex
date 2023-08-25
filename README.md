@@ -49,15 +49,16 @@ http://127.0.0.1:4000/docs
 ```
 ### pro
 #### Docker部署
-1. 打包镜像
+1. 项目目录添加.env文件
+2. 打包镜像
 ```Bash
 docker build -t fastapi-image .
 ```
-2. 启动容器
+3. 启动容器
 ```Bash
 docker run -d --name fastapi-pro -p 80:80 fastapi-image
 ```
-3. api文档
+4. api文档
 ```Text
 http://127.0.0.1/docs
 ```
