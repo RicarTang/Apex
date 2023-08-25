@@ -1,11 +1,11 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "14c5b9f98db3a3a16cb64ab5319606b3ac856bc1ad3c813047be427544caeb9d"
+            "sha256": "5b10f665ea3927fe62a9545a230223bc224cd5fd513c3c67e4768ae9d275b669"
         },
         "pipfile-spec": 6,
         "requires": {
-            "python_version": "3.10"
+            "python_version": "3.9"
         },
         "sources": [
             {
@@ -23,6 +23,14 @@
             ],
             "index": "pip_conf_index_global",
             "version": "==0.7.2"
+        },
+        "aiofiles": {
+            "hashes": [
+                "sha256:19297512c647d4b27a2cf7c34caa7e405c0d60b5560618a29a9fe027b18b0107",
+                "sha256:84ec2218d8419404abcb9f0c02df3f34c6e0a68ed41072acfb1cef5cbc29051a"
+            ],
+            "index": "pip_conf_index_global",
+            "version": "==23.2.1"
         },
         "aioredis": {
             "hashes": [

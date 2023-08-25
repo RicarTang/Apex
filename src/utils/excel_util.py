@@ -1,38 +1,41 @@
+import os
+import time
+from typing import List
+import asyncio
 from pathlib import Path
 from fastapi import UploadFile
+import aiofiles
 from openpyxl import load_workbook, Workbook
 
 
-class ExcelUtil:
-    """excel工具类"""
+async def read_all_testcase(filepath) -> List[tuple]:
+    """读取excel所有数据
 
-    def __init__(self, filename: str) -> None:
-        self.wb: Workbook = load_workbook(filename)
+    Args:
+        filepath (_type_): excel文件路径
 
-    def read_all(self) -> list:
-        """读取excel所有数据"""
-        # 获取所有sheet
-        sheets = self.wb.sheetnames
-        testcases = []  # 存放所有读取的testcase
-        # 遍历每个sheet的所有数据
-        for sheetname in sheets:
-            sheet = self.wb[sheetname]
-            # 使用列表推导式生成单个sheet的testcase
-            testcase = [item for item in sheet.values][1:]
-            # 使用 extend() 将单个sheet的testcase合并到总的testcases列表中
-            testcases.extend(testcase)
-        return testcases
-
-    def append_write(self):
-        """追加写入excel"""
-        pass
-
-    def cover_write(self):
-        """覆盖写入excel"""
-        pass
+    Returns:
+        List[tuple]: _description_
+    """
+    # 异步循环运行同步函数load_workbook
+    loop = asyncio.get_event_loop()
+    wb: Workbook = await loop.run_in_executor(
+        None, lambda: load_workbook(filepath, data_only=True)
+    )
+    # 获取所有sheet
+    sheets = wb.sheetnames
+    testcases = []  # 存放所有读取的testcase
+    # 遍历每个sheet的所有数据
+    for sheetname in sheets:
+        sheet = wb[sheetname]
+        # 使用列表推导式生成单个sheet的testcase
+        testcase = [item for item in sheet.values][1:]
+        # 使用 extend() 将单个sheet的testcase合并到总的testcases列表中
+        testcases.extend(testcase)
+    return testcases
 
 
-def save_file(file: UploadFile, save_path: Path) -> None:
+async def save_file(file: UploadFile, save_path: Path) -> None:
     """保存上传的文件
 
     Args:
@@ -41,16 +44,26 @@ def save_file(file: UploadFile, save_path: Path) -> None:
     """
     # 获取文件对象
     uploaded_file = file.file
+    # 判断目录
+    if not save_path.parent.exists():
+        os.makedirs(save_path.parent)
     # 将文件内容写入目标文件
-    with open(save_path, "wb") as f:
+    async with aiofiles.open(save_path, "wb") as f:
         # 避免一次读取内存过大
         while chunk := uploaded_file.read(8192):
-            f.write(chunk)
+            await f.write(chunk)
 
 
 if __name__ == "__main__":
     path = Path(__file__)
-    ex = path.parent.parent.parent / "static/testcase/测试用例模板.xlsx"
-    excel = ExcelUtil(ex)
-    data = excel.read_all()
-    print(data)
+    ex = path.parent.parent.parent / "static" / "testcase" / "测试用例模板.xlsx"
+
+    async def read():
+        data = await read_all_testcase(ex)
+        print(data)
+
+    async def write():
+        file = open(ex, "rb")
+        await save_file(file, ex.parent / "upload" / f"{time.time()}.xlsx")
+
+    asyncio.run(write(), debug=True)

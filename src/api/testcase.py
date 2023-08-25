@@ -17,14 +17,14 @@ from tortoise.exceptions import DoesNotExist
 from config import config
 from ..schemas import schemas
 from ..utils.log_util import log
-from ..utils.excel_util import ExcelUtil, save_file
+from ..utils.excel_util import save_file, read_all_testcase
 
 router = APIRouter()
 
 
 @router.post(
     "/import",
-    summary="导入测试用例",
+    summary="导入excel测试用例",
     response_model=schemas.ResultResponse[str],
 )
 async def add_testcases(response: Response, excel: UploadFile):
@@ -45,12 +45,13 @@ async def add_testcases(response: Response, excel: UploadFile):
             / f"{str(datetime.now().strftime('%Y-%m-%d-%H-%M-%S')) + excel.filename}"
         )
         # 保存上传的文件
-        save_file(
+        await save_file(
             file=excel,
             save_path=save_path,
         )
         # 读取表格数据
-        wb = ExcelUtil(save_path)
+        testcase_list = await read_all_testcase(save_path)
+        log.debug(f"testcase_list:{testcase_list}")
         # 保存testcase到数据库
 
     else:
