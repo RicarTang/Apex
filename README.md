@@ -18,6 +18,7 @@
 >   DB_URL: str   # 数据库地址，example： "mysql://root:123456@127.0.0.1:3306/tortoise"
 >   REDIS_URL: str  # redis地址，example："redis://[[name]:[pwd]]127.0.0.1:6379/0"
 >   SECRET_KEY: str  # jwt私钥，使用openssl rand -hex 32快捷生成
+### dev
 1. 安装依赖
 ```Bash
 pipenv install
@@ -45,4 +46,19 @@ pipenv run upgrade_db # 迁移，修改数据库表结构
 5. api文档
 ```Text
 http://127.0.0.1:4000/docs
+```
+### pro
+#### Docker部署
+1. 项目目录添加.env文件
+2. 打包镜像
+```Bash
+docker build -t fastapi-image .
+```
+3. 启动容器
+```Bash
+docker run -d --name fastapi-pro -p 80:80 fastapi-image
+```
+4. api文档
+```Text
+http://127.0.0.1/docs
 ```
