@@ -1,7 +1,7 @@
 """暂时丢弃此模块。"""
-from typing import Union
+from typing import Union, List
 from tortoise.exceptions import DoesNotExist
-from ..db.models import Users, Role, Comments, UserToken
+from ..db.models import Users, Role, Comments, UserToken, TestCase
 from ..db.enum import DisabledEnum
 from ..utils.log_util import log
 from ..utils.exception_util import TokenInvalidException
@@ -86,9 +86,7 @@ class UserTokenDao:
     """用户token crud"""
 
     @staticmethod
-    async def add_jwt(
-        current_user_id: int, token: str, client_ip: str
-    ) -> None:
+    async def add_jwt(current_user_id: int, token: str, client_ip: str) -> None:
         """添加/更新UserToken表数据
 
         Args:
@@ -142,3 +140,17 @@ class UserTokenDao:
             is_active=DisabledEnum.DISABLE
         )
         return result
+
+
+class TestCaseDao:
+    """测试用例Dao"""
+
+    @classmethod
+    async def add_testcase(cls, testcase: Union[dict, tuple]):
+        """添加单条测试用例"""
+        pass
+
+    @classmethod
+    async def add_testcase_from_list(cls, testcases: List[tuple]):
+        """导入测试用例列表"""
+        map(cls.add_testcase, testcases)

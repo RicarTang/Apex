@@ -1,4 +1,4 @@
-from enum import IntEnum
+from enum import IntEnum, Enum
 
 
 class DisabledEnum(IntEnum):
@@ -8,8 +8,28 @@ class DisabledEnum(IntEnum):
     DISABLE = 0
 
 
-class IsSuperEnum(IntEnum):
+class BoolEnum(IntEnum):
     """true / false"""
 
     TRUE = 1
     FALSE = 0
+
+
+
+class ApiMethodEnum(Enum):
+    """api方法"""
+
+    GET = "get"
+    POST = "post"
+    UPDATE = "update"
+    PUT = "put"
+    DELETE = "delete"
+    OPTIONS = "options"
+
+
+class RequestParamTypeEnum(Enum):
+    """请求参数类型"""
+
+    BODY = "body"
+    QUERY = "query"
+    PATH = "path"

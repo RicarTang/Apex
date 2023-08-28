@@ -13,19 +13,18 @@ from fastapi import (
     status,
 )
 from fastapi.responses import FileResponse
-from tortoise.exceptions import DoesNotExist
 from config import config
-from ..schemas import schemas
+from ..schemas import ResultResponse, testcase_schema
 from ..utils.log_util import log
-from ..utils.excel_util import ExcelUtil, save_file
+from ..utils.excel_util import save_file, read_all_testcase
 
 router = APIRouter()
 
 
 @router.post(
     "/import",
-    summary="导入测试用例",
-    response_model=schemas.ResultResponse[str],
+    summary="导入excel测试用例",
+    response_model=ResultResponse[str],
 )
 async def add_testcases(response: Response, excel: UploadFile):
     """导入测试用例
@@ -37,20 +36,18 @@ async def add_testcases(response: Response, excel: UploadFile):
         _type_: _description_
     """
     if excel.filename.endswith(("xlsx", "csv", "xls")):
+        # 保存文件名
+        save_name = str(datetime.now().strftime("%Y-%m-%d-%H-%M-%S")) + excel.filename
         # 保存路径
-        save_path = (
-            config.STATIC_PATH
-            / "testcase"
-            / "upload"
-            / f"{str(datetime.now().strftime('%Y-%m-%d-%H-%M-%S')) + excel.filename}"
-        )
+        save_path = config.STATIC_PATH / "testcase" / "upload" / save_name
         # 保存上传的文件
-        save_file(
+        await save_file(
             file=excel,
             save_path=save_path,
         )
         # 读取表格数据
-        wb = ExcelUtil(save_path)
+        testcase_list = await read_all_testcase(save_path)
+        log.debug(f"testcase_list:{testcase_list}")
         # 保存testcase到数据库
 
     else:
@@ -58,7 +55,7 @@ async def add_testcases(response: Response, excel: UploadFile):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="template suffix is error!"
         )
-    return schemas.ResultResponse[str](result=excel.filename)
+    return ResultResponse[str](result=f"Successful import {excel.filename}!")
 
 
 @router.get(
@@ -68,12 +65,11 @@ async def add_testcases(response: Response, excel: UploadFile):
 async def get_testcase_template():
     """下载测试用例excel模板"""
     template: Path = config.STATIC_PATH / "testcase" / "测试用例模板.xlsx"
-    if template.exists():
-        return FileResponse(template, filename="测试用例模板.xlsx")
-    else:
+    if not template.exists():
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="template is not exise!"
         )
+    return FileResponse(template, filename="测试用例模板.xlsx")
 
 
 # @router.get("/getAll")

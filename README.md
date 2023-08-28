@@ -15,7 +15,7 @@
 ## 使用
 默认超级管理员账号：superadmin,123456;
 > Tips💡：需要在项目根目录新建一个.env文件,添加字段如下:
->   DB_URL: str   # 数据库地址，example： "mysql://root:123456@127.0.0.1:3306/tortoise"
+>   DB_URL: str   # 数据库地址，example： "mysql://root:123456@127.0.0.1:3306/tortoise"（Dockerfile构建镜像时不能填本地回环地址,要指定ip）
 >   REDIS_URL: str  # redis地址，example："redis://[[name]:[pwd]]127.0.0.1:6379/0"
 >   SECRET_KEY: str  # jwt私钥，使用openssl rand -hex 32快捷生成
 ### dev
@@ -23,6 +23,7 @@
 ```Bash
 pipenv install
 ```
+> Tips💡：迁移数据库前需要先在mysql中创建好数据库,orm不会自动创建。
 2. 初始化aerich
 ```Bash
 pipenv run aerich_init # 需要在根目录
