@@ -1,33 +1,6 @@
-from typing import List, Optional, TypeVar, Generic
-from pydantic import BaseModel, Field, Extra, validator, ValidationError
-from pydantic.generics import GenericModel
-from ..db.models import (
-    User_Pydantic,
-    Comment_Pydantic,
-    # Login_pydantic,
-    Role_Pydantic,
-)
-from ..db.enum import DisabledEnum
-
-
-DataT = TypeVar("DataT")
-
-
-class ResultResponse(GenericModel, Generic[DataT]):
-    """
-    自定义返回模型，使用 generic-models 定义自定义模型
-    https://pydantic-docs.helpmanual.io/usage/models/#generic-models
-    所有返回数据都用如下格式，方便前端统一处理
-    {
-        code: 200,
-        message: 'success',
-        result: None
-    }
-    """
-
-    code: int = Field(default=200, description="返回码")
-    message: str = Field(default="success", description="消息内容")
-    result: Optional[DataT] = Field(description="返回数据主体")
+from typing import List, Optional
+from pydantic import BaseModel, Field, Extra
+from ..db.models import User_Pydantic, Role_Pydantic
 
 
 class User(BaseModel):
@@ -137,34 +110,3 @@ class LoginIn(BaseModel):
         """docs scheam添加example"""
 
         schema_extra = {"example": {"username": "admin", "password": "123456"}}
-
-
-# class LoginOut(BaseSchema):
-
-
-class CommentIn(BaseModel):
-    """
-    req schema，
-    用户单条评论。
-    """
-
-    # user_id: int = Field(gt=0, description="用户id")
-    comment: str = Field(max_length=50, description="用户评论")
-
-
-class CommentTo(Comment_Pydantic):
-    """
-    res schema，
-    用户单条评论。
-    """
-
-    pass
-
-
-class CommentsTo(List[Comment_Pydantic]):
-    """
-    res schema，
-    某个用户的所有评论。
-    """
-
-    pass

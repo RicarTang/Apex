@@ -1,6 +1,7 @@
 import os
 import time
-from typing import List
+from collections import namedtuple
+from typing import List, NamedTuple
 import asyncio
 from pathlib import Path
 from fastapi import UploadFile
@@ -25,11 +26,35 @@ async def read_all_testcase(filepath) -> List[tuple]:
     # 获取所有sheet
     sheets = wb.sheetnames
     testcases = []  # 存放所有读取的testcase
+    # 使用namedtuple
+    Testcase: NamedTuple = namedtuple(
+        "Testcase",
+        [
+            "case_no",
+            "case_title",
+            "case_description",
+            "case_module",
+            "case_sub_module",
+            "case_is_execute",
+            "api_path",
+            "api_method",
+            "request_headers",
+            "request_param_type",
+            "request_param",
+            "expect_code",
+            "expect_result",
+            "expect_data",
+            "request_to_redis",
+            "response_to_redis",
+            "case_editor",
+            "remark",
+        ],
+    )
     # 遍历每个sheet的所有数据
     for sheetname in sheets:
         sheet = wb[sheetname]
         # 使用列表推导式生成单个sheet的testcase
-        testcase = [item for item in sheet.values][1:]
+        testcase = [Testcase(*item) for item in sheet.values][1:]
         # 使用 extend() 将单个sheet的testcase合并到总的testcases列表中
         testcases.extend(testcase)
     return testcases
@@ -66,4 +91,4 @@ if __name__ == "__main__":
         file = open(ex, "rb")
         await save_file(file, ex.parent / "upload" / f"{time.time()}.xlsx")
 
-    asyncio.run(write(), debug=True)
+    asyncio.run(read(), debug=True)

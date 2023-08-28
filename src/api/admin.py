@@ -1,7 +1,7 @@
 from typing import Optional
 from fastapi import APIRouter, HTTPException, Depends, Response, status, Query
 from tortoise.exceptions import DoesNotExist
-from ..schemas import schemas
+from ..schemas import ResultResponse,user_schema
 from src.db.models import Role, Users
 from ..crud import UsersDao, RolePermDao
 from ..utils.log_util import log
@@ -14,7 +14,7 @@ router = APIRouter()
 @router.get(
     "/role/roles",
     summary="查询所有角色",
-    response_model=schemas.ResultResponse[schemas.RolesTo],
+    response_model=ResultResponse[user_schema.RolesTo],
 )
 async def query_roles(
     limit: Optional[int] = Query(default=20, ge=10),
@@ -28,18 +28,18 @@ async def query_roles(
     """
     roles = await Role.all().offset(limit * (page - 1)).limit(limit)
     total = await Role.all().count()
-    return schemas.ResultResponse[schemas.RolesTo](
-        result=schemas.RolesTo(data=roles, page=page, limit=limit, total=total)
+    return ResultResponse[user_schema.RolesTo](
+        result=user_schema.RolesTo(data=roles, page=page, limit=limit, total=total)
     )
 
 
 @router.post(
     "/role/create",
     summary="创建角色",
-    response_model=schemas.ResultResponse[schemas.RoleTo],
+    response_model=ResultResponse[user_schema.RoleTo],
     dependencies=[Depends(Authority("admin,add"))],
 )
-async def create_role(body: schemas.RoleIn):
+async def create_role(body: user_schema.RoleIn):
     """创建角色
 
     Args:
@@ -50,13 +50,13 @@ async def create_role(body: schemas.RoleIn):
     """
     role_obj = await Role.create(**body.dict(exclude_unset=True))
     log.debug(f"role_name返回:{role_obj}")
-    return schemas.ResultResponse[schemas.RoleTo](result=role_obj)
+    return ResultResponse[user_schema.RoleTo](result=role_obj)
 
 
 @router.delete(
     "/role/{role_id}",
     summary="删除角色",
-    response_model=schemas.ResultResponse[schemas.RoleTo],
+    response_model=ResultResponse[user_schema.RoleTo],
 )
 async def delete_role(role_id: int, response: Response):
     """删除角色
@@ -68,10 +68,10 @@ async def delete_role(role_id: int, response: Response):
     log.debug(f"删除角色id：{deleted_count}")
     if not deleted_count:
         response.status_code = status.HTTP_404_NOT_FOUND
-        return schemas.ResultResponse[str](
+        return ResultResponse[str](
             code=status.HTTP_404_NOT_FOUND, message=f"Role {role_id} not found"
         )
-    return schemas.ResultResponse[str](
+    return ResultResponse[str](
         message=f"Deleted role {role_id}", result={"deleted": deleted_count}
     )
 
@@ -95,7 +95,7 @@ async def delete_role(role_id: int, response: Response):
 @router.get(
     "/role/{role_id}",
     summary="查询角色",
-    response_model=schemas.ResultResponse[schemas.RoleTo],
+    response_model=ResultResponse[user_schema.RoleTo],
 )
 async def query_role(
     role_id: int,
@@ -108,51 +108,51 @@ async def query_role(
     try:
         role = await Role.get(id=role_id)
     except DoesNotExist:
-        return schemas.ResultResponse[str](message="role is not exist!")
-    return schemas.ResultResponse[schemas.RoleTo](result=role)
+        return ResultResponse[str](message="role is not exist!")
+    return ResultResponse[user_schema.RoleTo](result=role)
 
 
 @router.post(
     "/user/role",
     summary="新增用户角色",
-    response_model=schemas.ResultResponse[None],
+    response_model=ResultResponse[None],
 )
-async def add_user_role(req: schemas.UserAddRoleIn):
+async def add_user_role(req: user_schema.UserAddRoleIn):
     try:
         user = await Users.get(id=req.user_id).prefetch_related("roles")
     except DoesNotExist:
-        return schemas.ResultResponse[str](
+        return ResultResponse[str](
             code=status.HTTP_400_BAD_REQUEST,
             message=f"user: {req.user_id} is not exist!",
         )
     try:
         role = await Role.get(name=req.role)
     except DoesNotExist:
-        return schemas.ResultResponse[str](
+        return ResultResponse[str](
             code=status.HTTP_400_BAD_REQUEST, message=f"role: {req.role} is not exist!"
         )
     await user.roles.add(role)
-    return schemas.ResultResponse[str]()
+    return ResultResponse[str]()
 
 
 @router.post(
     "/permission",
     summary="新增角色权限",
-    response_model=schemas.ResultResponse[str],
+    response_model=ResultResponse[str],
     dependencies=[Depends(Authority("admin,add"))],
 )
-async def set_role_permission(req: schemas.RolePermIn):
+async def set_role_permission(req: user_schema.RolePermIn):
     """设置角色权限"""
     # 查询角色
     role = await RolePermDao.query_role(name=req.role)
     if not role:
-        return schemas.ResultResponse[str](
+        return ResultResponse[str](
             code=404, message=f"Role:{req.role} does not exist!"
         )
     e = await get_casbin()
     if await e.add_permission_for_role(req.role, req.model, req.act):
-        return schemas.ResultResponse[str]()
-    return schemas.ResultResponse[str](
+        return ResultResponse[str]()
+    return ResultResponse[str](
         message="Description Failed to add the role permission because the role permission already exists!"
     )
 

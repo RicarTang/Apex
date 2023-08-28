@@ -18,7 +18,7 @@ from ..core.security import (
 )
 from ..core.authentication import Authority
 from src.db.models import Users, Role
-from ..schemas import schemas
+from ..schemas import ResultResponse, user_schema
 from ..utils.log_util import log
 from ..utils.exception_util import (
     UserUnavailableException,
@@ -35,7 +35,7 @@ router = APIRouter()
 @router.get(
     "/users",
     summary="获取所有用户",
-    response_model=schemas.ResultResponse[schemas.UsersOut],
+    response_model=ResultResponse[user_schema.UsersOut],
     dependencies=[Depends(check_jwt_auth)],
 )
 async def get_users(
@@ -54,15 +54,15 @@ async def get_users(
     result = await Users.all().offset(limit * (page - 1)).limit(limit)
     # total
     total = await Users.all().count()
-    return schemas.ResultResponse[schemas.UsersOut](
-        result=schemas.UsersOut(data=result, page=page, limit=limit, total=total)
+    return ResultResponse[user_schema.UsersOut](
+        result=user_schema.UsersOut(data=result, page=page, limit=limit, total=total)
     )
 
 
 @router.get(
     "/role",
     summary="获取当前用户角色",
-    response_model=schemas.ResultResponse[schemas.RolesTo],
+    response_model=ResultResponse[user_schema.RolesTo],
 )
 async def query_user_role(
     request: Request,
@@ -74,49 +74,49 @@ async def query_user_role(
     user = await Users.filter(id=current_user.id).first().prefetch_related("roles")
     user_role_list = await user.roles.all().offset(limit * (page - 1)).limit(limit)
     total = await user.roles.all().count()
-    return schemas.ResultResponse[schemas.RolesTo](
-        result=schemas.RolesTo(data=user_role_list, page=page, limit=limit, total=total)
+    return ResultResponse[user_schema.RolesTo](
+        result=user_schema.RolesTo(
+            data=user_role_list, page=page, limit=limit, total=total
+        )
     )
 
 
 @router.get(
     "/me",
     summary="获取当前用户",
-    response_model=schemas.ResultResponse[schemas.UserPy],
+    response_model=ResultResponse[user_schema.UserPy],
     dependencies=[Depends(Authority("user,read"))],
 )
 async def get_current_user(
     request: Request, current_user: Users = Depends(current_user)
 ):
     """获取当前用户"""
-    return schemas.ResultResponse[schemas.UserPy](result=current_user)
+    return ResultResponse[user_schema.UserPy](result=current_user)
 
 
 @router.post(
     "/create",
     summary="创建用户",
-    response_model=schemas.ResultResponse[schemas.UserOut],
+    response_model=ResultResponse[user_schema.UserOut],
     dependencies=[Depends(check_jwt_auth), Depends(Authority("user,add"))],
 )
-async def create_user(user: schemas.UserIn):
+async def create_user(user: user_schema.UserIn):
     """创建用户."""
     user.password = md5_crypt.hash(user.password)
     user_obj = await Users(**user.dict(exclude_unset=True))
     # 添加用户角色
     role = await Role.filter(name="member").first()
     if not role:
-        return schemas.ResultResponse[str](
-            message=f"role: member is not exist,Please add!"
-        )
+        return ResultResponse[str](message=f"role: member is not exist,Please add!")
     await user_obj.save()
     await user_obj.roles.add(role)
     log.info(f"成功创建用户：{user.dict(exclude_unset=True)}")
-    return schemas.ResultResponse[schemas.UserOut](result=user_obj)
+    return ResultResponse[user_schema.UserOut](result=user_obj)
 
 
 @router.get(
     "/{user_id}",
-    response_model=schemas.ResultResponse[schemas.UserOut],
+    response_model=ResultResponse[user_schema.UserOut],
     summary="查询用户",
     responses={404: {"model": HTTPNotFoundError}},
     dependencies=[Depends(check_jwt_auth)],
@@ -127,17 +127,17 @@ async def get_user(user_id: int):
         user = await Users.get(id=user_id)
     except DoesNotExist:
         raise UserNotExistException
-    return schemas.ResultResponse[schemas.UserOut](result=user)
+    return ResultResponse[user_schema.UserOut](result=user)
 
 
 @router.put(
     "/{user_id}",
-    response_model=schemas.ResultResponse[schemas.UserOut],
+    response_model=ResultResponse[user_schema.UserOut],
     summary="更新用户",
     responses={404: {"model": HTTPNotFoundError}},
     dependencies=[Depends(check_jwt_auth), Depends(Authority("user,update"))],
 )
-async def update_user(user_id: int, user: schemas.UserIn):
+async def update_user(user_id: int, user: user_schema.UserIn):
     """更新用户信息."""
     # 查询用户是否存在
     if not await Users.filter(id=user_id).exists():
@@ -146,12 +146,12 @@ async def update_user(user_id: int, user: schemas.UserIn):
     user.password = md5_crypt.hash(user.password)
     result = await Users.filter(id=user_id).update(**user.dict(exclude_unset=True))
     log.debug(f"update更新{result}条数据")
-    return schemas.ResultResponse[schemas.UserOut](result=await Users.get(id=user_id))
+    return ResultResponse[user_schema.UserOut](result=await Users.get(id=user_id))
 
 
 @router.delete(
     "/{user_id}",
-    response_model=schemas.ResultResponse[str],
+    response_model=ResultResponse[str],
     summary="删除用户",
     responses={404: {"model": HTTPNotFoundError}},
     dependencies=[Depends(check_jwt_auth), Depends(Authority("user,delete"))],
@@ -161,10 +161,10 @@ async def delete_user(user_id: int, response: Response):
     deleted_count = await Users.filter(id=user_id).delete()
     if not deleted_count:
         response.status_code = status.HTTP_404_NOT_FOUND
-        return schemas.ResultResponse[str](
+        return ResultResponse[str](
             code=status.HTTP_404_NOT_FOUND, message=f"User {user_id} not found"
         )
-    return schemas.ResultResponse[str](
+    return ResultResponse[str](
         message=f"Deleted user {user_id}", result={"deleted": deleted_count}
     )
 
@@ -172,11 +172,11 @@ async def delete_user(user_id: int, response: Response):
 @router.post(
     "/login",
     summary="登录",
-    response_model=schemas.ResultResponse[schemas.Login],
+    response_model=ResultResponse[user_schema.Login],
 )
 async def login(
     request: Request,
-    user: schemas.LoginIn,
+    user: user_schema.LoginIn,
 ):
     """用户登陆."""
     # 查询数据库有无此用户
@@ -196,8 +196,8 @@ async def login(
     await UserTokenDao.add_jwt(
         current_user_id=query_user.id, token=access_token, client_ip=request.client.host
     )
-    return schemas.ResultResponse[schemas.Login](
-        result=schemas.Login(
+    return ResultResponse[user_schema.Login](
+        result=user_schema.Login(
             data=query_user,
             access_token=access_token,
             token_type="bearer",
@@ -208,7 +208,7 @@ async def login(
 @router.post(
     "/logout",
     summary="退出登录",
-    response_model=schemas.ResultResponse[str],
+    response_model=ResultResponse[str],
     dependencies=[Depends(check_jwt_auth)],
 )
 async def logout(request: Request):
@@ -216,4 +216,4 @@ async def logout(request: Request):
     access_type, access_token = request.headers["authorization"].split(" ")
     if not await UserTokenDao.update_token_state(token=access_token):
         raise TokenInvalidException
-    return schemas.ResultResponse[str](result="Successfully logged out!")
+    return ResultResponse[str](result="Successfully logged out!")

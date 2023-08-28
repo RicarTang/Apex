@@ -13,9 +13,8 @@ from fastapi import (
     status,
 )
 from fastapi.responses import FileResponse
-from tortoise.exceptions import DoesNotExist
 from config import config
-from ..schemas import schemas
+from ..schemas import ResultResponse, testcase_schema
 from ..utils.log_util import log
 from ..utils.excel_util import save_file, read_all_testcase
 
@@ -25,7 +24,7 @@ router = APIRouter()
 @router.post(
     "/import",
     summary="导入excel测试用例",
-    response_model=schemas.ResultResponse[str],
+    response_model=ResultResponse[str],
 )
 async def add_testcases(response: Response, excel: UploadFile):
     """导入测试用例
@@ -56,7 +55,7 @@ async def add_testcases(response: Response, excel: UploadFile):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="template suffix is error!"
         )
-    return schemas.ResultResponse[str](result=f"Successful import {excel.filename}!")
+    return ResultResponse[str](result=f"Successful import {excel.filename}!")
 
 
 @router.get(
