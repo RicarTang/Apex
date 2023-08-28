@@ -69,7 +69,7 @@ async def add_testcases(response: Response, excel: UploadFile):
         testcase_list = await read_all_testcase(save_path)
         log.debug(f"testcase_list:{testcase_list}")
         # 保存testcase到数据库
-
+        await TestCaseDao.add_testcase_from_list(testcase_list)
     else:
         # 上传文件格式错误
         raise HTTPException(

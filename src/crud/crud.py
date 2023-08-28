@@ -145,8 +145,8 @@ class UserTokenDao:
 class TestCaseDao:
     """测试用例Dao"""
 
-    @classmethod
-    async def add_testcase(cls, testcase: Union[dict, NamedTuple]) -> TestCase:
+    @staticmethod
+    async def add_testcase(testcase: Union[dict, NamedTuple]) -> TestCase:
         """添加单条测试用例
 
         Args:
@@ -161,7 +161,13 @@ class TestCaseDao:
             result = await TestCase.create(**testcase)
         return result
 
-    @classmethod
-    async def add_testcase_from_list(cls, testcases: List[NamedTuple]):
-        """导入测试用例列表"""
-        map(cls.add_testcase, testcases)
+    @staticmethod
+    async def add_testcase_from_list(testcases: List[NamedTuple]):
+        """导入测试用例列表
+
+        Args:
+            testcases (List[NamedTuple]): namedtuple组成的列表
+        """
+        # 转换namedtuple列表为模型对象列表
+        testcase_model_list = [TestCase(**testcase._asdict()) for testcase in testcases]
+        await TestCase.bulk_create(testcase_model_list)

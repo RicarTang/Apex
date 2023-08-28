@@ -80,7 +80,7 @@ app.include_router(
     testcase_api,
     tags=["Testcase"],
     prefix="/testcase",
-    dependencies=[Depends(check_jwt_auth)],
+    # dependencies=[Depends(check_jwt_auth)],
 )
 
 

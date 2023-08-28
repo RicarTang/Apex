@@ -1,8 +1,8 @@
 import os
 import time
+import asyncio
 from collections import namedtuple
 from typing import List, NamedTuple
-import asyncio
 from pathlib import Path
 from fastapi import UploadFile
 import aiofiles
