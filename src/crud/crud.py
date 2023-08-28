@@ -1,5 +1,5 @@
 """暂时丢弃此模块。"""
-from typing import Union, List
+from typing import Union, List, NamedTuple
 from tortoise.exceptions import DoesNotExist
 from ..db.models import Users, Role, Comments, UserToken, TestCase
 from ..db.enum import DisabledEnum
@@ -146,11 +146,22 @@ class TestCaseDao:
     """测试用例Dao"""
 
     @classmethod
-    async def add_testcase(cls, testcase: Union[dict, tuple]):
-        """添加单条测试用例"""
-        pass
+    async def add_testcase(cls, testcase: Union[dict, NamedTuple]) -> TestCase:
+        """添加单条测试用例
+
+        Args:
+            testcase (Union[dict, NamedTuple]): 测试用例数据,导入时为具名元组,添加单条时是字典类型
+
+        Returns:
+            TestCase: _description_
+        """
+        if isinstance(testcase, tuple):
+            result = await TestCase.create(**testcase._asdict())
+        else:
+            result = await TestCase.create(**testcase)
+        return result
 
     @classmethod
-    async def add_testcase_from_list(cls, testcases: List[tuple]):
+    async def add_testcase_from_list(cls, testcases: List[NamedTuple]):
         """导入测试用例列表"""
         map(cls.add_testcase, testcases)

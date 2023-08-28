@@ -14,11 +14,31 @@ from fastapi import (
 )
 from fastapi.responses import FileResponse
 from config import config
+from ..crud import TestCaseDao
 from ..schemas import ResultResponse, testcase_schema
 from ..utils.log_util import log
 from ..utils.excel_util import save_file, read_all_testcase
 
 router = APIRouter()
+
+
+@router.post(
+    "/add",
+    summary="添加测试用例",
+    response_model=ResultResponse[testcase_schema.TestCaseTo],
+)
+async def add_testcase(body: testcase_schema.TestCaseIn):
+    """添加单条测试用例到数据库
+
+    Args:
+        body (testcase_schema.TestCaseIn): _description_
+
+
+    Returns:
+        _type_: _description_
+    """
+    result = await TestCaseDao.add_testcase(body.dict())
+    return ResultResponse[testcase_schema.TestCaseTo](result=result)
 
 
 @router.post(

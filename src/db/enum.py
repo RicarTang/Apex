@@ -15,8 +15,7 @@ class BoolEnum(IntEnum):
     FALSE = 0
 
 
-
-class ApiMethodEnum(Enum):
+class ApiMethodEnum(str, Enum):  # 继承str以便pydantic验证
     """api方法"""
 
     GET = "get"
@@ -27,7 +26,7 @@ class ApiMethodEnum(Enum):
     OPTIONS = "options"
 
 
-class RequestParamTypeEnum(Enum):
+class RequestParamTypeEnum(str, Enum):
     """请求参数类型"""
 
     BODY = "body"

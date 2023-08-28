@@ -95,7 +95,7 @@ class TestCase(AbstractBaseModel):
         default=ApiMethodEnum.GET,
         description="api请求方法",
     )
-    request_headers = fields.JSONField(description="请求头,必须为json")
+    request_headers = fields.CharField(max_length=500,null=True, description="请求头,必须为json")
     request_param_type = fields.CharEnumField(
         max_length=10,
         enum_type=RequestParamTypeEnum,
@@ -105,7 +105,7 @@ class TestCase(AbstractBaseModel):
     request_param = fields.TextField(description="请求参数")
     expect_code = fields.IntField(description="预期状态码")
     expect_result = fields.CharField(max_length=20, null=True, description="预期结果")
-    expect_data = fields.TextField(description="预期返回数据")
+    expect_data = fields.TextField(null=True, description="预期返回数据")
     request_to_redis = fields.IntEnumField(
         enum_type=BoolEnum,
         default=BoolEnum.FALSE,
@@ -132,3 +132,5 @@ UserIn_Pydantic = pydantic_model_creator(
 Comment_Pydantic = pydantic_model_creator(Comments, name="CommentTo")
 # 角色schema
 Role_Pydantic = pydantic_model_creator(Role, name="RoleTo")
+# 测试用例schema
+Testcase_Pydantic = pydantic_model_creator(TestCase, name="TestCaseTo")
