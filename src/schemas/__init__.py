@@ -1,1 +1,1 @@
-from generic_schema import ResultResponse
+from .generic_schema import ResultResponse
