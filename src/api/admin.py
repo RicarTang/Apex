@@ -57,6 +57,7 @@ async def create_role(body: user_schema.RoleIn):
     "/role/{role_id}",
     summary="删除角色",
     response_model=ResultResponse[user_schema.RoleTo],
+    dependencies=[Depends(Authority("admin,delete"))],
 )
 async def delete_role(role_id: int, response: Response):
     """删除角色
