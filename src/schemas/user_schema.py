@@ -1,6 +1,7 @@
 from typing import List, Optional
 from pydantic import BaseModel, Field, Extra
 from ..db.models import User_Pydantic, Role_Pydantic
+from .common_schema import PageParam
 
 
 class User(BaseModel):
@@ -28,14 +29,11 @@ class UserOut(User_Pydantic):
     #     orm_mode = True
 
 
-class UsersOut(BaseModel):
+class UsersOut(PageParam):
     """用户集res schema"""
 
     # List[User_Pydantic]
     data: List[User_Pydantic]
-    page: int
-    limit: int
-    total: int
 
 
 class UserPy(User_Pydantic, extra=Extra.ignore):
