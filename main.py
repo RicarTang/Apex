@@ -5,7 +5,14 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from tortoise.contrib.fastapi import register_tortoise
-from src.api import user_api, comment_api, admin_api, testcase_api
+from src.api import (
+    user_api,
+    comment_api,
+    admin_api,
+    testcase_api,
+    testsuite_api,
+    testenv_api,
+)
 from src.core.security import check_jwt_auth
 from src.core.exception import (
     custom_http_exception_handler,
@@ -63,7 +70,11 @@ app.add_middleware(
 
 
 # router
-app.include_router(user_api, tags=["User"], prefix="/user")
+app.include_router(
+    user_api,
+    tags=["User"],
+    prefix="/user",
+)
 app.include_router(
     comment_api,
     tags=["Comment"],
@@ -82,7 +93,18 @@ app.include_router(
     prefix="/testcase",
     # dependencies=[Depends(check_jwt_auth)],
 )
-
+app.include_router(
+    testsuite_api,
+    tags=["Testsuite"],
+    prefix="/testsuite",
+    # dependencies=[Depends(check_jwt_auth)],
+)
+app.include_router(
+    testenv_api,
+    tags=["TestEnvironment"],
+    prefix="/testenv",
+    # dependencies=[Depends(check_jwt_auth)],
+)
 
 # 注册自定义的exception(方式一)
 app.add_exception_handler(HTTPException, custom_http_exception_handler)

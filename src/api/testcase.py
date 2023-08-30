@@ -15,6 +15,7 @@ from fastapi import (
 from fastapi.responses import FileResponse
 from config import config
 from ..crud import TestCaseDao
+from ..db.models import TestCase
 from ..schemas import ResultResponse, testcase_schema
 from ..utils.log_util import log
 from ..utils.excel_util import save_file, read_all_testcase
@@ -92,4 +93,53 @@ async def get_testcase_template():
     return FileResponse(template, filename="测试用例模板.xlsx")
 
 
-# @router.get("/getAll")
+@router.get(
+    "/getAll",
+    summary="获取所有测试用例",
+    response_model=ResultResponse[testcase_schema.TestCasesTo],
+)
+async def get_all_testcase(
+    limit: Optional[int] = Query(default=20, ge=10),
+    page: Optional[int] = Query(default=1, gt=0),
+):
+    """获取所有测试用例
+
+    Args:
+        limit (Optional[int], optional): _description_. Defaults to Query(default=20, ge=10).
+        page (Optional[int], optional): _description_. Defaults to Query(default=1, gt=0).
+    """
+    testcases = await TestCase.all().offset(limit * (page - 1)).limit(limit)
+    total = await TestCase.all().count()
+    return ResultResponse[testcase_schema.TestCasesTo](
+        result=testcase_schema.TestCasesTo(
+            data=testcases,
+            page=page,
+            limit=limit,
+            total=total,
+        )
+    )
+
+
+@router.get(
+    "/{case_id}",
+    summary="获取指定testcase",
+    response_model=ResultResponse[testcase_schema.TestCaseTo],
+)
+async def get_testcase():
+    pass
+
+
+@router.post(
+    "/executeOne",
+    summary="执行单条测试用例",
+)
+async def execute_testcase(body: testcase_schema.ExecuteTestcaseIn):
+    pass
+
+
+@router.post(
+    "/executeAll",
+    summary="执行所有测试用例",
+)
+async def execute_all_testcase():
+    pass

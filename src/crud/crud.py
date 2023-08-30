@@ -1,6 +1,6 @@
-"""暂时丢弃此模块。"""
 from typing import Union, List, NamedTuple
 from tortoise.exceptions import DoesNotExist
+from tortoise.queryset import QuerySet
 from ..db.models import Users, Role, Comments, UserToken, TestCase
 from ..db.enum import DisabledEnum
 from ..utils.log_util import log
@@ -43,7 +43,7 @@ class UsersDao:
         return await Users.create(**kwargs)
 
     @staticmethod
-    async def query_user_role(**kwargs):
+    async def query_user_role(**kwargs) -> QuerySet:
         """查询用户角色
         :param kwargs: filter条件
         :return:
@@ -146,7 +146,7 @@ class TestCaseDao:
     """测试用例Dao"""
 
     @staticmethod
-    async def add_testcase(testcase: Union[dict, NamedTuple]) -> TestCase:
+    async def add_testcase(testcase: Union[dict, NamedTuple]) -> QuerySet:
         """添加单条测试用例
 
         Args:
@@ -162,7 +162,7 @@ class TestCaseDao:
         return result
 
     @staticmethod
-    async def add_testcase_from_list(testcases: List[NamedTuple]):
+    async def add_testcase_from_list(testcases: List[NamedTuple]) -> None:
         """导入测试用例列表
 
         Args:

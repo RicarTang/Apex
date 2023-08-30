@@ -59,13 +59,10 @@ class RoleTo(Role_Pydantic):
     pass
 
 
-class RolesTo(BaseModel):
+class RolesTo(PageParam):
     """返回多角色res schema"""
 
     data: List[Role_Pydantic]
-    page: int
-    limit: int
-    total: int
 
 
 class UserAddRoleIn(BaseModel):

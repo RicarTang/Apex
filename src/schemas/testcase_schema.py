@@ -1,15 +1,16 @@
-from typing import Optional
+from typing import Optional, List
 from pydantic import BaseModel, Field
 from ..db.enum import BoolEnum, ApiMethodEnum, RequestParamTypeEnum
 from ..db.models import Testcase_Pydantic
+from .common_schema import PageParam
 
 
 class TestCaseIn(BaseModel):
     """测试用例 request schema"""
 
     case_no: str = Field(max_length=10, description="用例编号")
-    case_title: str = Field(max_length=30, description="用例名称/标题")
-    case_description: Optional[str] = Field(max_length=50, description="用例说明")
+    case_title: str = Field(max_length=50, description="用例名称/标题")
+    case_description: Optional[str] = Field(max_length=100, description="用例说明")
     case_module: str = Field(max_length=20, description="用例所属模块")
     case_sub_module: Optional[str] = Field(max_length=20, description="用例子模块")
     case_is_execute: BoolEnum = Field(
@@ -40,3 +41,15 @@ class TestCaseTo(Testcase_Pydantic):
     """测试用例 response schema"""
 
     pass
+
+
+class TestCasesTo(PageParam):
+    """翻页测试用例 response schema"""
+
+    data: List[Testcase_Pydantic]
+
+
+class ExecuteTestcaseIn(BaseModel):
+    """执行单条测试用例request schema"""
+
+    case_id: int

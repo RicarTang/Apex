@@ -9,14 +9,14 @@ import aiofiles
 from openpyxl import load_workbook, Workbook
 
 
-async def read_all_testcase(filepath) -> List[tuple]:
+async def read_all_testcase(filepath) -> List[NamedTuple]:
     """读取excel所有数据
 
     Args:
         filepath (_type_): excel文件路径
 
     Returns:
-        List[tuple]: _description_
+        List[NamedTuple]: _description_
     """
     # 异步循环运行同步函数load_workbook
     loop = asyncio.get_event_loop()
