@@ -1,7 +1,7 @@
 from typing import Optional
 from fastapi import APIRouter, HTTPException, Depends, Response, status, Query
 from tortoise.exceptions import DoesNotExist
-from ..schemas import ResultResponse,user_schema
+from ..schemas import ResultResponse, user_schema
 from src.db.models import Role, Users
 from ..crud import UsersDao, RolePermDao
 from ..utils.log_util import log
@@ -56,7 +56,7 @@ async def create_role(body: user_schema.RoleIn):
 @router.delete(
     "/role/{role_id}",
     summary="删除角色",
-    response_model=ResultResponse[user_schema.RoleTo],
+    response_model=ResultResponse[str],
     dependencies=[Depends(Authority("admin,delete"))],
 )
 async def delete_role(role_id: int, response: Response):
@@ -72,9 +72,7 @@ async def delete_role(role_id: int, response: Response):
         return ResultResponse[str](
             code=status.HTTP_404_NOT_FOUND, message=f"Role {role_id} not found"
         )
-    return ResultResponse[str](
-        message=f"Deleted role {role_id}", result={"deleted": deleted_count}
-    )
+    return ResultResponse[str](message=f"successful deleted role!")
 
 
 # @router.put(
@@ -147,9 +145,7 @@ async def set_role_permission(req: user_schema.RolePermIn):
     # 查询角色
     role = await RolePermDao.query_role(name=req.role)
     if not role:
-        return ResultResponse[str](
-            code=404, message=f"Role:{req.role} does not exist!"
-        )
+        return ResultResponse[str](code=404, message=f"Role:{req.role} does not exist!")
     e = await get_casbin()
     if await e.add_permission_for_role(req.role, req.model, req.act):
         return ResultResponse[str]()

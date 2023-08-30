@@ -95,7 +95,9 @@ class TestCase(AbstractBaseModel):
         default=ApiMethodEnum.GET,
         description="api请求方法",
     )
-    request_headers = fields.CharField(max_length=500,null=True, description="请求头,必须为json")
+    request_headers = fields.CharField(
+        max_length=500, null=True, description="请求头,必须为json"
+    )
     request_param_type = fields.CharEnumField(
         max_length=10,
         enum_type=RequestParamTypeEnum,
@@ -120,17 +122,18 @@ class TestCase(AbstractBaseModel):
     remark = fields.CharField(max_length=100, null=True, description="备注")
 
 
+# response schema
 # 用户schema
 User_Pydantic = pydantic_model_creator(
-    Users, name="User", exclude=("password", "is_delete")
-)
-Login_pydantic = pydantic_model_creator(Users, name="Login_models")
-UserIn_Pydantic = pydantic_model_creator(
-    Users, name="UserIn_models", exclude_readonly=True
+    Users, name="UserTo", exclude=("password", "is_delete")
 )
 # 评论schema
-Comment_Pydantic = pydantic_model_creator(Comments, name="CommentTo")
+Comment_Pydantic = pydantic_model_creator(
+    Comments, name="CommentTo", exclude=("is_delete",)
+)
 # 角色schema
-Role_Pydantic = pydantic_model_creator(Role, name="RoleTo")
+Role_Pydantic = pydantic_model_creator(Role, name="RoleTo", exclude=("is_delete",))
 # 测试用例schema
-Testcase_Pydantic = pydantic_model_creator(TestCase, name="TestCaseTo")
+Testcase_Pydantic = pydantic_model_creator(
+    TestCase, name="TestCaseTo", exclude=("is_delete",)
+)

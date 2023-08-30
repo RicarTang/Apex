@@ -164,9 +164,7 @@ async def delete_user(user_id: int, response: Response):
         return ResultResponse[str](
             code=status.HTTP_404_NOT_FOUND, message=f"User {user_id} not found"
         )
-    return ResultResponse[str](
-        message=f"Deleted user {user_id}", result={"deleted": deleted_count}
-    )
+    return ResultResponse[str](message=f"successful deleted user!")
 
 
 @router.post(
@@ -216,4 +214,4 @@ async def logout(request: Request):
     access_type, access_token = request.headers["authorization"].split(" ")
     if not await UserTokenDao.update_token_state(token=access_token):
         raise TokenInvalidException
-    return ResultResponse[str](result="Successfully logged out!")
+    return ResultResponse[str](message="Successfully logged out!")

@@ -75,7 +75,7 @@ async def add_testcases(response: Response, excel: UploadFile):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="template suffix is error!"
         )
-    return ResultResponse[str](result=f"Successful import {excel.filename}!")
+    return ResultResponse[str](message=f"Successful import {excel.filename}!")
 
 
 @router.get(
