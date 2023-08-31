@@ -158,13 +158,10 @@ async def update_user(user_id: int, user: user_schema.UserIn):
 )
 async def delete_user(user_id: int, response: Response):
     """删除用户."""
+    if not await Users.filter(id=user_id).exists():
+        raise UserNotExistException
     deleted_count = await Users.filter(id=user_id).delete()
-    if not deleted_count:
-        response.status_code = status.HTTP_404_NOT_FOUND
-        return ResultResponse[str](
-            code=status.HTTP_404_NOT_FOUND, message=f"User {user_id} not found"
-        )
-    return ResultResponse[str](message=f"successful deleted user!")
+    return ResultResponse[str](message="successful deleted user!")
 
 
 @router.post(
