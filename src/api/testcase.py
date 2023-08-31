@@ -13,6 +13,7 @@ from fastapi import (
     status,
 )
 from fastapi.responses import FileResponse
+from tortoise.exceptions import DoesNotExist
 from config import config
 from ..crud import TestCaseDao
 from ..db.models import TestCase
@@ -125,8 +126,17 @@ async def get_all_testcase(
     summary="获取指定testcase",
     response_model=ResultResponse[testcase_schema.TestCaseTo],
 )
-async def get_testcase():
-    pass
+async def get_testcase(case_id: int):
+    """获取指定testcase
+
+    Args:
+        case_id (int): _description_. Defaults to Query(gt=0).
+    """
+    try:
+        testcase = await TestCase.get(id=case_id)
+    except DoesNotExist:
+        raise
+    return ResultResponse[testcase_schema.TestCaseTo](result=testcase)
 
 
 @router.post(
@@ -134,7 +144,8 @@ async def get_testcase():
     summary="执行单条测试用例",
 )
 async def execute_testcase(body: testcase_schema.ExecuteTestcaseIn):
-    pass
+    """待完善"""
+    return
 
 
 @router.post(
@@ -142,4 +153,5 @@ async def execute_testcase(body: testcase_schema.ExecuteTestcaseIn):
     summary="执行所有测试用例",
 )
 async def execute_all_testcase():
-    pass
+    """待完善"""
+    return

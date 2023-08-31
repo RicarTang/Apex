@@ -2,6 +2,7 @@ from typing import Optional, List
 from typing import Optional
 from pydantic import BaseModel, HttpUrl, Field
 from ..db.models import Testenv_Pydantic
+from .common_schema import PageParam
 
 
 class TestEnvIn(BaseModel):
@@ -16,3 +17,9 @@ class TestEnvTo(Testenv_Pydantic):
     """response schema"""
 
     pass
+
+
+class TestEnvsTo(PageParam):
+    """response schema"""
+
+    data: List[Testenv_Pydantic]
