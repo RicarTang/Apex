@@ -158,7 +158,9 @@ class TestSuite(AbstractBaseModel):
 class TestEnv(AbstractBaseModel):
     """测试环境表"""
 
+    summary = fields.CharField(max_length=30, description="测试环境名称")
     test_env_url = fields.CharField(max_length=50, index=True, description="测试环境地址")
+    remark = fields.CharField(max_length=100, null=True, description="备注")
 
     class Meta:
         table = "test_environment"
