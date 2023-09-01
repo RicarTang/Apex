@@ -20,7 +20,7 @@ from ..core.authentication import Authority
 from src.db.models import Users, Role
 from ..schemas import ResultResponse, user_schema
 from ..utils.log_util import log
-from ..utils.exception_util import (
+from ..utils.exceptions.user import (
     UserUnavailableException,
     PasswordValidateErrorException,
     UserNotExistException,

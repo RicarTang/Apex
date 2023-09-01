@@ -70,3 +70,41 @@ async def get_testsuite(suite_id: int):
     except DoesNotExist:
         raise
     return ResultResponse[testsuite_schema.TestSuiteTo](result=result)
+
+
+@router.put(
+    "/{suite_id}",
+    summary="更新测试套件",
+    response_model=ResultResponse[testsuite_schema.TestSuiteTo],
+)
+async def update_testsuite(suite_id: int, body: testsuite_schema.TestSuiteIn):
+    """更新测试套件数据
+
+    Args:
+        suite_id (int): _description_
+        body (testsuite_schema.TestSuiteIn): _description_
+    """
+    if not await TestSuite.filter(id=suite_id).exists():
+        raise
+    result = await TestSuite.filter(id=suite_id).update(**body.dict(exclude_unset=True))
+    log.debug(f"update更新{result}条数据")
+    return ResultResponse[testsuite_schema.TestSuiteTo](
+        result=await TestSuite.get(id=suite_id)
+    )
+
+
+@router.delete(
+    "/{suite_id}",
+    summary="删除测试套件",
+    response_model=ResultResponse[str],
+)
+async def delete_testsuite(suite_id: int):
+    """删除指定id测试套件
+
+    Args:
+        suite_id (int): _description_
+    """
+    if not await TestSuite.filter(id=suite_id).exists():
+        raise
+    result = await TestSuite.filter(id=suite_id).delete()
+    return ResultResponse[str](message="successful deleted testsuite!")

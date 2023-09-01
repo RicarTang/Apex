@@ -22,7 +22,7 @@ async def create_comment(
 
 
 @router.get(
-    "/comments/{user_id}",
+    "/{user_id}",
     summary="获取用户评论",
     response_model=ResultResponse[comment_schema.CommentsTo],
 )

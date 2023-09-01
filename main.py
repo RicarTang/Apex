@@ -12,13 +12,14 @@ from src.api import (
     testcase_api,
     testsuite_api,
     testenv_api,
+    config_api,
 )
 from src.core.security import check_jwt_auth
 from src.core.exception import (
     custom_http_exception_handler,
     custom_validation_exception_handler,
 )
-from src.core.cache import init_redis_pool
+from src.core.cache import init_cache
 from src.utils.background_task_util import scheduler
 from src.utils.log_util import log
 from src.db.settings import TORTOISE_ORM
@@ -47,7 +48,7 @@ register_tortoise(
 async def app_startup():
     """fastapi初始化"""
     # 初始化缓存池
-    await init_redis_pool()
+    await init_cache()
     # 创建默认用户角色,需要在注册tortoise后面初始化默认用户
     await create_initial_users()
     # 修改默认swagger参数，使用static文件
@@ -69,7 +70,7 @@ app.add_middleware(
 )
 
 
-# router
+# include router
 app.include_router(
     user_api,
     tags=["User"],
@@ -103,6 +104,12 @@ app.include_router(
     testenv_api,
     tags=["TestEnvironment"],
     prefix="/testenv",
+    # dependencies=[Depends(check_jwt_auth)],
+)
+app.include_router(
+    config_api,
+    tags=["Config"],
+    prefix="/config",
     # dependencies=[Depends(check_jwt_auth)],
 )
 

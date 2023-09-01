@@ -139,6 +139,43 @@ async def get_testcase(case_id: int):
     return ResultResponse[testcase_schema.TestCaseTo](result=testcase)
 
 
+@router.put(
+    "/{case_id}",
+    summary="更新测试用例",
+    response_model=ResultResponse[testcase_schema.TestCaseTo],
+)
+async def update_testcase(case_id: int, body: dict):
+    """更新测试用例数据
+
+    Args:
+        body (dict): _description_
+    """
+    if not await TestCase.filter(id=case_id).exists():
+        raise
+    result = await TestCase.filter(id=case_id).update(**body.dict(exclude_unset=True))
+    log.debug(f"update更新{result}条数据")
+    return ResultResponse[testcase_schema.TestCaseTo](
+        result=await TestCase.get(id=case_id)
+    )
+
+
+@router.delete(
+    "/{case_id}",
+    summary="删除测试用例",
+    response_model=ResultResponse[str],
+)
+async def delete_testcase(case_id: int):
+    """删除指定id的测试用例
+
+    Args:
+        case_id (int): _description_
+    """
+    if not await TestCase.filter(id=case_id).exists():
+        raise
+    result = await TestCase.filter(id=case_id).delete()
+    return ResultResponse[str](message="successful deleted testcase!")
+
+
 @router.post(
     "/executeOne",
     summary="执行单条测试用例",

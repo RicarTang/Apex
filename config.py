@@ -12,10 +12,14 @@ class BaseConfig(BaseSettings):
     ROOT_PATH: Union[str, Path] = Path(__file__).parent
     # static静态文件目录
     STATIC_PATH: Union[str, Path] = ROOT_PATH / "static"
+    # 测试目录
+    TEST_PATH: Union[str, Path] = ROOT_PATH / "src" / "autotest"
     # casbin
     RBAC_MODEL_PATH: Union[str, Path] = (
         ROOT_PATH / "src" / "utils" / "casbin" / "rbac_model.conf"
     )
+    # autotest 配置路径
+    TEST_CONFIG_PATH: Union[str, Path] = TEST_PATH / "config" / "config.yaml"
     # models
     MODELS_PATH: str = "src.db.models"
     # 日志配置

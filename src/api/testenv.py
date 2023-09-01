@@ -3,6 +3,7 @@ from fastapi import APIRouter, Query
 from tortoise.exceptions import DoesNotExist
 from ..db.models import TestEnv
 from ..schemas import ResultResponse, testenv_schema
+from ..utils.exceptions.testenv import TestEnvNotExistException
 from ..utils.log_util import log
 
 
@@ -65,7 +66,7 @@ async def get_env(env_id: int):
     try:
         result = await TestEnv.get(id=env_id)
     except DoesNotExist:
-        raise
+        raise TestEnvNotExistException
     return ResultResponse[testenv_schema.TestEnvTo](result=result)
 
 
@@ -76,15 +77,19 @@ async def get_env(env_id: int):
 )
 async def update_env(
     env_id: int,
-    body: dict,
+    body: testenv_schema.TestEnvIn,
 ):
     """更新env数据信息
 
     Args:
         env_id (int): _description_
+        body (testenv_schema.TestEnvIn): _description_
+
+    Returns:
+        _type_: _description_
     """
     if not await TestEnv.filter(id=env_id).exists():
-        raise
+        raise TestEnvNotExistException
     result = await TestEnv.filter(id=env_id).update(**body.dict(exclude_unset=True))
     log.debug(f"update更新{result}条数据")
     return ResultResponse[testenv_schema.TestEnvTo](result=await TestEnv.get(id=env_id))
@@ -102,6 +107,6 @@ async def delete_env(env_id: int):
         env_id (int): _description_
     """
     if not await TestEnv.filter(id=env_id).exists():
-        raise
+        raise TestEnvNotExistException
     result = await TestEnv.filter(id=env_id).delete()
     return ResultResponse[str](message="successful deleted environment!")

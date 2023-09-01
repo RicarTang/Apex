@@ -6,7 +6,7 @@ from fastapi import Depends, Request
 from config import config
 from ..db.models import Users
 from ..utils.log_util import log
-from ..utils.exception_util import (
+from ..utils.exceptions.user import (
     TokenUnauthorizedException,
     TokenExpiredException,
     TokenInvalidException,
