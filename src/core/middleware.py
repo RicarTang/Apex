@@ -1,4 +1,5 @@
 import time
+import json
 from typing import List
 from starlette.types import Message
 from fastapi import Request
@@ -29,7 +30,6 @@ class LoggingMiddleware(BaseHTTPMiddleware):
         async def wrapped_receive() -> Message:  # 取body
             nonlocal done
             message = await receive()
-            log.debug(f"message内容：{message}")
             if message["type"] == "http.disconnect":
                 done = True
                 return message
@@ -50,7 +50,18 @@ class LoggingMiddleware(BaseHTTPMiddleware):
         process_time = time.time() - start_time
         response.headers["X-Process-Time"] = str(process_time)  # 可以使用response, 添加信息
         body = b"".join(chunks)
-        log.debug({"requestBody": body})
+        body = body.decode("utf-8")
+        try:
+            body = json.loads(body)
+        except:
+            pass
+        log_dict = dict(
+            method=request.method,
+            url=request.url,
+            client_ip=request.client.host,
+            body=body,
+        )
+        log.info(log_dict)
         return response
 
 
@@ -62,6 +73,6 @@ middleware = [
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
-        expose_headers=["X-Process-Time"],  # 浏览器显示自定义请求头
+        expose_headers=["X-Process-Time"],  # 客户端显示自定义请求头
     ),
 ]
