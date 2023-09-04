@@ -1,9 +1,7 @@
 import sys
-from fastapi import FastAPI, Request, Depends, HTTPException
+from fastapi import FastAPI, Depends, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import JSONResponse
-from fastapi.middleware.cors import CORSMiddleware
 from tortoise.contrib.fastapi import register_tortoise
 from src.api import (
     user_api,
@@ -15,6 +13,7 @@ from src.api import (
     config_api,
 )
 from src.core.security import check_jwt_auth
+from src.core.middleware import middleware
 from src.core.exception import (
     custom_http_exception_handler,
     custom_validation_exception_handler,
@@ -30,6 +29,7 @@ app = FastAPI(
     title="api swagger",
     version="1.0",
     description="fastapi+tortoise-orm async web framework",
+    middleware=middleware  # 注册middleware
 )
 
 # 挂载静态文件
@@ -60,14 +60,25 @@ async def app_startup():
     ] = "/static/swagger-ui/swagger-ui.css"
 
 
-# 注册CORS中间件
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# 注册CORS中间件(迁移至core.middleware模块)
+# app.add_middleware(
+#     CORSMiddleware,
+#     allow_origins=["*"],
+#     allow_credentials=True,
+#     allow_methods=["*"],
+#     allow_headers=["*"],
+#     expose_headers=["X-Process-Time"],  # 浏览器显示自定义请求头
+# )
+# app.add_middleware(TimeMiddleware)
+
+# 自定义中间件(函数方式)
+# @app.middleware("http")
+# async def custom_time_header(request: Request, call_next):
+#     start_time = time.time()
+#     response = await call_next(request)
+#     process_time = time.time() - start_time
+#     response.headers["X-Process-Time"] = str(process_time)
+#     return response
 
 
 # include router
