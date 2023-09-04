@@ -56,12 +56,21 @@ class LoggingMiddleware(BaseHTTPMiddleware):
         except:
             pass
         log_dict = dict(
+            response_code=response.status_code,
             method=request.method,
             url=request.url,
             client_ip=request.client.host,
             body=body,
         )
-        log.info(log_dict)
+        if str(response.status_code).startswith("2") or str(
+            response.status_code
+        ).startswith("3"):
+            log.info(log_dict)
+        elif str(response.status_code).startswith("4") or str(
+            response.status_code
+        ).startswith("5"):
+            log.error(log_dict)
+
         return response
 
 
