@@ -115,14 +115,33 @@ async def create_user(user: user_schema.UserIn):
 
 
 @router.get(
+    "/query",
+    summary="查询用户",
+    response_model=ResultResponse[user_schema.UsersOut],
+    dependencies=[Depends(check_jwt_auth)],
+)
+async def query_user(
+    username: str,
+    limit: Optional[int] = Query(default=20, ge=10),
+    page: Optional[int] = Query(default=1, gt=0),
+):
+    """查询用户"""
+    result = await Users.filter(username__contains=username).all()
+    total = len(result)
+    return ResultResponse[user_schema.UsersOut](
+        result=user_schema.UsersOut(data=result, page=page, limit=limit, total=total)
+    )
+
+
+@router.get(
     "/{user_id}",
     response_model=ResultResponse[user_schema.UserOut],
-    summary="查询用户",
+    summary="根据id查询用户",
     responses={404: {"model": HTTPNotFoundError}},
     dependencies=[Depends(check_jwt_auth)],
 )
 async def get_user(user_id: int):
-    """查询单个用户."""
+    """根据id查询用户."""
     try:
         user = await Users.get(id=user_id)
     except DoesNotExist:
