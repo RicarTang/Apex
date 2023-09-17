@@ -25,7 +25,8 @@ class BaseConfig(BaseSettings):
     # 日志配置
     STREAM_LOG_LEVEL = "DEBUG"  # log级别：'CRITICAL': CRITICAL,'FATAL': FATAL,'ERROR': ERROR,'WARN': WARNING,'WARNING': WARNING,'INFO': INFO,'DEBUG': DEBUG,'NOTSET': NOTSET
     FILE_LOG_LEVEL = "INFO"
-    LOG_FORMATTER = "%(levelname)s:     %(asctime)s - %(filename)s - %(funcName)s - line: %(lineno)d - message: %(message)s"
+    # LOG_FORMATTER = "%(levelname)s:     %(asctime)s - %(filename)s - %(funcName)s - line: %(lineno)d - message: %(message)s"
+    LOG_FORMATTER = "<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>"
     # 数据库
     # DB_URL = "mysql://root:Mayday990812@127.0.0.1:3306/tortoise"
     DB_URL: str

@@ -22,9 +22,10 @@ aioredis = "*"
 hiredis = "*"
 fastapi-cache2 = {extras = ["redis"], version = "*"}
 openpyxl = "*"
-asynccasbin = "*"
 aiofiles = "*"
 pyyaml = "*"
+loguru = "*"
+asynccasbin = "*"
 
 [dev-packages]
 black = "*"

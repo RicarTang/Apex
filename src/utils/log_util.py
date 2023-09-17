@@ -1,34 +1,52 @@
-import os
-import logging
+import sys
+import datetime
 from pathlib import Path
 from config import config
-import datetime
+from loguru import logger
 
 
-def set_log():
-    logger = logging.getLogger(__name__)
-    logger.setLevel(config.STREAM_LOG_LEVEL)
-    # 判断log文件夹是否存在，不存在创建log目录
+def log_handler():
+    """日志设置"""
+    # log 目录
     log_directory: Path = Path(__file__).parent.parent / "log"
-    if not log_directory.exists():
-        os.makedirs(log_directory)
-    # 文件日志处理器
-    file_handler = logging.FileHandler(
-        log_directory / f"{datetime.date.today()}.log",
-        encoding="utf-8",
+    info_log_directory = log_directory / "info"
+    error_log_directory = log_directory / "error"
+    # 当前时间
+    current_date = datetime.date.today()
+    # 设置日志文件名格式，将日期添加到文件名中
+    log_file_info = f"{info_log_directory}/info_{current_date}.log"
+    log_file_error = f"{error_log_directory}/error_{current_date}.log"
+    # 移除默认的输出处理器
+    logger.remove()
+    # 添加控制台输出处理器
+    logger.add(
+        sys.stdout,
+        level="DEBUG",
+        format=config.LOG_FORMATTER,
     )
-    file_handler.setLevel(config.FILE_LOG_LEVEL)
-    log_format = logging.Formatter(config.LOG_FORMATTER)
-    file_handler.setFormatter(log_format)
-    logger.addHandler(file_handler)
-    # 控制台日志处理器
-    stream_handler = logging.StreamHandler()
-    stream_handler.setFormatter(log_format)
-    logger.addHandler(stream_handler)
+    # 添加 info 日志处理器
+    logger.add(
+        log_file_info,
+        rotation="00:00",
+        level="INFO",
+        encoding="utf-8",
+        format=config.LOG_FORMATTER,
+        enqueue=True,  # 进程安全
+    )
+    # 添加 error 日志处理器
+    logger.add(
+        log_file_error,
+        rotation="00:00",
+        level="ERROR",
+        encoding="utf-8",
+        format=config.LOG_FORMATTER,
+        enqueue=True,
+    )
+
     return logger
 
 
-log = set_log()
+log = log_handler()
 
 if __name__ == "__main__":
     log.debug("测试咯个哥哥in")
