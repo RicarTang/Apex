@@ -26,6 +26,7 @@ aiofiles = "*"
 pyyaml = "*"
 loguru = "*"
 asynccasbin = "*"
+win32-setctime = "*"
 
 [dev-packages]
 black = "*"
