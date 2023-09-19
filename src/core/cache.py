@@ -1,7 +1,7 @@
 # from redis import asyncio as aioredis
 from fastapi import Depends
 # from redis.client import Redis
-from aioredis.client import Redis
+import aioredis
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
 from config import config
@@ -9,7 +9,7 @@ from config import config
 
 async def aioredis_pool():
     """异步redis"""
-    redis = Redis.from_url(config.REDIS_URL)
+    redis = await aioredis.from_url(config.REDIS_URL)
     return redis
 
 
