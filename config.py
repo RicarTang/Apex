@@ -30,7 +30,7 @@ class BaseConfig(BaseSettings):
     # 数据库
     # DB_URL = "mysql://root:Mayday990812@127.0.0.1:3306/tortoise"
     DB_URL: str
-    # redis  example：redis://[[name]:[pwd]]127.0.0.1:6379/0
+    # redis  example：redis://:123456@127.0.0.1:6379/0
     REDIS_URL: str
 
     # jwt相关
