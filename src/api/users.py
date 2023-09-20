@@ -183,6 +183,34 @@ async def delete_user(user_id: int, response: Response):
     return ResultResponse[str](message="successful deleted user!")
 
 
+@router.delete(
+    "/batchDelete",
+    summary="批量删除用户",
+    response_model=ResultResponse[str],
+    dependencies=[Depends(check_jwt_auth), Depends(Authority("user,delete"))],
+)
+async def batch_delete_user(users_id: list):
+    """批量删除用户
+
+    Args:
+        users_id (list): 用户id组成的列表
+
+    Raises:
+        UserNotExistException: _description_
+        PasswordValidateErrorException: _description_
+        UserUnavailableException: _description_
+        TokenInvalidException: _description_
+
+    Returns:
+        _type_: _description_
+    """
+    # 使用 filter 方法过滤出要删除的记录
+    users_to_delete = await Users.filter(id__in=users_id)
+    # 使用 delete 方法批量删除记录
+    result = await users_to_delete.delete()
+    return ResultResponse[str](message="successful deleted users!")
+
+
 @router.post(
     "/login",
     summary="登录",
