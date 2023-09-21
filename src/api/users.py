@@ -173,7 +173,7 @@ async def update_user(user_id: int, user: user_schema.UserIn):
     "/batchDelete",
     summary="批量删除用户",
     response_model=ResultResponse[str],
-    # dependencies=[Depends(check_jwt_auth), Depends(Authority("user,delete"))],
+    dependencies=[Depends(check_jwt_auth), Depends(Authority("user,delete"))],
 )
 async def batch_delete_user(body: user_schema.BatchDelete):
     """批量删除用户
