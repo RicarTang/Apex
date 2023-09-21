@@ -105,3 +105,7 @@ class LoginIn(BaseModel):
         """docs scheam添加example"""
 
         schema_extra = {"example": {"username": "admin", "password": "123456"}}
+
+class BatchDelete(BaseModel):
+    """批量删除用户 req schema"""
+    users_id: List[int]

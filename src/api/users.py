@@ -9,6 +9,7 @@ from fastapi import (
     Header,
 )
 from passlib.hash import md5_crypt
+from tortoise.transactions import in_transaction
 from tortoise.contrib.fastapi import HTTPNotFoundError
 from tortoise.exceptions import DoesNotExist
 from ..core.security import (
@@ -169,6 +170,27 @@ async def update_user(user_id: int, user: user_schema.UserIn):
 
 
 @router.delete(
+    "/batchDelete",
+    summary="批量删除用户",
+    response_model=ResultResponse[str],
+    # dependencies=[Depends(check_jwt_auth), Depends(Authority("user,delete"))],
+)
+async def batch_delete_user(body: user_schema.BatchDelete):
+    """批量删除用户
+
+    Args:
+        body (user_schema.BatchDelete): _description_
+
+    Returns:
+        _type_: _description_
+    """
+    async with in_transaction():  # 事务
+        # 使用 filter 方法过滤出要删除的记录，然后delete删除
+        users_to_delete = await Users.filter(id__in=body.users_id).delete()
+    return ResultResponse[str](message=f"successful deleted {users_to_delete} users!")
+
+
+@router.delete(
     "/{user_id}",
     response_model=ResultResponse[str],
     summary="删除用户",
@@ -181,34 +203,6 @@ async def delete_user(user_id: int, response: Response):
         raise UserNotExistException
     deleted_count = await Users.filter(id=user_id).delete()
     return ResultResponse[str](message="successful deleted user!")
-
-
-@router.delete(
-    "/batchDelete",
-    summary="批量删除用户",
-    response_model=ResultResponse[str],
-    dependencies=[Depends(check_jwt_auth), Depends(Authority("user,delete"))],
-)
-async def batch_delete_user(users_id: list):
-    """批量删除用户
-
-    Args:
-        users_id (list): 用户id组成的列表
-
-    Raises:
-        UserNotExistException: _description_
-        PasswordValidateErrorException: _description_
-        UserUnavailableException: _description_
-        TokenInvalidException: _description_
-
-    Returns:
-        _type_: _description_
-    """
-    # 使用 filter 方法过滤出要删除的记录
-    users_to_delete = await Users.filter(id__in=users_id)
-    # 使用 delete 方法批量删除记录
-    result = await users_to_delete.delete()
-    return ResultResponse[str](message="successful deleted users!")
 
 
 @router.post(
