@@ -50,8 +50,8 @@ class LoggingMiddleware(BaseHTTPMiddleware):
         process_time = time.time() - start_time
         response.headers["X-Process-Time"] = str(process_time)  # 可以使用response, 添加信息
         body = b"".join(chunks)
-        body = body.decode("utf-8")
         try:
+            body = body.decode("utf-8")  # 请求体会有为文件的情况
             body = json.loads(body)
         except:
             pass
