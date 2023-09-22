@@ -2,6 +2,7 @@
 
 ## 概述
 使用fastapi+tortoise-orm+mysql+casbin写的后台管理api，接口测试平台后端，用Vue构建前端。
+前端github地址（开发中）：https://github.com/RicarTang/testframework_vue3
 ## 技术架构
 - 使用pythonweb框架fastapi
 - 使用pipenv包管理工具（强烈推荐）
