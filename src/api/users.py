@@ -122,7 +122,7 @@ async def create_user(user: user_schema.UserIn):
     dependencies=[Depends(check_jwt_auth)],
 )
 async def query_user(
-    username: str,
+    username: Optional[str] = Query(default=None,description="用户名"),
     limit: Optional[int] = Query(default=20, ge=10),
     page: Optional[int] = Query(default=1, gt=0),
 ):

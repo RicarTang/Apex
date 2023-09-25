@@ -122,6 +122,27 @@ async def get_all_testcase(
 
 
 @router.get(
+    "/query",
+    summary="查询测试用例",
+    response_model=ResultResponse[testcase_schema.TestCasesTo],
+    # dependencies=[Depends(check_jwt_auth)],
+)
+async def query_testcase(
+    case_title: Optional[str] = Query(default=None, description="用例标题"),
+    limit: Optional[int] = Query(default=20, ge=10),
+    page: Optional[int] = Query(default=1, gt=0),
+):
+    """查询测试用例"""
+    result = await TestCase.filter(case_title__contains=case_title).all()
+    total = len(result)
+    return ResultResponse[testcase_schema.TestCasesTo](
+        result=testcase_schema.TestCasesTo(
+            data=result, page=page, limit=limit, total=total
+        )
+    )
+
+
+@router.get(
     "/{case_id}",
     summary="获取指定testcase",
     response_model=ResultResponse[testcase_schema.TestCaseTo],
