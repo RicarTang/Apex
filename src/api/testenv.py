@@ -1,6 +1,8 @@
 from typing import Optional
-from fastapi import APIRouter, Query, Request
+from fastapi import APIRouter, Query, Request, Body, Depends
 from tortoise.exceptions import DoesNotExist
+from aioredis import Redis
+from ..core.cache import aioredis_pool
 from ..db.models import TestEnv
 from ..schemas import ResultResponse, testenv_schema
 from ..utils.exceptions.testenv import TestEnvNotExistException
@@ -51,6 +53,18 @@ async def get_all_env(
         )
     )
 
+@router.get(
+    "/getCurrentEnv",
+    summary="获取当前环境变量",
+)
+async def get_current_env(redis: Redis = Depends(aioredis_pool)):
+    """获取当前环境变量
+
+    Args:
+        redis (Redis, optional): _description_. Defaults to Depends(aioredis_pool).
+    """
+    result = await redis.get("currentEnv")
+    return result
 
 @router.get(
     "/{env_id}",
@@ -110,3 +124,18 @@ async def delete_env(env_id: int):
         raise TestEnvNotExistException
     result = await TestEnv.filter(id=env_id).delete()
     return ResultResponse[str](message="successful deleted environment!")
+
+
+
+@router.post(
+    "/setCurrentEnv",
+    summary="设置当前环境变量",
+)
+async def set_current_env(env_id: int = Body(...), redis: Redis = Depends(aioredis_pool)):
+    """设置当前环境变量
+
+    Args:
+        env_id (int, optional): _description_. Defaults to Body().
+    """
+    await redis.set("currentEnv", "http://127.0.0.1")
+    return 1

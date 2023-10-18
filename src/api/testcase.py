@@ -14,6 +14,7 @@ from fastapi import (
 )
 from fastapi.responses import FileResponse
 from tortoise.exceptions import DoesNotExist
+from aiohttp import ClientSession
 from config import config
 from ..crud import TestCaseDao
 from ..db.models import TestCase
@@ -203,7 +204,9 @@ async def delete_testcase(case_id: int):
 )
 async def execute_testcase(body: testcase_schema.ExecuteTestcaseIn):
     """待完善"""
-    return
+    async with ClientSession() as session:
+        async with session.request("get","http://httpbin.org/get") as resp:
+            return await resp.json()
 
 
 @router.post(
