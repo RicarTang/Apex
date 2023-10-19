@@ -15,12 +15,16 @@ from fastapi import (
 from fastapi.responses import FileResponse
 from tortoise.exceptions import DoesNotExist
 from aiohttp import ClientSession
+from aiohttp.client_exceptions import ClientConnectionError
+from aioredis import Redis
 from config import config
+from ..core.cache import aioredis_pool
 from ..crud import TestCaseDao
 from ..db.models import TestCase
 from ..schemas import ResultResponse, testcase_schema
 from ..utils.log_util import log
 from ..utils.excel_util import save_file, read_all_testcase
+from ..utils.exceptions.testcase import TestcaseNotExistException
 
 router = APIRouter()
 
@@ -202,11 +206,32 @@ async def delete_testcase(case_id: int):
     "/executeOne",
     summary="执行单条测试用例",
 )
-async def execute_testcase(body: testcase_schema.ExecuteTestcaseIn):
-    """待完善"""
+async def execute_testcase(
+    body: testcase_schema.ExecuteTestcaseIn, redis: Redis = Depends(aioredis_pool)
+):
+    """执行测试用例
+
+    Args:
+        body (testcase_schema.ExecuteTestcaseIn): 前端给case_id
+        redis (Redis, optional): _description_. Defaults to Depends(aioredis_pool).
+
+    Returns:
+        _type_: _description_
+    """
+    testcase = await TestCase.filter(id=body.case_id).first()
+    current_env = await redis.get("currentEnv")
+    if not testcase:
+        raise TestcaseNotExistException
     async with ClientSession() as session:
-        async with session.request("get","http://httpbin.org/get") as resp:
-            return await resp.json()
+        try:
+            async with session.request(
+                testcase.api_method, current_env.decode('utf-8') + testcase.api_path
+            ) as resp:
+                res = await resp.json()
+        except ClientConnectionError as e:
+            raise HTTPException(status_code=200,detail=e)
+        else:
+            return res
 
 
 @router.post(
