@@ -3,7 +3,7 @@ import asyncio
 from aiohttp import ClientSession
 from aioredis import Redis
 from aiohttp.client_exceptions import ClientConnectionError
-from ....core.cache import aioredis_pool
+from ..cache import aioredis_pool
 
 
 class ApiTestDependency:

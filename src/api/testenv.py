@@ -3,11 +3,12 @@ from fastapi import APIRouter, Query, Request, Body, Depends
 from tortoise.exceptions import DoesNotExist
 from aioredis import Redis
 from ..core.cache import aioredis_pool
+from ..core.test.api_test import ApiTestDependency
 from ..db.models import TestEnv
 from ..schemas import ResultResponse, testenv_schema
 from ..utils.exceptions.testenv import TestEnvNotExistException
 from ..utils.log_util import log
-from ..utils.dependency.test.api_test import ApiTestDependency
+
 
 
 router = APIRouter()
