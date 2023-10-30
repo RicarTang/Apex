@@ -11,11 +11,9 @@ def log_handler():
     log_directory: Path = Path(__file__).parent.parent / "log"
     info_log_directory = log_directory / "info"
     error_log_directory = log_directory / "error"
-    # 当前时间
-    current_date = datetime.date.today()
     # 设置日志文件名格式，将日期添加到文件名中
-    log_file_info = f"{info_log_directory}/info_{current_date}.log"
-    log_file_error = f"{error_log_directory}/error_{current_date}.log"
+    log_file_info = info_log_directory / "info_{time:YYYY-MM-DD}.log"
+    log_file_error = error_log_directory / "error_{time:YYYY-MM-DD}.log"
     # 移除默认的输出处理器
     logger.remove()
     # 添加控制台输出处理器
