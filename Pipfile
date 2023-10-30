@@ -29,6 +29,7 @@ win32-setctime = "*"
 asynccasbin = "*"
 aiohttp = {extras = ["speedups"], version = "*"}
 pytest = "*"
+sse-starlette = "*"
 
 [dev-packages]
 black = "*"

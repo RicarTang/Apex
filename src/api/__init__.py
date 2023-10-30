@@ -5,3 +5,4 @@ from .testcase import router as testcase_api
 from .testsuite import router as testsuite_api
 from .testenv import router as testenv_api
 from .config import router as config_api
+from .sse import router as sse_api

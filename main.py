@@ -11,6 +11,7 @@ from src.api import (
     testsuite_api,
     testenv_api,
     config_api,
+    sse_api,
 )
 from src.core.security import check_jwt_auth
 from src.core.middleware import middleware
@@ -121,6 +122,12 @@ app.include_router(
     config_api,
     tags=["Config"],
     prefix="/config",
+    # dependencies=[Depends(check_jwt_auth)],
+)
+app.include_router(
+    sse_api,
+    tags=["SSE Demo"],
+    prefix="/sse",
     # dependencies=[Depends(check_jwt_auth)],
 )
 
