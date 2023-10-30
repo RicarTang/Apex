@@ -1,9 +1,8 @@
 from fastapi import Depends
-import asyncio
 from aiohttp import ClientSession
 from aioredis import Redis
 from aiohttp.client_exceptions import ClientConnectionError
-from ..cache import aioredis_pool
+from src.core.cache import aioredis_pool
 
 
 class ApiTestDependency:
@@ -30,9 +29,7 @@ class ApiTestDependency:
         """设置当前环境变量
 
         Args:
-            key (str): redis 键
             value (str): redis 值
-            redis (Redis, optional): redis依赖
         """
         try:
             await self.redis.set(self.current_env_name, value)
