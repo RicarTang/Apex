@@ -12,13 +12,13 @@ class ResultResponse(GenericModel, Generic[DataT]):
     https://pydantic-docs.helpmanual.io/usage/models/#generic-models
     所有返回数据都用如下格式，方便前端统一处理
     {
-        code: 200,
+        success: True,  # 简化接口状态码
         message: 'success',
         result: None
     }
     """
 
-    code: int = Field(default=200, description="返回码")
+    success: bool = Field(default=True, description="成功状态")
     message: str = Field(default="success", description="消息内容")
     result: Optional[DataT] = Field(description="返回数据主体")
 

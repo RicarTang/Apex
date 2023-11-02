@@ -26,6 +26,7 @@ from ..utils.exceptions.user import (
     PasswordValidateErrorException,
     UserNotExistException,
     TokenInvalidException,
+    RoleNotExistException,
 )
 from ..crud import UserTokenDao
 
@@ -107,7 +108,7 @@ async def create_user(user: user_schema.UserIn):
     # 添加用户角色
     role = await Role.filter(name="member").first()
     if not role:
-        return ResultResponse[str](message=f"role: member is not exist,Please add!")
+        raise RoleNotExistException
     await user_obj.save()
     await user_obj.roles.add(role)
     log.info(f"成功创建用户：{user.dict(exclude_unset=True)}")

@@ -6,6 +6,7 @@ from src.db.models import Role, Users
 from ..crud import UsersDao, RolePermDao
 from ..utils.log_util import log
 from ..core.authentication import get_casbin, Authority
+from ..utils.exceptions.user import RoleNotExistException, UserNotExistException
 
 
 router = APIRouter()
@@ -69,9 +70,7 @@ async def delete_role(role_id: int, response: Response):
     log.debug(f"删除角色id：{deleted_count}")
     if not deleted_count:
         response.status_code = status.HTTP_404_NOT_FOUND
-        return ResultResponse[str](
-            code=status.HTTP_404_NOT_FOUND, message=f"Role {role_id} not found"
-        )
+        raise RoleNotExistException
     return ResultResponse[str](message=f"successful deleted role!")
 
 
@@ -107,7 +106,7 @@ async def query_role(
     try:
         role = await Role.get(id=role_id)
     except DoesNotExist:
-        return ResultResponse[str](message="role is not exist!")
+        raise RoleNotExistException
     return ResultResponse[user_schema.RoleTo](result=role)
 
 
@@ -120,16 +119,11 @@ async def add_user_role(req: user_schema.UserAddRoleIn):
     try:
         user = await Users.get(id=req.user_id).prefetch_related("roles")
     except DoesNotExist:
-        return ResultResponse[str](
-            code=status.HTTP_400_BAD_REQUEST,
-            message=f"user: {req.user_id} is not exist!",
-        )
+        raise UserNotExistException
     try:
         role = await Role.get(name=req.role)
     except DoesNotExist:
-        return ResultResponse[str](
-            code=status.HTTP_400_BAD_REQUEST, message=f"role: {req.role} is not exist!"
-        )
+        raise RoleNotExistException
     await user.roles.add(role)
     return ResultResponse[str]()
 
@@ -145,7 +139,7 @@ async def set_role_permission(req: user_schema.RolePermIn):
     # 查询角色
     role = await RolePermDao.query_role(name=req.role)
     if not role:
-        return ResultResponse[str](code=404, message=f"Role:{req.role} does not exist!")
+        raise RoleNotExistException
     e = await get_casbin()
     if await e.add_permission_for_role(req.role, req.model, req.act):
         return ResultResponse[str]()

@@ -15,7 +15,7 @@ async def custom_http_exception_handler(request: Request, exc: HTTPException):
     """
     return JSONResponse(
         status_code=exc.status_code,
-        content={"code": exc.status_code, "message": f"{exc.detail}"},
+        content={"success": False, "message": f"{exc.detail}"},
     )
 
 
@@ -33,5 +33,5 @@ async def custom_validation_exception_handler(
     """
     return JSONResponse(
         status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-        content={"code": status.HTTP_400_BAD_REQUEST, "message": exc.errors()},
+        content={"success": False, "message": exc.errors()},
     )

@@ -7,6 +7,7 @@ from tortoise.exceptions import DoesNotExist
 from ..db.models import TestSuite
 from ..schemas import ResultResponse, testsuite_schema
 from ..utils.log_util import log
+from ..utils.exceptions.testsuite import TestsuiteNotExistException
 
 
 router = APIRouter()
@@ -68,7 +69,7 @@ async def get_testsuite(suite_id: int):
     try:
         result = await TestSuite.get(id=suite_id)
     except DoesNotExist:
-        raise
+        raise TestsuiteNotExistException
     return ResultResponse[testsuite_schema.TestSuiteTo](result=result)
 
 
@@ -85,7 +86,7 @@ async def update_testsuite(suite_id: int, body: testsuite_schema.TestSuiteIn):
         body (testsuite_schema.TestSuiteIn): _description_
     """
     if not await TestSuite.filter(id=suite_id).exists():
-        raise
+        raise TestsuiteNotExistException
     result = await TestSuite.filter(id=suite_id).update(**body.dict(exclude_unset=True))
     log.debug(f"update更新{result}条数据")
     return ResultResponse[testsuite_schema.TestSuiteTo](
@@ -105,6 +106,6 @@ async def delete_testsuite(suite_id: int):
         suite_id (int): _description_
     """
     if not await TestSuite.filter(id=suite_id).exists():
-        raise
+        raise TestsuiteNotExistException
     result = await TestSuite.filter(id=suite_id).delete()
     return ResultResponse[str](message="successful deleted testsuite!")

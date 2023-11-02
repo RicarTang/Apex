@@ -3,6 +3,7 @@ from src.db.models import Comments, Users
 from ..schemas import ResultResponse, comment_schema
 from ..utils.log_util import log
 from ..core.security import check_jwt_auth, get_current_user
+from ..utils.exceptions.user import UserNotExistException
 
 router = APIRouter()
 
@@ -35,7 +36,7 @@ async def get_user_comment(
         coms = await user.comments.all()
         log.debug(f"用户{user}的所有评论：{coms}")
     except AttributeError:
-        raise HTTPException(detail="User is not exist!")
+        raise UserNotExistException
     return ResultResponse[comment_schema.CommentsTo](result=coms)
 
 

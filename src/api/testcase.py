@@ -161,7 +161,7 @@ async def get_testcase(case_id: int):
     try:
         testcase = await TestCase.get(id=case_id)
     except DoesNotExist:
-        raise
+        raise TestcaseNotExistException
     return ResultResponse[testcase_schema.TestCaseTo](result=testcase)
 
 
@@ -177,7 +177,7 @@ async def update_testcase(case_id: int, body: dict):
         body (dict): _description_
     """
     if not await TestCase.filter(id=case_id).exists():
-        raise
+        raise TestcaseNotExistException
     result = await TestCase.filter(id=case_id).update(**body.dict(exclude_unset=True))
     log.debug(f"update更新{result}条数据")
     return ResultResponse[testcase_schema.TestCaseTo](
@@ -197,7 +197,7 @@ async def delete_testcase(case_id: int):
         case_id (int): _description_
     """
     if not await TestCase.filter(id=case_id).exists():
-        raise
+        raise TestcaseNotExistException
     result = await TestCase.filter(id=case_id).delete()
     return ResultResponse[str](message="successful deleted testcase!")
 
