@@ -43,6 +43,10 @@ class TestCaseTo(Testcase_Pydantic):
     pass
 
 
+class TestCases(List[TestCaseTo]):
+    pass
+
+
 class TestCasesTo(PageParam):
     """翻页测试用例 response schema"""
 
