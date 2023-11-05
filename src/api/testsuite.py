@@ -82,7 +82,7 @@ async def get_testsuite(suite_id: int):
         suite_id (int): _description_
     """
     try:
-        result = await TestSuite.get(id=suite_id)
+        result = await TestSuite.get(id=suite_id).prefetch_related("testcase")
     except DoesNotExist:
         raise TestsuiteNotExistException
     return ResultResponse[testsuite_schema.TestSuiteTo](result=result)

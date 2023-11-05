@@ -21,6 +21,19 @@ async def create_comment(
     # log.debug(f"com返回参数：{await com.first().values()}")
     return ResultResponse[comment_schema.CommentTo](result=com)
 
+@router.get(
+    "/me", summary="获取我的评论", response_model=ResultResponse[comment_schema.CommentsTo]
+)
+async def get_comments_me(current_user: Users = Depends(get_current_user)):
+    """当前用户的所有评论"""
+    user = (
+        await Users.filter(username=current_user.username)
+        .first()
+        .prefetch_related("comments")
+    )
+    comments = await user.comments.all()
+    log.debug(f"comments:{comments}")
+    return ResultResponse[comment_schema.CommentsTo](result=comments)
 
 @router.get(
     "/{user_id}",
@@ -40,16 +53,4 @@ async def get_user_comment(
     return ResultResponse[comment_schema.CommentsTo](result=coms)
 
 
-@router.get(
-    "/me", summary="获取我的评论", response_model=ResultResponse[comment_schema.CommentsTo]
-)
-async def get_comments_me(current_user: Users = Depends(get_current_user)):
-    """当前用户的所有评论"""
-    user = (
-        await Users.filter(username=current_user.username)
-        .first()
-        .prefetch_related("comments")
-    )
-    comments = await user.comments.all()
-    log.debug(f"comments:{comments}")
-    return ResultResponse[comment_schema.CommentsTo](result=comments)
+
