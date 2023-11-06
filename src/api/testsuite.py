@@ -55,15 +55,11 @@ async def get_all_testsuite(
         .offset(limit * (page - 1))
         .limit(limit)
     )
-    # 使用pydantic的from_orm方法对关联的预取数据进行序列化
-    testsuites_list = [
-        testsuite_schema.TestSuiteTo.from_orm(testsuite) for testsuite in query_list
-    ]
     total = await TestSuite.all().count()
     # return testsuites_list
     return ResultResponse[testsuite_schema.TestSuitesTo](
         result=testsuite_schema.TestSuitesTo(
-            data=testsuites_list,
+            data=query_list,
             page=page,
             limit=limit,
             total=total,
