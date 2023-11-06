@@ -17,7 +17,7 @@ class TestSuiteIn(BaseModel):
 class TestSuiteTo(Testsuite_Pydantic):
     """测试套件response schema"""
 
-    testcase: TestCases = Field(description="套件包含的用例")
+    testcases: TestCases = Field(description="套件包含的用例")
 
 
 class TestSuitesTo(PageParam):

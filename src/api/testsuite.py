@@ -28,7 +28,8 @@ async def add_testsuite(body: testsuite_schema.TestSuiteIn):
     async with in_transaction():
         testsuite = await TestSuite.create(**body.dict())
         testcase_result = await TestCase.get(id=body.testcase_id)
-        await testsuite.testcase.add(testcase_result)
+        await testsuite.testcases.add(testcase_result)
+        await testsuite.fetch_related('testcases')
     return ResultResponse[testsuite_schema.TestSuiteTo](result=testsuite)
 
 
@@ -50,7 +51,7 @@ async def get_all_testsuite(
     # 使用prefetch_related预取关联的testcase列表
     query_list = (
         await TestSuite.all()
-        .prefetch_related("testcase")
+        .prefetch_related("testcases")
         .offset(limit * (page - 1))
         .limit(limit)
     )

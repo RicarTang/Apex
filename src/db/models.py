@@ -133,7 +133,9 @@ class TestCase(AbstractBaseModel):
     )
     case_editor = fields.CharField(max_length=20, null=True, description="用例编写者")
     remark = fields.CharField(max_length=100, null=True, description="备注")
-    testsuite: fields.ManyToManyRelation["TestSuite"]
+    testsuites: fields.ManyToManyRelation["TestSuite"] = fields.ManyToManyField(
+        model_name="models.TestSuite"
+    )
 
     class Meta:
         table = "test_case"
@@ -146,8 +148,8 @@ class TestSuite(AbstractBaseModel):
     suite_no = fields.CharField(max_length=10, unique=True, description="套件编号")
     suite_title = fields.CharField(max_length=50, index=True, description="套件名称/标题")
     remark = fields.CharField(max_length=100, null=True, description="备注")
-    testcase: fields.ManyToManyRelation[TestCase] = fields.ManyToManyField(
-        model_name="models.TestCase", related_name="testsuite"
+    testcases: fields.ManyToManyRelation["TestCase"] = fields.ManyToManyField(
+        model_name="models.TestCase"
     )
 
     class Meta:
