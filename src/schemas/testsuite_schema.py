@@ -11,7 +11,9 @@ class TestSuiteIn(BaseModel):
     suite_no: str = Field(max_length=10, description="套件编号")
     suite_title: str = Field(max_length=50, description="套件名称/标题")
     remark: Optional[str] = Field(description="备注")
-    testcase_id: Optional[int] = Field(gt=0, description="测试用例id")
+    testcase_id: Optional[List[int]] = Field(
+        gt=0, description="测试用例id", alias="testcase_id_list"
+    )
 
 
 class TestSuiteTo(Testsuite_Pydantic):

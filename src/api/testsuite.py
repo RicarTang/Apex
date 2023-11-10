@@ -23,13 +23,19 @@ async def add_testsuite(body: testsuite_schema.TestSuiteIn):
     """新增测试套件
 
     Args:
-        body (testsuite_schema.TestSuiteIn): _description_
+        body (testsuite_schema.TestSuiteIn): 包含测试套件信息的请求体
+
+    Returns:
+        ResultResponse[testsuite_schema.TestSuiteTo]: 添加成功后的测试套件信息
     """
     async with in_transaction():
-        testsuite = await TestSuite.create(**body.dict())
-        testcase_result = await TestCase.get(id=body.testcase_id)
-        await testsuite.testcases.add(testcase_result)
-        await testsuite.fetch_related('testcases')
+        try:
+            testsuite = await TestSuite.create(**body.dict())
+            testcases_result = await TestCase.filter(id__in=body.testcase_id).all()
+            await testsuite.testcases.add(*testcases_result)
+            await testsuite.fetch_related("testcases")
+        except Exception as e:
+            log.error(f"事务操作失败：{e}")
     return ResultResponse[testsuite_schema.TestSuiteTo](result=testsuite)
 
 
