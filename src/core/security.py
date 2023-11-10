@@ -12,7 +12,7 @@ from ..utils.exceptions.user import (
     TokenInvalidException,
     UserLoggedOutException,
 )
-from ..crud import UserTokenDao, UsersDao
+from ..services import UserTokenService, UserService
 
 
 oauth2_bearer = HTTPBearer(auto_error=False)
@@ -70,7 +70,7 @@ async def check_jwt_auth(
     except JWTError:
         raise TokenExpiredException
     # 检查token状态
-    if not await UserTokenDao.query_jwt_state(bearer.credentials):
+    if not await UserTokenService.query_jwt_state(bearer.credentials):
         raise UserLoggedOutException
     return payload
 
@@ -96,6 +96,6 @@ async def get_current_user(
     if not username:
         raise TokenInvalidException
     # 查询用户
-    user = await UsersDao.query_user(username=username)
+    user = await UserService.query_user(username=username)
     log.debug(f"当前用户：{user}")
     return user

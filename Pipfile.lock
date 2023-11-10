@@ -183,14 +183,6 @@
             "markers": "python_version >= '3.7'",
             "version": "==4.0.3"
         },
-        "asynccasbin": {
-            "hashes": [
-                "sha256:2136d60f98abba5e38c2924a8dd7d161498d615461a37eb0de9c99659be8d760",
-                "sha256:a1aa60113e17e67bb026cfe7342a72f86b2359a6dcd1207deed74e0119416d81"
-            ],
-            "index": "pip_conf_index_global",
-            "version": "==1.1.8"
-        },
         "asyncmy": {
             "hashes": [
                 "sha256:00d7e4f838da081fe6b8918204187403e259b5e33c110ad8a5a537202dc8d5ed",

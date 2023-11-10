@@ -19,7 +19,7 @@ from aiohttp.client_exceptions import ClientConnectionError
 from aioredis import Redis
 from config import config
 from ..core.cache import aioredis_pool
-from ..crud import TestCaseDao
+from ..services import TestCaseService
 from ..db.models import TestCase
 from ..schemas import ResultResponse, testcase_schema
 from ..utils.log_util import log

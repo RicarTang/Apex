@@ -3,7 +3,7 @@ from fastapi import APIRouter, HTTPException, Depends, Response, status, Query
 from tortoise.exceptions import DoesNotExist
 from ..schemas import ResultResponse, user_schema
 from src.db.models import Role, Users
-from ..crud import UsersDao, RolePermDao
+from ..services import UserService, RolePermissionService
 from ..utils.log_util import log
 from ..core.authentication import get_casbin, Authority
 from ..utils.exceptions.user import RoleNotExistException, UserNotExistException

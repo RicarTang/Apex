@@ -11,7 +11,7 @@ from ..utils.log_util import log
 from .util import Singleton
 
 # from ..db.models import Role,Users
-from ..crud import UsersDao
+from ..services import UserService
 
 
 class TortoiseCasbin(metaclass=Singleton):
@@ -25,7 +25,7 @@ class TortoiseCasbin(metaclass=Singleton):
         判断是否拥有权限
         """
         # 获取用户角色，判断角色是否有权限
-        roles = await UsersDao.query_user_role(username=user)
+        roles = await UserService.query_user_role(username=user)
         if not roles:
             return False
         # 使用filter遍历判断所有角色

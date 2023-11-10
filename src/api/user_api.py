@@ -5,8 +5,6 @@ from fastapi import (
     Request,
     Query,
     Response,
-    status,
-    Header,
 )
 from passlib.hash import md5_crypt
 from tortoise.transactions import in_transaction
@@ -28,7 +26,7 @@ from ..utils.exceptions.user import (
     TokenInvalidException,
     RoleNotExistException,
 )
-from ..crud import UserTokenDao
+from ..services import UserTokenService
 
 
 router = APIRouter()
@@ -67,7 +65,6 @@ async def get_users(
     response_model=ResultResponse[user_schema.RolesTo],
 )
 async def query_user_role(
-    request: Request,
     limit: Optional[int] = Query(default=20, ge=10),
     page: Optional[int] = Query(default=1, gt=0),
     current_user: Users = Depends(current_user),
@@ -229,7 +226,7 @@ async def login(
     # 创建jwt
     access_token = create_access_token(data={"sub": query_user.username})
     # 更新用户jwt
-    await UserTokenDao.add_jwt(
+    await UserTokenService.add_jwt(
         current_user_id=query_user.id, token=access_token, client_ip=request.client.host
     )
     return ResultResponse[user_schema.Login](
@@ -250,6 +247,6 @@ async def login(
 async def logout(request: Request):
     # 修改当前用户数据库token状态为0
     access_type, access_token = request.headers["authorization"].split(" ")
-    if not await UserTokenDao.update_token_state(token=access_token):
+    if not await UserTokenService.update_token_state(token=access_token):
         raise TokenInvalidException
     return ResultResponse[str](message="Successfully logged out!")

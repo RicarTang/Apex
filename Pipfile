@@ -26,10 +26,10 @@ aiofiles = "*"
 pyyaml = "*"
 loguru = "*"
 win32-setctime = "*"
-asynccasbin = "*"
 aiohttp = {extras = ["speedups"], version = "*"}
 pytest = "*"
 sse-starlette = "*"
+asynccasbin = "*"
 
 [dev-packages]
 black = "*"
