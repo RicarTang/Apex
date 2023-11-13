@@ -1,4 +1,5 @@
 import re
+from .exceptions.common_exception import IncorrectFileError
 
 
 def serach_filename(data: str) -> str:
@@ -18,4 +19,4 @@ def serach_filename(data: str) -> str:
         filename_with_prefix = filename_match.group(0)
         return filename_with_prefix.decode("utf-8")
     else:
-        return "导入了未知的文件名"
+        raise IncorrectFileError

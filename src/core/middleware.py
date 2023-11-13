@@ -2,12 +2,13 @@ import time
 import json
 from typing import List
 from starlette.types import Message
-from fastapi import Request
+from fastapi import Request, HTTPException, status
 from starlette.middleware import Middleware
 from starlette.middleware.base import BaseHTTPMiddleware
 from fastapi.middleware.cors import CORSMiddleware
 from ..utils.log_util import log
 from ..utils.re_util import serach_filename
+from ..utils.exceptions.common_exception import IncorrectFileError
 
 
 class LoggingMiddleware(BaseHTTPMiddleware):
@@ -55,8 +56,14 @@ class LoggingMiddleware(BaseHTTPMiddleware):
             body = body.decode("utf-8")  # 请求体会有为文件的情况
             body = json.loads(body)
         except UnicodeDecodeError:
-            body = serach_filename(body)  # 提取filename
-        except:
+            try:
+                body = serach_filename(body)  # 提取filename
+            except IncorrectFileError as e:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST, detail=f"{e}"
+                )
+        except Exception as e:
+            log.error(f"请求体decode失败!")
             pass
         log_dict = dict(
             response_code=response.status_code,
