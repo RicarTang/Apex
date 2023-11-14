@@ -39,8 +39,15 @@ class TortoiseCasbin(metaclass=Singleton):
         return True
 
     async def add_permission_for_role(self, role: str, model: str, act: str):
-        """
-        添加角色权限
+        """添加角色权限
+
+        Args:
+            role (str): 角色名称。
+            model (str): 模块,比如user/testcase等等。
+            act (str): 角色可进行的操作,权限行为。
+
+        Returns:
+            _type_: _description_
         """
         return await self.enforce.add_policy(role, model, act)
 
@@ -48,9 +55,9 @@ class TortoiseCasbin(metaclass=Singleton):
         """移除角色权限
 
         Args:
-            role (str): _description_
-            model (str): _description_
-            act (str): _description_
+            role (str): 角色名称。
+            model (str): 模块,比如user/testcase等等。
+            act (str): 角色可进行的操作,权限行为。
 
         Returns:
             _type_: _description_
@@ -66,7 +73,7 @@ class Authority:
 
     def __init__(self, policy: str):
         """
-        :param policy:
+        :param policy: model与act的字符串组合。
         """
         self.policy = policy
 
@@ -89,7 +96,7 @@ class Authority:
             raise HTTPException(status_code=403, detail="The user has no permission!")
 
 
-async def check_authority(policy):
+async def check_authority(policy: str):
     """
     进行权限认证
     :param policy: 字符串，以 user,model,act拼接而成,例如"user,auth,add"

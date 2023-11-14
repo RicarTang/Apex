@@ -26,6 +26,6 @@ class ResultResponse(GenericModel, Generic[DataT]):
 class PageParam(BaseModel):
     """翻页接口参数"""
 
-    page: int
-    limit: int
-    total: int
+    page: int = Field(description="当前分页")
+    limit: int = Field(description="分页大小")
+    total: int = Field(description="总数据数")

@@ -1,5 +1,6 @@
 import time
 import json
+from json.decoder import JSONDecodeError
 from typing import List
 from starlette.types import Message
 from fastapi import Request, HTTPException, status
@@ -62,8 +63,7 @@ class LoggingMiddleware(BaseHTTPMiddleware):
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST, detail=f"{e}"
                 )
-        except Exception as e:
-            log.error(f"请求体decode失败!")
+        except JSONDecodeError:
             pass
         log_dict = dict(
             response_code=response.status_code,

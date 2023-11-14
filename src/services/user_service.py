@@ -1,17 +1,17 @@
-from typing import Union, List, NamedTuple
-from tortoise.exceptions import DoesNotExist
+from typing import Any
 from tortoise.queryset import QuerySet
-from ..db.models import Users, Role, Comments, UserToken, TestCase
+from tortoise.exceptions import DoesNotExist, MultipleObjectsReturned
+from ..db.models import Users, Role, UserToken
 from ..db.enum import DisabledEnum
 from ..utils.log_util import log
-from ..utils.exceptions.user import TokenInvalidException
+from ..utils.exceptions.user import TokenInvalidException, UserNotExistException
 
 
 class UserService:
     """用户服务."""
 
     @staticmethod
-    async def create_superadmin(**kwargs):
+    async def create_superadmin(**kwargs: Any) -> Users:
         """创建超级管理员
 
         Returns:
@@ -21,7 +21,7 @@ class UserService:
         return await Users.create(**kwargs)
 
     @staticmethod
-    async def query_user(**kwargs):
+    async def query_user(**kwargs: Any):
         """
         查询用户.
         :param kwargs:
@@ -31,7 +31,14 @@ class UserService:
                 username = "jack"
         :return: QuerySetSingle Type
         """
-        return await Users.get(**kwargs)
+        try:
+            query_result = await Users.get(**kwargs)
+        except DoesNotExist:
+            raise UserNotExistException
+        except MultipleObjectsReturned:
+            pass
+        else:
+            return query_result
 
     @staticmethod
     async def create_user(**kwargs):
@@ -61,6 +68,7 @@ class UserService:
         """
         user = await Users.filter(**kwargs).first().prefetch_related("roles")
 
+
 class UserTokenService:
     """用户token 服务"""
 
@@ -80,11 +88,12 @@ class UserTokenService:
         if await UserToken.filter(
             user_id=current_user_id, client_ip=client_ip, is_active=DisabledEnum.ENABLE
         ).update(token=token):
-            return
+            log.debug(f"更新用户{current_user_id}token信息")
         else:
             await UserToken.create(
                 token=token, user_id=current_user_id, client_ip=client_ip
             )
+            log.debug(f"创建用户{current_user_id}token信息")
 
     @staticmethod
     async def query_jwt_state(token: str) -> bool:
