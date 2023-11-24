@@ -60,7 +60,7 @@ async def create_role(body: user_schema.RoleIn):
     response_model=ResultResponse[str],
     dependencies=[Depends(Authority("admin,delete"))],
 )
-async def delete_role(role_id: int, response: Response):
+async def delete_role(role_id: int):
     """删除角色
 
     Args:
@@ -69,7 +69,6 @@ async def delete_role(role_id: int, response: Response):
     deleted_count = await Role.filter(id=role_id).delete()
     log.debug(f"删除角色id：{deleted_count}")
     if not deleted_count:
-        response.status_code = status.HTTP_404_NOT_FOUND
         raise RoleNotExistException
     return ResultResponse[str](message=f"successful deleted role!")
 
@@ -137,7 +136,7 @@ async def add_user_role(req: user_schema.UserAddRoleIn):
 async def set_role_permission(req: user_schema.RolePermIn):
     """设置角色权限"""
     # 查询角色
-    role = await RolePermDao.query_role(name=req.role)
+    role = await RolePermissionService.query_role(name=req.role)
     if not role:
         raise RoleNotExistException
     e = await get_casbin()

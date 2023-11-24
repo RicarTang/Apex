@@ -80,6 +80,6 @@ class RoleNotExistException(HTTPException):
 
     def __init__(self):
         super().__init__(
-            status_code=status.HTTP_200_OK,
+            status_code=status.HTTP_404_NOT_FOUND,
             detail="Role does not exist!",
         )
