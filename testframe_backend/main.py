@@ -151,7 +151,3 @@ except:
 else:
     log.info("暂无后台任务！")
 
-if __name__ == "__main__":
-    import uvicorn
-
-    uvicorn.run("main:app", host="0.0.0.0", port=4000, reload=True,log_level="debug")

@@ -141,3 +141,6 @@ dmypy.json
 
 # upload
 upload/
+
+# pdm-python
+.pdm-python
