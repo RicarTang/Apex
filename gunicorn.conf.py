@@ -4,10 +4,12 @@
 #preload_app = True
 
 # 并行工作进程数
-workers = 1
+
+workers = 2
 
 # 指定每个工作者的线程数
-threads = 2
+threads = 5
+
 
 worker_class = 'uvicorn.workers.UvicornWorker'
 

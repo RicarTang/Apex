@@ -140,4 +140,9 @@ dmypy.json
 .idea/
 
 # upload
+
 upload/
+
+# pdm-python
+.pdm-python
+
