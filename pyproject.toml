@@ -1,0 +1,55 @@
+[tool.poetry]
+name = "testframe-backend"
+version = "0.1.0"
+description = ""
+authors = ["RicarTang <357965604@qq.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+pydantic = "^2.5.2"
+tortoise-orm = {extras = ["asyncmy"], version = "^0.20.0"}
+gunicorn = "^21.2.0"
+passlib = "^1.7.4"
+python-jose = "^3.3.0"
+apscheduler = "^3.10.4"
+aerich = "^0.7.2"
+casbin = "^1.33.0"
+asynccasbin = "^1.1.8"
+casbin-tortoise-adapter = "^1.2.1"
+aioredis = "^2.0.1"
+hiredis = "^2.2.3"
+openpyxl = "^3.1.2"
+aiofiles = "^23.2.1"
+pyyaml = "^6.0.1"
+loguru = "^0.7.2"
+aiohttp = {extras = ["speedups"], version = "^3.9.1"}
+pytest = "^7.4.3"
+sse-starlette = "^1.8.2"
+pydantic-settings = "^2.1.0"
+fastapi-cache2 = {extras = ["redis"], version = "^0.2.1"}
+python-multipart = "^0.0.6"
+fastapi = "^0.104.1"
+uvicorn = {extras = ["standard"], version = "^0.24.0.post1"}
+
+[tool.poetry.scripts]
+dev = "testframe_backend.main:app"
+pro = "uvicorn testframe_backend.main:app --host 0.0.0.0 --port 80"
+aerich_init = "aerich init -t testframe_backend.src.db.settings.TORTOISE_ORM"
+init_db = "aerich init-db"
+migrate_db = "aerich migrate"
+upgrade_db = "aerich upgrade"
+demo = "python -m pip list"
+
+
+[tool.poetry.group.dev.dependencies]
+black = "^23.11.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.aerich]
+tortoise_orm = "testframe_backend.src.db.settings.TORTOISE_ORM"
+location = "./migrations"
+src_folder = "./testframe_backend/."
