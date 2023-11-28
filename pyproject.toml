@@ -50,8 +50,8 @@ dev = [
 [tool.pdm.build]
 includes = []
 [project]
-name = "testframe-backend"
-version = "0.1.0"
+name = ""
+version = ""
 description = ""
 authors = [
     {name = "RicarTang", email = "357965604@qq.com"},
@@ -82,7 +82,7 @@ dependencies = [
     "fastapi<1.0.0,>=0.104.1",
     "uvicorn[standard]<1.0.0.0,>=0.24.0.post1",
 ]
-requires-python = ">=3.9,<4.0"
+requires-python = ">=3.9"
 readme = "README.md"
 license = {text = "MIT"}
 
