@@ -49,7 +49,7 @@ register_tortoise(
 async def app_startup():
     """fastapi初始化"""
     # 初始化缓存池
-    await init_cache()
+    # await init_cache()
     # 创建默认用户角色,需要在注册tortoise后面初始化默认用户
     await create_initial_users()
     # 修改默认swagger参数，使用static文件

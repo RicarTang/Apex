@@ -29,8 +29,8 @@ worker_connections = 2000
 pidfile = '/var/run/gunicorn.pid'
 
 # 日志标准输出
-accesslog = "./src/log/gunicorn_access.log"
-errorlog = "./src/log/gunicorn_error.log"
+accesslog = "./testframe_backend/src/log/gunicorn_access.log"
+errorlog = "./testframe_backend/src/log/gunicorn_error.log"
 
 # 设置日志记录水平 
 loglevel = 'info'
