@@ -44,11 +44,20 @@ src_folder = "./testframe_backend/."
 [tool.pdm]
 [tool.pdm.dev-dependencies]
 dev = [
-    "black<24.0.0,>=23.11.0",
+    "black>=23.11.0",
 ]
 
 [tool.pdm.build]
 includes = []
+
+[tool.pdm.scripts]
+celery_server = "celery -A testframe_backend.src.utils.celery.celery_config.celery worker -P gevent -c 1000 --loglevel=INFO"
+dev = "uvicorn testframe_backend.main:app --host 0.0.0.0 --port 4000 --reload"
+gun_dev = "gunicorn -c gunicorn.conf.py testframe_backend.main:app"
+aerich_init = "aerich init -t testframe_backend.src.db.settings.TORTOISE_ORM"
+init_db = "aerich init-db"
+migrate_db = "aerich migrate"
+upgrade_db = "aerich upgrade"
 [project]
 name = ""
 version = ""
@@ -81,16 +90,14 @@ dependencies = [
     "python-multipart<1.0.0,>=0.0.6",
     "fastapi<1.0.0,>=0.104.1",
     "uvicorn[standard]<1.0.0.0,>=0.24.0.post1",
+    "celery>=5.3.6",
+    "sqlalchemy>=2.0.23",
+    "cryptography>=41.0.7",
+    "pymysql>=1.1.0",
+    "gevent>=23.9.1",
 ]
 requires-python = ">=3.9"
 readme = "README.md"
 license = {text = "MIT"}
 
 
-[tool.pdm.scripts]
-dev = "uvicorn testframe_backend.main:app --host 0.0.0.0 --port 4000"
-gun_dev = "gunicorn -c gunicorn.conf.py testframe_backend.main:app"
-aerich_init = "aerich init -t testframe_backend.src.db.settings.TORTOISE_ORM"
-init_db = "aerich init-db"
-migrate_db = "aerich migrate"
-upgrade_db = "aerich upgrade"

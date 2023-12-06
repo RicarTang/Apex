@@ -5,10 +5,12 @@ from fastapi import (
 )
 from tortoise.exceptions import DoesNotExist
 from tortoise.transactions import in_transaction
+from celery.result import AsyncResult
 from ..db.models import TestSuite, TestCase
 from ..schemas import ResultResponse, testsuite_schema
 from ..utils.log_util import log
 from ..utils.exceptions.testsuite import TestsuiteNotExistException
+from ..utils.celery.task.testcase_task import run_pytest
 
 
 router = APIRouter()
@@ -72,6 +74,14 @@ async def get_all_testsuite(
         )
     )
 
+@router.get(
+    "/testResult",
+    summary="测试运行结果",
+)
+async def test_run_result(task_id:str):
+    result = AsyncResult(task_id)
+    return {"task_id": task_id, "status": result.status, "result": result.result}
+
 
 @router.get(
     "/{suite_id}",
@@ -127,3 +137,15 @@ async def delete_testsuite(suite_id: int):
         raise TestsuiteNotExistException
     result = await TestSuite.filter(id=suite_id).delete()
     return ResultResponse[str](message="successful deleted testsuite!")
+
+@router.post(
+    "/run_test",
+    summary="运行测试套件",
+
+)
+async def run_testsuite():
+    task = run_pytest.delay()  # 将Celery任务发送到消息队列
+    print(run_pytest.name)
+    return {"message": "Tests are running in the background.", "task_id": task.id}
+
+
