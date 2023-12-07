@@ -5,36 +5,38 @@ from aiohttp.client_exceptions import ClientConnectionError
 from ...src.core.cache import aioredis_pool
 
 
-class ApiTestDependency:
-    """api接口测试依赖项"""
+class TestEnvService:
+    """测试环境服务"""
 
     def __init__(
         self,
-        current_env_name: str = "currentEnv",
-        redis: Redis = Depends(aioredis_pool),
+        current_env_name: str = "currentEnv"
     ) -> None:
-        self.redis = redis
         self.current_env_name = current_env_name
 
+
+    @property
     async def get_current_env(self):
-        """拿取当前环境变量"""
-        try:
-            current_env = await self.redis.get(self.current_env_name)
-        except ClientConnectionError as e:
-            raise e
-        else:
-            return current_env
+        """拿取平台当前环境变量"""
+        async with aioredis_pool() as redis:
+            try:
+                current_env = await redis.get(self.current_env_name)
+            except ClientConnectionError as e:
+                raise e
+            else:
+                return current_env
 
     async def set_current_env(self, value: str):
         """设置当前环境变量
 
         Args:
-            value (str): redis 值
+            value (str): 环境变量值
         """
-        try:
-            await self.redis.set(self.current_env_name, value)
-        except Exception as e:
-            raise e
+        async with aioredis_pool() as redis:
+            try:
+                await redis.set(self.current_env_name, value)
+            except Exception as e:
+                raise e
 
     async def execute_one(self, method: str, url: str, expect_code: int):
         """执行单条测试用例

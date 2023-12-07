@@ -10,7 +10,7 @@ from ..db.models import TestSuite, TestCase
 from ..schemas import ResultResponse, testsuite_schema
 from ..utils.log_util import log
 from ..utils.exceptions.testsuite import TestsuiteNotExistException
-from ..utils.celery.task.testcase_task import run_pytest
+from ..utils.celery.task.testcase_task import run_pytest,task_test
 
 
 router = APIRouter()
@@ -82,6 +82,16 @@ async def test_run_result(task_id:str):
     result = AsyncResult(task_id)
     return {"task_id": task_id, "status": result.status, "result": result.result}
 
+@router.post(
+    "/run_test",
+    summary="运行测试套件",
+
+)
+async def run_testsuite():
+    # task: AsyncResult = run_pytest.delay()  # 将Celery任务发送到消息队列
+    task: AsyncResult = task_test.delay()  # 将Celery任务发送到消息队列
+    return {"message": "Tests are running in the background.", "task_id": task.id}
+
 
 @router.get(
     "/{suite_id}",
@@ -138,14 +148,5 @@ async def delete_testsuite(suite_id: int):
     result = await TestSuite.filter(id=suite_id).delete()
     return ResultResponse[str](message="successful deleted testsuite!")
 
-@router.post(
-    "/run_test",
-    summary="运行测试套件",
-
-)
-async def run_testsuite():
-    task = run_pytest.delay()  # 将Celery任务发送到消息队列
-    print(run_pytest.name)
-    return {"message": "Tests are running in the background.", "task_id": task.id}
 
 
