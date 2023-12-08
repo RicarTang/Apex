@@ -1,6 +1,5 @@
 from fastapi import Depends
 from aiohttp import ClientSession
-from aioredis import Redis
 from aiohttp.client_exceptions import ClientConnectionError
 from ...src.core.cache import aioredis_pool
 

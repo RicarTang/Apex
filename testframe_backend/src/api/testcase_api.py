@@ -16,7 +16,7 @@ from fastapi.responses import FileResponse
 from tortoise.exceptions import DoesNotExist
 from aiohttp import ClientSession
 from aiohttp.client_exceptions import ClientConnectionError
-from aioredis import Redis
+from redis.asyncio import Redis
 from ...config import config
 from ..core.cache import aioredis_pool
 from ..services import TestCaseService

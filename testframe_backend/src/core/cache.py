@@ -1,8 +1,6 @@
-# from redis import asyncio as aioredis
 from fastapi import Depends
 from contextlib import asynccontextmanager
-# from redis.client import Redis
-import aioredis
+from redis import asyncio as aioredis
 # from fastapi_cache import FastAPICache
 # from fastapi_cache.backends.redis import RedisBackend
 from ...config import config

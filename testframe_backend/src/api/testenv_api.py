@@ -1,7 +1,6 @@
 from typing import Optional
 from fastapi import APIRouter, Query, Request, Body, Depends
 from tortoise.exceptions import DoesNotExist
-from aioredis import Redis
 from ..db.models import TestEnv
 from ..services.testenv_service import TestEnvService
 from ..schemas import ResultResponse, testenv_schema
@@ -81,7 +80,8 @@ async def set_current_env(
     Args:
         env_id (int, optional): _description_. Defaults to Body().
     """
-    await api_test.set_current_env("http://127.0.0.1")
+    await api_test.set_current_env("http://127.0.0.1:4000")
+    await api_test.set_current_env("http://127.0.0.1:4000")
     return 1
 
 @router.get(
