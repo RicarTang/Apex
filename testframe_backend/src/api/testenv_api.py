@@ -8,7 +8,6 @@ from ..utils.exceptions.testenv import TestEnvNotExistException
 from ..utils.log_util import log
 
 
-
 router = APIRouter()
 
 
@@ -59,30 +58,31 @@ async def get_all_env(
     summary="获取当前环境变量",
     response_model=ResultResponse[str],
 )
-async def get_current_env(api_test: TestEnvService = Depends()):
+async def get_current_env():
     """获取当前环境变量
 
     Args:
         redis (Redis, optional): _description_. Defaults to Depends(aioredis_pool).
     """
-    result = await api_test.get_current_env
+    result = await TestEnvService.get_current_env()
     return ResultResponse[str](result=result)
+
 
 @router.post(
     "/setCurrentEnv",
     summary="设置当前环境变量",
 )
 async def set_current_env(
-    env_id: int = Body(...), api_test: TestEnvService = Depends()
+    body: testenv_schema.CurrentEnvIn,
 ):
     """设置当前环境变量
 
     Args:
         env_id (int, optional): _description_. Defaults to Body().
     """
-    await api_test.set_current_env("http://127.0.0.1:4000")
-    await api_test.set_current_env("http://127.0.0.1:4000")
+    await TestEnvService.set_current_env("http://127.0.0.1:4000")
     return 1
+
 
 @router.get(
     "/{env_id}",
@@ -142,6 +142,3 @@ async def delete_env(env_id: int):
         raise TestEnvNotExistException
     result = await TestEnv.filter(id=env_id).delete()
     return ResultResponse[str](message="successful deleted environment!")
-
-
-

@@ -22,3 +22,7 @@ class TestEnvsTo(PageParam):
     """response schema"""
 
     data: List[Testenv_Pydantic]
+
+class CurrentEnvIn(BaseModel):
+    """设置current env"""
+    env_id: int

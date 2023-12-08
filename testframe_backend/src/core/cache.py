@@ -16,7 +16,7 @@ async def aioredis_pool():
     try:
         yield redis
     finally:
-        await redis.close()
+        await redis.aclose()
 
 
 async def init_cache(redis=Depends(aioredis_pool)):
