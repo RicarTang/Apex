@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["cross_platform"]
 lock_version = "4.4"
-content_hash = "sha256:7381643b016f6a8f05e8d4050b126073d9d7383bd1c2f062e02d9bff94cfadb2"
+content_hash = "sha256:fbdafeadc6da0aa1d3402366b1c7c8ecdd926702f93beeac8ac322da5ad3d80e"
 
 [[package]]
 name = "aerich"
@@ -237,6 +237,33 @@ dependencies = [
 files = [
     {file = "aiosqlite-0.17.0-py3-none-any.whl", hash = "sha256:6c49dc6d3405929b1d08eeccc72306d3677503cc5e5e43771efc1e00232e8231"},
     {file = "aiosqlite-0.17.0.tar.gz", hash = "sha256:f0e6acc24bc4864149267ac82fb46dfb3be4455f99fe21df82609cc6e6baee51"},
+]
+
+[[package]]
+name = "allure-pytest"
+version = "2.13.2"
+summary = "Allure pytest integration"
+dependencies = [
+    "allure-python-commons==2.13.2",
+    "pytest>=4.5.0",
+]
+files = [
+    {file = "allure-pytest-2.13.2.tar.gz", hash = "sha256:22243159e8ec81ce2b5254b4013802198821b1b42f118f69d4a289396607c7b3"},
+    {file = "allure_pytest-2.13.2-py3-none-any.whl", hash = "sha256:17de9dbee7f61c8e66a5b5e818b00e419dbcea44cb55c24319401ba813220690"},
+]
+
+[[package]]
+name = "allure-python-commons"
+version = "2.13.2"
+requires_python = ">=3.6"
+summary = "Common module for integrate allure with python-based frameworks"
+dependencies = [
+    "attrs>=16.0.0",
+    "pluggy>=0.4.0",
+]
+files = [
+    {file = "allure-python-commons-2.13.2.tar.gz", hash = "sha256:8a03681330231b1deadd86b97ff68841c6591320114ae638570f1ed60d7a2033"},
+    {file = "allure_python_commons-2.13.2-py3-none-any.whl", hash = "sha256:2bb3646ec3fbf5b36d178a5e735002bc130ae9f9ba80f080af97d368ba375051"},
 ]
 
 [[package]]

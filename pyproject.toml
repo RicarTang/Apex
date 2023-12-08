@@ -98,6 +98,7 @@ dependencies = [
     "gevent>=23.9.1",
     "requests>=2.31.0",
     "pytest-asyncio>=0.23.2",
+    "allure-pytest>=2.13.2",
 ]
 requires-python = ">=3.9"
 readme = "README.md"
