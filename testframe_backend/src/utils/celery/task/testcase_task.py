@@ -10,5 +10,5 @@ def run_pytest():
 
 @celery.task
 def task_test():
-    pytest.main(["testframe_backend/src/autotest/test_schema.py::TestApi::test_demo"])
+    pytest.main(["testframe_backend/src/autotest/test_schema.py::TestApi"])
     return "Pytest completed."

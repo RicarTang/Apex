@@ -1,21 +1,18 @@
 # import time
 from datetime import datetime
 from pathlib import Path
-from typing import Optional, List
+from typing import Optional
+from httpx import AsyncClient
 from fastapi import (
     APIRouter,
     HTTPException,
     Depends,
     UploadFile,
-    Request,
     Query,
-    Response,
     status,
 )
 from fastapi.responses import FileResponse
 from tortoise.exceptions import DoesNotExist
-from aiohttp import ClientSession
-from aiohttp.client_exceptions import ClientConnectionError
 from redis.asyncio import Redis
 from ...config import config
 from ..core.cache import aioredis_pool
@@ -53,7 +50,7 @@ async def add_testcase(body: testcase_schema.TestCaseIn):
     summary="导入excel测试用例",
     response_model=ResultResponse[str],
 )
-async def add_testcases(response: Response, excel: UploadFile):
+async def add_testcases(excel: UploadFile):
     """导入测试用例
 
     Args:
@@ -222,14 +219,15 @@ async def execute_testcase(
     current_env = await redis.get("currentEnv")
     if not testcase:
         raise TestcaseNotExistException
-    async with ClientSession() as session:
+    async with AsyncClient(base_url=current_env) as client:
         try:
-            async with session.request(
-                testcase.api_method, current_env.decode('utf-8') + testcase.api_path
-            ) as resp:
-                res = await resp.json()
-        except ClientConnectionError as e:
-            raise HTTPException(status_code=200,detail=e)
+            res = await client.request(
+                method=testcase.api_method,
+                url=testcase.api_path,
+            )
+            assert res.status_code == testcase.expect_code
+        except AssertionError:
+            pass
         else:
             return res
 

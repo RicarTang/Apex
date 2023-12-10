@@ -21,6 +21,8 @@ aerich_init = "aerich init -t testframe_backend.src.db.settings.TORTOISE_ORM"
 init_db = "aerich init-db"
 migrate_db = "aerich migrate"
 upgrade_db = "aerich upgrade"
+test = "pytest -m endpoint"
+
 [project]
 name = ""
 version = ""
@@ -43,7 +45,6 @@ dependencies = [
     "aiofiles<24.0.0,>=23.2.1",
     "pyyaml<7.0.0,>=6.0.1",
     "loguru<1.0.0,>=0.7.2",
-    "aiohttp[speedups]<4.0.0,>=3.9.1",
     "pytest<8.0.0,>=7.4.3",
     "sse-starlette<2.0.0,>=1.8.2",
     "pydantic-settings<3.0.0,>=2.1.0",
@@ -54,12 +55,12 @@ dependencies = [
     "sqlalchemy>=2.0.23",
     "cryptography>=41.0.7",
     "pymysql>=1.1.0",
-    "requests>=2.31.0",
     "pytest-asyncio>=0.23.2",
     "allure-pytest>=2.13.2",
     "redis[hiredis]>=5.0.1",
     "fastapi-cache2>=0.2.1",
     "pendulum>=2.1.2",
+    "httpx>=0.25.2",
 ]
 requires-python = ">=3.9"
 readme = "README.md"

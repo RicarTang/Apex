@@ -10,7 +10,7 @@ from ..db.models import TestSuite, TestCase
 from ..schemas import ResultResponse, testsuite_schema
 from ..utils.log_util import log
 from ..utils.exceptions.testsuite import TestsuiteNotExistException
-from ..utils.celery.task.testcase_task import run_pytest,task_test
+from ..utils.celery.task.testcase_task import task_test
 
 
 router = APIRouter()
