@@ -1,8 +1,10 @@
+import pickle
 from typing import Optional
 from fastapi import (
     APIRouter,
     Query,
 )
+from fastapi.encoders import jsonable_encoder
 from tortoise.exceptions import DoesNotExist
 from tortoise.transactions import in_transaction
 from celery.result import AsyncResult
@@ -10,7 +12,7 @@ from ..db.models import TestSuite, TestCase
 from ..schemas import ResultResponse, testsuite_schema
 from ..utils.log_util import log
 from ..utils.exceptions.testsuite import TestsuiteNotExistException
-from ..utils.celery.task.testcase_task import task_test
+from ..autotest.utils.celery.task.testcase_task import task_test
 
 
 router = APIRouter()
@@ -74,22 +76,31 @@ async def get_all_testsuite(
         )
     )
 
+
 @router.get(
     "/testResult",
     summary="测试运行结果",
 )
-async def test_run_result(task_id:str):
+async def test_run_result(task_id: str):
     result = AsyncResult(task_id)
     return {"task_id": task_id, "status": result.status, "result": result.result}
+
 
 @router.post(
     "/run_test",
     summary="运行测试套件",
-
 )
-async def run_testsuite():
+async def run_testsuite(suite_id: int):
     # task: AsyncResult = run_pytest.delay()  # 将Celery任务发送到消息队列
-    task: AsyncResult = task_test.delay()  # 将Celery任务发送到消息队列
+    try:
+        result = await TestSuite.get(id=suite_id).prefetch_related("testcases")
+    except DoesNotExist:
+        raise TestsuiteNotExistException
+    task: AsyncResult = task_test.delay(
+        testsuite_data=pickle.dumps(
+            ResultResponse[testsuite_schema.TestSuiteTo](result=result).result.testcases
+        )
+    )  # 将Celery任务发送到消息队列,并传递测试数据
     return {"message": "Tests are running in the background.", "task_id": task.id}
 
 
@@ -105,7 +116,7 @@ async def get_testsuite(suite_id: int):
         suite_id (int): _description_
     """
     try:
-        result = await TestSuite.get(id=suite_id).prefetch_related("testcase")
+        result = await TestSuite.get(id=suite_id).prefetch_related("testcases")
     except DoesNotExist:
         raise TestsuiteNotExistException
     return ResultResponse[testsuite_schema.TestSuiteTo](result=result)
@@ -147,6 +158,3 @@ async def delete_testsuite(suite_id: int):
         raise TestsuiteNotExistException
     result = await TestSuite.filter(id=suite_id).delete()
     return ResultResponse[str](message="successful deleted testsuite!")
-
-
-
