@@ -19,7 +19,7 @@ from .src.core.exception import (
     custom_http_exception_handler,
     custom_validation_exception_handler,
 )
-from .src.core.cache import init_cache
+# from .src.core.cache import init_cache
 from .src.utils.background_task_util import scheduler
 from .src.utils.log_util import log
 from .src.db.settings import TORTOISE_ORM

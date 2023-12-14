@@ -97,7 +97,7 @@ async def run_testsuite(suite_id: int):
     except DoesNotExist:
         raise TestsuiteNotExistException
     task: AsyncResult = task_test.delay(
-        testsuite_data=pickle.dumps(
+        testsuite_data=jsonable_encoder(
             ResultResponse[testsuite_schema.TestSuiteTo](result=result).result.testcases
         )
     )  # 将Celery任务发送到消息队列,并传递测试数据

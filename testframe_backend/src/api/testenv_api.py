@@ -59,12 +59,8 @@ async def get_all_env(
     response_model=ResultResponse[str],
 )
 async def get_current_env():
-    """获取当前环境变量
-
-    Args:
-        redis (Redis, optional): _description_. Defaults to Depends(aioredis_pool).
-    """
-    result = await TestEnvService.get_current_env()
+    """获取当前环境变量"""
+    result = await TestEnvService().aio_get_current_env()
     return ResultResponse[str](result=result)
 
 
@@ -80,7 +76,7 @@ async def set_current_env(
     Args:
         env_id (int, optional): _description_. Defaults to Body().
     """
-    await TestEnvService.set_current_env("http://127.0.0.1:4000")
+    await TestEnvService().aio_set_current_env("http://127.0.0.1:4000")
     return 1
 
 

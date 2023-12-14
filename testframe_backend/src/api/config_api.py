@@ -3,7 +3,7 @@ from typing import Optional, Union
 from fastapi import APIRouter, Query, Depends
 from tortoise.exceptions import DoesNotExist
 from ...config import config
-from ..core.cache import aioredis_pool
+from ..core.cache import RedisService
 from ..db.models import TestEnv
 from ..schemas import ResultResponse
 from ..utils.log_util import log
@@ -17,7 +17,7 @@ router = APIRouter()
     "/setConfig",
     summary="设置配置信息",
 )
-async def set_config(redis=Depends(aioredis_pool)):
+async def set_config():
     pass
 
 
@@ -32,16 +32,9 @@ async def set_config(redis=Depends(aioredis_pool)):
     summary="获取当前配置",
     response_model=ResultResponse[dict],
 )
-async def get_config(redis=Depends(aioredis_pool)):
-    """获取test配置信息
-
-    Args:
-        redis (_type_, optional): _description_. Defaults to Depends(aioredis_pool).
-
-    Returns:
-        _type_: _description_
-    """
-    config_redis = await redis.get("config")
+async def get_config():
+    """获取test配置信息"""
+    config_redis = await RedisService().aio_get("config")
     try:
         config_redis = json.loads(config_redis)
     except TypeError:

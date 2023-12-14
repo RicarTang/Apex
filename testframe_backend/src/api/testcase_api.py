@@ -15,7 +15,7 @@ from fastapi.responses import FileResponse
 from tortoise.exceptions import DoesNotExist
 from redis.asyncio import Redis
 from ...config import config
-from ..core.cache import aioredis_pool
+from ..core.cache import RedisService
 from ..services import TestCaseService
 from ..db.models import TestCase
 from ..schemas import ResultResponse, testcase_schema
@@ -204,19 +204,17 @@ async def delete_testcase(case_id: int):
     summary="执行单条测试用例",
 )
 async def execute_testcase(
-    body: testcase_schema.ExecuteTestcaseIn, redis: Redis = Depends(aioredis_pool)
+    body: testcase_schema.ExecuteTestcaseIn,
 ):
     """执行测试用例
 
     Args:
         body (testcase_schema.ExecuteTestcaseIn): 前端给case_id
-        redis (Redis, optional): _description_. Defaults to Depends(aioredis_pool).
-
     Returns:
         _type_: _description_
     """
     testcase = await TestCase.filter(id=body.case_id).first()
-    current_env = await redis.get("currentEnv")
+    current_env = await RedisService().get("currentEnv")
     if not testcase:
         raise TestcaseNotExistException
     async with AsyncClient(base_url=current_env) as client:
