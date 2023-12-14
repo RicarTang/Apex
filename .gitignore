@@ -146,3 +146,5 @@ upload/
 # pdm-python
 .pdm-python
 
+# allure report
+report/

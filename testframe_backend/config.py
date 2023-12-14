@@ -17,6 +17,8 @@ class BaseConfig(BaseSettings):
     STATIC_PATH: Union[str, Path] = ROOT_PATH / "static"
     # 测试目录
     TEST_PATH: Union[str, Path] = ROOT_PATH / "src" / "autotest"
+    # pytest测试结果输出目录
+    # PYTEST_DATA: Union[str, Path] = TEST_PATH / ""
 
     # casbin配置路径
     RBAC_MODEL_PATH: Union[str, Path] = (
