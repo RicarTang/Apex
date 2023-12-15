@@ -61,7 +61,7 @@ async def get_all_testsuite(
     # 使用prefetch_related预取关联的testcase列表
     query_list = (
         await TestSuite.all()
-        .prefetch_related("testcases")
+        .prefetch_related("testcases","task_id")
         .offset(limit * (page - 1))
         .limit(limit)
     )
@@ -125,7 +125,7 @@ async def get_testsuite(suite_id: int):
         suite_id (int): _description_
     """
     try:
-        result = await TestSuite.get(id=suite_id).prefetch_related("testcases")
+        result = await TestSuite.get(id=suite_id).prefetch_related("testcases","task_id")
     except DoesNotExist:
         raise TestsuiteNotExistException
     return ResultResponse[testsuite_schema.TestSuiteTo](result=result)

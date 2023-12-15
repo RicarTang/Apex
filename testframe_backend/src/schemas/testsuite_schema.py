@@ -1,8 +1,9 @@
-from typing import Optional, List
-from pydantic import BaseModel, Field
-from ..db.models import Testsuite_Pydantic
+from typing import Optional, List, Union
+from pydantic import BaseModel, Field, field_validator
+from ..db.models import Testsuite_Pydantic, TestSuiteTaskId
 from .common_schema import PageParam
 from .testcase_schema import TestCaseTo
+from ..utils.log_util import log
 
 
 class TestSuiteIn(BaseModel):
@@ -20,6 +21,26 @@ class TestSuiteTo(Testsuite_Pydantic):
     """测试套件response schema"""
 
     testcases: List[TestCaseTo] = Field(description="套件包含的用例")
+    task_id: Optional[str] = Field(description="运行测试的task id")
+
+    @field_validator("task_id", mode="before")
+    @classmethod
+    def modify_task_id_before_validation(
+        cls, value: TestSuiteTaskId
+    ) -> Union[str, None]:
+        """模型验证前修改入参
+
+        Args:
+            value (TestSuiteTaskId): TestSuiteTaskId orm对象
+
+        Returns:
+            Union[str, None]: 返回task_id | None
+        """
+        try:
+            return value.task_id
+        except AttributeError:
+            # orm对象返回空，不做处理
+            pass
 
 
 class TestSuitesTo(PageParam):
