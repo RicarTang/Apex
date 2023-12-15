@@ -1,7 +1,7 @@
 [tool.aerich]
 tortoise_orm = "testframe_backend.src.db.settings.TORTOISE_ORM"
 location = "./migrations"
-src_folder = "./testframe_backend/."
+src_folder = "./."
 
 [tool.pdm]
 [tool.pdm.dev-dependencies]

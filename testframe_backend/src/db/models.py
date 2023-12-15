@@ -151,9 +151,23 @@ class TestSuite(AbstractBaseModel):
     testcases: fields.ManyToManyRelation["TestCase"] = fields.ManyToManyField(
         model_name="models.TestCase"
     )
+    task_id: fields.ReverseRelation["TestSuiteTaskId"]
 
     class Meta:
         table = "test_suite"
+        ordering = ["-created_at"]
+
+
+class TestSuiteTaskId(AbstractBaseModel):
+    """测试套件与task id表"""
+
+    task_id = fields.CharField(max_length=50, index=True, description="运行测试套件的task id")
+    testsuite: fields.OneToOneRelation[TestSuite] = fields.OneToOneField(
+        model_name="models.TestSuite", related_name="task_id"
+    )
+
+    class Meta:
+        table = "test_suite_task_id"
         ordering = ["-created_at"]
 
 

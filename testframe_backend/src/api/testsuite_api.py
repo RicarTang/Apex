@@ -8,7 +8,7 @@ from fastapi.encoders import jsonable_encoder
 from tortoise.exceptions import DoesNotExist
 from tortoise.transactions import in_transaction
 from celery.result import AsyncResult
-from ..db.models import TestSuite, TestCase
+from ..db.models import TestSuite, TestCase, TestSuiteTaskId
 from ..schemas import ResultResponse, testsuite_schema
 from ..utils.log_util import log
 from ..utils.exceptions.testsuite import TestsuiteNotExistException
@@ -89,6 +89,7 @@ async def test_run_result(task_id: str):
 @router.post(
     "/run",
     summary="运行测试套件",
+    response_model=ResultResponse[dict],
 )
 async def run_testsuite(suite_id: int):
     try:
@@ -100,7 +101,16 @@ async def run_testsuite(suite_id: int):
             ResultResponse[testsuite_schema.TestSuiteTo](result=result).result.testcases
         )
     )  # 将Celery任务发送到消息队列,并传递测试数据
-    return {"message": "Tests are running in the background.", "task_id": task.id}
+    # 对应保存suite与task id
+    suite_task_id = await TestSuiteTaskId.get_or_none(testsuite_id=suite_id)
+    if suite_task_id:
+        suite_task_id.task_id = task.id
+        await suite_task_id.save()
+    else:
+        await TestSuiteTaskId.create(testsuite_id=suite_id, task_id=task.id)
+    return ResultResponse[dict](
+        result={"message": "Tests are running in the background.", "task_id": task.id}
+    )
 
 
 @router.get(
