@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["cross_platform"]
 lock_version = "4.4"
-content_hash = "sha256:a4db4cf790e1c91153b88c59591556011b77835d2326a9f7ab6a69bb838f2889"
+content_hash = "sha256:05de1b35e9863b0b4f0bad905ba4ad6300d59ab3d1d1c4ba373cc8fdcb9eb37a"
 
 [[package]]
 name = "aerich"
@@ -1376,6 +1376,19 @@ dependencies = [
 files = [
     {file = "pytest-7.4.3-py3-none-any.whl", hash = "sha256:0d009c083ea859a71b76adf7c1d502e4bc170b80a8ef002da5806527b9591fac"},
     {file = "pytest-7.4.3.tar.gz", hash = "sha256:d989d136982de4e3b29dabcc838ad581c64e8ed52c11fbe86ddebd9da0818cd5"},
+]
+
+[[package]]
+name = "pytest-assume"
+version = "2.4.3"
+summary = "A pytest plugin that allows multiple failures per test"
+dependencies = [
+    "pytest>=2.7",
+    "six",
+]
+files = [
+    {file = "pytest-assume-2.4.3.tar.gz", hash = "sha256:983e90537660fd7aa18bb554693523020272e7edeee3e40435593297bcc6347e"},
+    {file = "pytest_assume-2.4.3-py3-none-any.whl", hash = "sha256:09074220213b87cf1f400609701a44b75078b4e69588c7227e061ff9b3ecf54b"},
 ]
 
 [[package]]

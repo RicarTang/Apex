@@ -87,11 +87,10 @@ async def test_run_result(task_id: str):
 
 
 @router.post(
-    "/run_test",
+    "/run",
     summary="运行测试套件",
 )
 async def run_testsuite(suite_id: int):
-    # task: AsyncResult = run_pytest.delay()  # 将Celery任务发送到消息队列
     try:
         result = await TestSuite.get(id=suite_id).prefetch_related("testcases")
     except DoesNotExist:

@@ -61,6 +61,7 @@ dependencies = [
     "fastapi-cache2>=0.2.1",
     "pendulum>=2.1.2",
     "httpx>=0.25.2",
+    "pytest-assume>=2.4.3",
 ]
 requires-python = ">=3.9"
 readme = "README.md"

@@ -1,4 +1,4 @@
-import sys
+import sys, os
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.exceptions import RequestValidationError
@@ -19,6 +19,8 @@ from .src.core.exception import (
     custom_http_exception_handler,
     custom_validation_exception_handler,
 )
+from .config import config
+
 # from .src.core.cache import init_cache
 from .src.utils.background_task_util import scheduler
 from .src.utils.log_util import log
@@ -33,8 +35,6 @@ app = FastAPI(
     middleware=middleware,  # 注册middleware
 )
 
-# 挂载静态文件
-app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # 注册tortoise orm 需要在create_initial_users前面
 register_tortoise(
@@ -50,6 +50,24 @@ async def app_startup():
     """fastapi初始化"""
     # 初始化缓存池
     # await init_cache()
+    # 挂载静态文件
+    # swagger 静态文件
+    app.mount(
+        "/static",
+        StaticFiles(packages=[("testframe_backend", "static")]),
+        name="static",
+    )
+    # allure报告
+    if config.ON_STATICFILES:
+        try:
+            app.mount(
+                "/report",
+                StaticFiles(directory=config.ALLURE_REPORT, html=True),
+                name="report",
+            )
+        except RuntimeError:
+            os.makedirs(config.ALLURE_REPORT)
+
     # 创建默认用户角色,需要在注册tortoise后面初始化默认用户
     await create_initial_users()
     # 修改默认swagger参数，使用static文件
@@ -150,4 +168,3 @@ except:
     log.info("后台任务启动失败！")
 else:
     log.info("暂无后台任务！")
-
