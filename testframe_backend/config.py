@@ -13,16 +13,14 @@ class BaseConfig(BaseSettings):
     # 目录相关
     # 根目录
     ROOT_PATH: Union[str, Path] = Path(__file__).parent
-    # 当前用户目录
-    HOME_PATH: Union[str, Path] = Path.home()
     # static静态文件目录
     STATIC_PATH: Union[str, Path] = ROOT_PATH / "static"
     # 测试目录
     TEST_PATH: Union[str, Path] = ROOT_PATH / "src" / "autotest"
     # pytest测试结果输出目录
-    PYTEST_DATA: Union[str, Path] = HOME_PATH / "test_report" / "pytest_data"
+    PYTEST_DATA: Union[str, Path] = TEST_PATH / "report" / "pytest_data"
     # allure report 目录
-    ALLURE_REPORT: Union[str, Path] = HOME_PATH / "test_report" / "allure_report"
+    ALLURE_REPORT: Union[str, Path] = TEST_PATH / "report" / "allure_report"
     # 是否使用StaticFiles, 默认使用StaticFiles,还可配置nginx提高性能(使用nginx时这个配置配置为False)
     ON_STATICFILES: bool = True
 
