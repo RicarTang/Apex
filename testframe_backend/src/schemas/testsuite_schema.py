@@ -36,8 +36,11 @@ class TestSuiteTo(Testsuite_Pydantic):
         Returns:
             Union[str, None]: 返回task_id | None
         """
-        if value:
+        try:
             return value.task_id
+        except AttributeError:
+            # orm对象返回空，不做处理
+            pass
 
 
 class TestSuitesTo(PageParam):

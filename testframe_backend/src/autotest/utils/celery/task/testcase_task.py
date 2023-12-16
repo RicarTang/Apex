@@ -1,6 +1,7 @@
 import pickle
 import pytest
 import os
+import subprocess
 from pathlib import Path
 from ..celery_config import celery
 from .....core.cache import RedisService
@@ -36,8 +37,15 @@ def task_test(self, testsuite_data: list) -> None:
             pytest_data_dir,
         ]
     )
-
-    os.system(
-        f"allure generate {pytest_data_dir} -o {allure_report_dir} --clean"
-    )
+    try:
+        subprocess.run(
+            f"allure generate {pytest_data_dir} -o {allure_report_dir} --clean",
+            shell=True,
+            check=True,
+        )
+    except subprocess.CalledProcessError as e:
+        raise e
+    # os.system(
+    #     f"allure generate {pytest_data_dir} -o {allure_report_dir} --clean"
+    # )
     return "Pytest completed."
