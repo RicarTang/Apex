@@ -1,4 +1,3 @@
-import pickle
 from typing import Optional
 from fastapi import (
     APIRouter,
@@ -12,7 +11,9 @@ from ..db.models import TestSuite, TestCase, TestSuiteTaskId
 from ..schemas import ResultResponse, testsuite_schema
 from ..utils.log_util import log
 from ..utils.exceptions.testsuite import TestsuiteNotExistException
+from ..utils.exceptions.testenv import CurrentTestEnvNotSetException
 from ..autotest.utils.celery.task.testcase_task import task_test
+from ..services.testenv_service import TestEnvService
 
 
 router = APIRouter()
@@ -61,7 +62,7 @@ async def get_all_testsuite(
     # 使用prefetch_related预取关联的testcase列表
     query_list = (
         await TestSuite.all()
-        .prefetch_related("testcases","task_id")
+        .prefetch_related("testcases", "task_id")
         .offset(limit * (page - 1))
         .limit(limit)
     )
@@ -96,6 +97,8 @@ async def run_testsuite(suite_id: int):
         result = await TestSuite.get(id=suite_id).prefetch_related("testcases")
     except DoesNotExist:
         raise TestsuiteNotExistException
+    if not await TestEnvService().aio_get_current_env():
+        raise CurrentTestEnvNotSetException
     task: AsyncResult = task_test.delay(
         testsuite_data=jsonable_encoder(
             ResultResponse[testsuite_schema.TestSuiteTo](result=result).result.testcases
@@ -125,7 +128,9 @@ async def get_testsuite(suite_id: int):
         suite_id (int): _description_
     """
     try:
-        result = await TestSuite.get(id=suite_id).prefetch_related("testcases","task_id")
+        result = await TestSuite.get(id=suite_id).prefetch_related(
+            "testcases", "task_id"
+        )
     except DoesNotExist:
         raise TestsuiteNotExistException
     return ResultResponse[testsuite_schema.TestSuiteTo](result=result)

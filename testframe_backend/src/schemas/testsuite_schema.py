@@ -26,7 +26,7 @@ class TestSuiteTo(Testsuite_Pydantic):
     @field_validator("task_id", mode="before")
     @classmethod
     def modify_task_id_before_validation(
-        cls, value: TestSuiteTaskId
+        cls, value: Union[TestSuiteTaskId, None]
     ) -> Union[str, None]:
         """模型验证前修改入参
 
@@ -36,11 +36,8 @@ class TestSuiteTo(Testsuite_Pydantic):
         Returns:
             Union[str, None]: 返回task_id | None
         """
-        try:
+        if value:
             return value.task_id
-        except AttributeError:
-            # orm对象返回空，不做处理
-            pass
 
 
 class TestSuitesTo(PageParam):
