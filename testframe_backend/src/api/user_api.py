@@ -249,4 +249,4 @@ async def logout(request: Request):
     access_type, access_token = request.headers["authorization"].split(" ")
     if not await UserTokenService.update_token_state(token=access_token):
         raise TokenInvalidException
-    return ResultResponse[str](message="Successfully logged out!")
+    return ResultResponse[str](result="Successfully logged out!")
