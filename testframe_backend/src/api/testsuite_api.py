@@ -92,9 +92,9 @@ async def test_run_result(task_id: str):
     summary="运行测试套件",
     response_model=ResultResponse[dict],
 )
-async def run_testsuite(suite_id: int):
+async def run_testsuite(body: testsuite_schema.TestSuiteId):
     try:
-        result = await TestSuite.get(id=suite_id).prefetch_related("testcases")
+        result = await TestSuite.get(id=body.suite_id).prefetch_related("testcases")
     except DoesNotExist:
         raise TestsuiteNotExistException
     if not await TestEnvService().aio_get_current_env():
@@ -105,12 +105,12 @@ async def run_testsuite(suite_id: int):
         )
     )  # 将Celery任务发送到消息队列,并传递测试数据
     # 对应保存suite与task id
-    suite_task_id = await TestSuiteTaskId.get_or_none(testsuite_id=suite_id)
+    suite_task_id = await TestSuiteTaskId.get_or_none(testsuite_id=body.suite_id)
     if suite_task_id:
         suite_task_id.task_id = task.id
         await suite_task_id.save()
     else:
-        await TestSuiteTaskId.create(testsuite_id=suite_id, task_id=task.id)
+        await TestSuiteTaskId.create(testsuite_id=body.suite_id, task_id=task.id)
     return ResultResponse[dict](
         result={"message": "Tests are running in the background.", "task_id": task.id}
     )

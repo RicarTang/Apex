@@ -47,3 +47,9 @@ class TestSuitesTo(PageParam):
     """翻页测试套件 response schema"""
 
     data: List[TestSuiteTo]
+
+
+class TestSuiteId(BaseModel):
+    """suite id"""
+
+    suite_id: int = Field(description="测试套件id")
