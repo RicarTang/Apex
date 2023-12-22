@@ -6,3 +6,4 @@ from .testsuite_api import router as testsuite_api
 from .testenv_api import router as testenv_api
 from .config_api import router as config_api
 from .sse_api import router as sse_api
+from .default_api import router as default_api

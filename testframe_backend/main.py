@@ -12,6 +12,7 @@ from .src.api import (
     testenv_api,
     config_api,
     sse_api,
+    default_api,
 )
 from .src.core.security import check_jwt_auth
 from .src.core.middleware import middleware
@@ -101,6 +102,7 @@ async def app_startup():
 
 
 # include router
+app.include_router(default_api)  # default
 app.include_router(
     user_api,
     tags=["User"],

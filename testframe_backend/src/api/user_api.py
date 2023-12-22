@@ -1,17 +1,10 @@
 from typing import Optional
-from fastapi import (
-    APIRouter,
-    Depends,
-    Request,
-    Query,
-    Response,
-)
+from fastapi import APIRouter, Depends, Query, Response
 from passlib.hash import md5_crypt
 from tortoise.transactions import in_transaction
 from tortoise.contrib.fastapi import HTTPNotFoundError
 from tortoise.exceptions import DoesNotExist
 from ..core.security import (
-    create_access_token,
     check_jwt_auth,
     get_current_user as current_user,
 )
@@ -20,13 +13,9 @@ from ...src.db.models import Users, Role
 from ..schemas import ResultResponse, user_schema
 from ..utils.log_util import log
 from ..utils.exceptions.user import (
-    UserUnavailableException,
-    PasswordValidateErrorException,
     UserNotExistException,
-    TokenInvalidException,
     RoleNotExistException,
 )
-from ..services import UserTokenService
 
 
 router = APIRouter()
@@ -85,9 +74,7 @@ async def query_user_role(
     summary="获取当前用户",
     response_model=ResultResponse[user_schema.UserPy],
 )
-async def get_current_user(
-    current_user: Users = Depends(current_user)
-):
+async def get_current_user(current_user: Users = Depends(current_user)):
     """获取当前用户"""
     return ResultResponse[user_schema.UserPy](result=current_user)
 
@@ -119,7 +106,7 @@ async def create_user(user: user_schema.UserIn):
     dependencies=[Depends(check_jwt_auth)],
 )
 async def query_user(
-    username: Optional[str] = Query(default=None,description="用户名"),
+    username: Optional[str] = Query(default=None, description="用户名"),
     limit: Optional[int] = Query(default=20, ge=10),
     page: Optional[int] = Query(default=1, gt=0),
 ):
@@ -200,53 +187,3 @@ async def delete_user(user_id: int, response: Response):
         raise UserNotExistException
     deleted_count = await Users.filter(id=user_id).delete()
     return ResultResponse[str](message="successful deleted user!")
-
-
-@router.post(
-    "/login",
-    summary="登录",
-    response_model=ResultResponse[user_schema.Login],
-)
-async def login(
-    request: Request,
-    user: user_schema.LoginIn,
-):
-    """用户登陆."""
-    # 查询数据库有无此用户
-    try:
-        query_user = await Users.get(username=user.username)
-    except DoesNotExist:
-        raise UserNotExistException
-    # 验证密码
-    if not md5_crypt.verify(secret=user.password, hash=query_user.password):
-        raise PasswordValidateErrorException
-    # 用户为黑名单
-    if not query_user.is_active:
-        raise UserUnavailableException
-    # 创建jwt
-    access_token = create_access_token(data={"sub": query_user.username})
-    # 更新用户jwt
-    await UserTokenService.add_jwt(
-        current_user_id=query_user.id, token=access_token, client_ip=request.client.host
-    )
-    return ResultResponse[user_schema.Login](
-        result=user_schema.Login(
-            data=query_user,
-            access_token=access_token,
-            token_type="bearer",
-        )
-    )
-
-
-@router.post(
-    "/logout",
-    summary="退出登录",
-    response_model=ResultResponse[str],
-    dependencies=[Depends(check_jwt_auth)],
-)
-async def logout(request: Request):
-    # 修改当前用户数据库token状态为0
-    access_type, access_token = request.headers["authorization"].split(" ")
-    if not await UserTokenService.update_token_state(token=access_token):
-        raise TokenInvalidException
-    return ResultResponse[str](result="Successfully logged out!")
