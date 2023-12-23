@@ -1,6 +1,6 @@
 from typing import List
 from pydantic import BaseModel, Field
-from ..db.models import Comment_Pydantic
+from ..db.models import CommentPydantic
 
 
 class CommentIn(BaseModel):
@@ -13,7 +13,7 @@ class CommentIn(BaseModel):
     comment: str = Field(max_length=50, description="用户评论")
 
 
-class CommentTo(Comment_Pydantic):
+class CommentTo(CommentPydantic):
     """
     res schema，
     用户单条评论。
@@ -22,7 +22,7 @@ class CommentTo(Comment_Pydantic):
     pass
 
 
-# class CommentsTo(List[Comment_Pydantic]):
+# class CommentsTo(List[CommentPydantic]):
 #     """
 #     res schema，
 #     某个用户的所有评论。

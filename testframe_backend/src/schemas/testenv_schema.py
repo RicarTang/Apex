@@ -1,6 +1,6 @@
 from typing import Optional, List
 from pydantic import BaseModel, HttpUrl, Field
-from ..db.models import Testenv_Pydantic
+from ..db.models import TestenvPydantic
 from .common_schema import PageParam
 
 
@@ -12,7 +12,7 @@ class TestEnvIn(BaseModel):
     remark: Optional[str] = Field(max_length=100, description="备注")
 
 
-class TestEnvTo(Testenv_Pydantic):
+class TestEnvTo(TestenvPydantic):
     """response schema"""
 
     pass
@@ -21,7 +21,7 @@ class TestEnvTo(Testenv_Pydantic):
 class TestEnvsTo(PageParam):
     """response schema"""
 
-    data: List[Testenv_Pydantic]
+    data: List[TestenvPydantic]
 
 class CurrentEnvIn(BaseModel):
     """设置current env"""

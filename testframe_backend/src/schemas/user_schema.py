@@ -1,6 +1,6 @@
 from typing import List, Optional
 from pydantic import BaseModel, Field, Extra
-from ..db.models import User_Pydantic, Role_Pydantic
+from ..db.models import UserPydantic, RolePydantic
 from .common_schema import PageParam
 
 
@@ -21,7 +21,7 @@ class UserIn(User):
     # user_role: str
 
 
-class UserOut(User_Pydantic):
+class UserOut(UserPydantic):
     """单用户res schema"""
 
     pass
@@ -32,11 +32,11 @@ class UserOut(User_Pydantic):
 class UsersOut(PageParam):
     """用户集res schema"""
 
-    # List[User_Pydantic]
-    data: List[User_Pydantic]
+    # List[UserPydantic]
+    data: List[UserPydantic]
 
 
-class UserPy(User_Pydantic, extra=Extra.ignore):
+class UserPy(UserPydantic, extra=Extra.ignore):
     """
     extra=Extra.ignore,表示忽略多的属性，
     不加时，多了模型没有的属性会报错，
@@ -53,7 +53,7 @@ class RoleIn(BaseModel):
     description: Optional[str] = Field(max_length=50, description="角色详情")
 
 
-class RoleTo(Role_Pydantic):
+class RoleTo(RolePydantic):
     """角色res schema"""
 
     pass
@@ -62,7 +62,7 @@ class RoleTo(Role_Pydantic):
 class RolesTo(PageParam):
     """返回多角色res schema"""
 
-    data: List[Role_Pydantic]
+    data: List[RolePydantic]
 
 
 class UserAddRoleIn(BaseModel):

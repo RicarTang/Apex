@@ -1,6 +1,6 @@
 from typing import Optional, List, Union
 from pydantic import BaseModel, Field, field_validator
-from ..db.models import Testsuite_Pydantic, TestSuiteTaskId
+from ..db.models import TestsuitePydantic, TestSuiteTaskId
 from .common_schema import PageParam
 from .testcase_schema import TestCaseTo
 from ..utils.log_util import log
@@ -17,7 +17,7 @@ class TestSuiteIn(BaseModel):
     )
 
 
-class TestSuiteTo(Testsuite_Pydantic):
+class TestSuiteTo(TestsuitePydantic):
     """测试套件response schema"""
 
     testcases: List[TestCaseTo] = Field(description="套件包含的用例")

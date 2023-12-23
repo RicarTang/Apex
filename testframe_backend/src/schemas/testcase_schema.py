@@ -1,7 +1,7 @@
 from typing import Optional, List
 from pydantic import BaseModel, Field
 from ..db.enum import BoolEnum, ApiMethodEnum, RequestParamTypeEnum
-from ..db.models import Testcase_Pydantic
+from ..db.models import TestcasePydantic
 from .common_schema import PageParam
 
 
@@ -37,7 +37,7 @@ class TestCaseIn(BaseModel):
     remark: Optional[str] = Field(description="备注")
 
 
-class TestCaseTo(Testcase_Pydantic):
+class TestCaseTo(TestcasePydantic):
     """测试用例 response schema"""
 
     pass
@@ -50,7 +50,7 @@ class TestCaseTo(Testcase_Pydantic):
 class TestCasesTo(PageParam):
     """翻页测试用例 response schema"""
 
-    data: List[Testcase_Pydantic]
+    data: List[TestcasePydantic]
 
 
 class ExecuteTestcaseIn(BaseModel):

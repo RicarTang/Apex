@@ -35,7 +35,7 @@ class Users(AbstractBaseModel):
         ordering = ["-created_at"]
 
     def __str__(self):
-        return str(self.username)
+        return f"<{self.__class__.__name__},id:{self.id}>"
 
 
 class Role(AbstractBaseModel):
@@ -67,7 +67,7 @@ class Comments(AbstractBaseModel):
         ordering = ["-created_at"]
 
     def __str__(self):
-        return str(self.id)
+        return f"<{self.__class__.__name__},id:{self.id}>"
 
 
 class UserToken(AbstractBaseModel):
@@ -86,6 +86,45 @@ class UserToken(AbstractBaseModel):
 
     class Meta:
         table = "user_token"
+
+
+class Routes(AbstractBaseModel):
+    """前端路由表"""
+
+    name = fields.CharField(max_length=255)
+    path = fields.CharField(max_length=255)
+    hidden = fields.BooleanField()
+    redirect = fields.CharField(max_length=255, null=True)
+    component = fields.CharField(max_length=255)
+    always_show = fields.BooleanField(null=True)
+    is_admin_visible = fields.BooleanField(null=True)
+
+    parent: fields.ReverseRelation["Routes"] = fields.ForeignKeyField(
+        "models.Routes", related_name="children", null=True
+    )
+
+    def __str__(self):
+        return f"<{self.__class__.__name__},id:{self.id}>"
+
+
+class RouteMeta(AbstractBaseModel):
+    """路由meta"""
+
+    title = fields.CharField(max_length=255)
+    icon = fields.CharField(max_length=255)
+    no_cache = fields.BooleanField()
+    link = fields.CharField(max_length=255, null=True)
+
+    route: fields.OneToOneRelation["Routes"] = fields.OneToOneField(
+        "models.Routes", related_name="meta"
+    )
+
+    class Meta:
+        table = "route_meta"
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"<{self.__class__.__name__},id:{self.id}>"
 
 
 class TestCase(AbstractBaseModel):
@@ -185,38 +224,48 @@ class TestEnv(AbstractBaseModel):
 
 # response schema
 # 用户schema
-User_Pydantic = pydantic_model_creator(
+UserPydantic = pydantic_model_creator(
     Users,
     name="UserTo",
     exclude=("password", "is_delete"),
 )
 # 评论schema
-Comment_Pydantic = pydantic_model_creator(
+CommentPydantic = pydantic_model_creator(
     Comments,
     name="CommentTo",
     exclude=("is_delete",),
 )
 # 角色schema
-Role_Pydantic = pydantic_model_creator(
+RolePydantic = pydantic_model_creator(
     Role,
     name="RoleTo",
     exclude=("is_delete",),
 )
 # 测试用例schema
-Testcase_Pydantic = pydantic_model_creator(
+TestcasePydantic = pydantic_model_creator(
     TestCase,
     name="TestCaseTo",
     exclude=("is_delete",),
 )
 # 测试套件schema
-Testsuite_Pydantic = pydantic_model_creator(
+TestsuitePydantic = pydantic_model_creator(
     TestSuite,
     name="TestSuiteTo",
     exclude=("is_delete",),
 )
 # 测试环境schema
-Testenv_Pydantic = pydantic_model_creator(
+TestenvPydantic = pydantic_model_creator(
     TestEnv,
     name="TestEnvTo",
     exclude=("is_delete",),
+)
+RoutesPydantic = pydantic_model_creator(
+    Routes,
+    name="RoutesTo",
+    exclude=("is_delete", "id", "created_at", "update_at"),
+)
+RouteMetaPydantic = pydantic_model_creator(
+    RouteMeta,
+    name="RouteMetaTo",
+    exclude=("is_delete", "id", "created_at", "update_at"),
 )
