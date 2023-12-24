@@ -22,27 +22,31 @@ router = APIRouter()
 
 
 @router.get(
-    "/users",
+    "/list",
     summary="获取所有用户",
     response_model=ResultResponse[user_schema.UsersOut],
     dependencies=[Depends(check_jwt_auth)],
 )
 async def get_users(
+    username: Optional[str] = Query(default=None, description="用户名",alias="userName"),
     limit: Optional[int] = Query(default=20, ge=10),
     page: Optional[int] = Query(default=1, gt=0),
 ):
-    """获取所有用户.
-
-    Args:
-        limit (Optional[int], optional): pagesize. Defaults to Query(default=20, ge=10).
-        page (Optional[int], optional): page. Defaults to Query(default=1, gt=0).
-
-    Returns:
-        _type_: _description_
-    """
-    result = await Users.all().offset(limit * (page - 1)).limit(limit)
-    # total
-    total = await Users.all().count()
+    """获取用户列表"""
+    # 查询用户名
+    if username:
+        result = (
+            await Users.filter(username__contains=username)
+            .all()
+            .offset(limit * (page - 1))
+            .limit(limit)
+        )
+        total = await Users.filter(username__contains=username).all().count()
+    # 默认查询
+    else:
+        result = await Users.all().offset(limit * (page - 1)).limit(limit)
+        # total
+        total = await Users.all().count()
     return ResultResponse[user_schema.UsersOut](
         result=user_schema.UsersOut(data=result, page=page, limit=limit, total=total)
     )
@@ -122,7 +126,6 @@ async def query_user(
     "/{user_id}",
     response_model=ResultResponse[user_schema.UserOut],
     summary="根据id查询用户",
-    responses={404: {"model": HTTPNotFoundError}},
     dependencies=[Depends(check_jwt_auth)],
 )
 async def get_user(user_id: int):
@@ -143,14 +146,23 @@ async def get_user(user_id: int):
 )
 async def update_user(user_id: int, user: user_schema.UserIn):
     """更新用户信息."""
-    # 查询用户是否存在
-    if not await Users.filter(id=user_id).exists():
-        raise UserNotExistException
-    # 更新
-    user.password = md5_crypt.hash(user.password)
-    result = await Users.filter(id=user_id).update(**user.dict(exclude_unset=True))
-    log.debug(f"update更新{result}条数据")
-    return ResultResponse[user_schema.UserOut](result=await Users.get(id=user_id))
+    # 使用 atomic 事务
+    async with in_transaction():
+        # 查询用户是否存在
+        existing_user = await Users.get_or_none(id=user_id)
+        if not existing_user:
+            raise UserNotExistException
+        # 如果提供了密码，进行密码哈希
+        if user.password:
+            user.password = md5_crypt.hash(user.password)
+
+        # 使用 filter 更新指定字段
+        result = await Users.filter(id=user_id).update(**user.dict(exclude_unset=True))
+        log.debug(f"update 更新{result}条数据")
+
+        # 获取更新后的用户信息
+        updated_user = await Users.get(id=user_id)
+        return ResultResponse[user_schema.UserOut](result=updated_user)
 
 
 @router.delete(

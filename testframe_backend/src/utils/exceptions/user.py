@@ -50,7 +50,7 @@ class UserNotExistException(HTTPException):
 
     def __init__(self):
         super().__init__(
-            status_code=status.HTTP_200_OK,
+            status_code=status.HTTP_404_NOT_FOUND,
             detail="User does not exist!",
         )
 
@@ -60,7 +60,7 @@ class PasswordValidateErrorException(HTTPException):
 
     def __init__(self):
         super().__init__(
-            status_code=status.HTTP_200_OK,
+            status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Password validate error!",
         )
 

@@ -1,23 +1,25 @@
 from typing import List, Optional
 from pydantic import BaseModel, Field, Extra
-from ..db.models import UserPydantic, RolePydantic
+from ..db.models import UserPydantic, RolePydantic, DisabledEnum
 from .common_schema import PageParam
 
 
 class User(BaseModel):
     """用户"""
 
-    username: str = Field(max_length=20, description="用户名")
-    descriptions: Optional[str] = Field(max_length=50, description="用户描述")
-    # is_active: Optional[DisabledEnum] = Field(
-    #     default=DisabledEnum.ENABLE, description="0:Disable,1:Enable"
-    # )
+    username: Optional[str] = Field(default=None, max_length=20, description="用户名")
+    descriptions: Optional[str] = Field(default=None, max_length=50, description="用户描述")
+    is_active: Optional[DisabledEnum] = Field(
+        default=None, description="0:Disable,1:Enable"
+    )
 
 
 class UserIn(User):
     """用户req schema"""
 
-    password: str = Field(min_length=6, max_length=20, description="用户密码")
+    password: Optional[str] = Field(
+        default=None, min_length=6, max_length=20, description="用户密码"
+    )
     # user_role: str
 
 

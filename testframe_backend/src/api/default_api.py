@@ -40,12 +40,12 @@ async def login(
         query_user = await Users.get(username=user.username)
     except DoesNotExist:
         raise UserNotExistException
+    # 用户为不可用状态
+    if not query_user.is_active:
+        raise UserUnavailableException
     # 验证密码
     if not md5_crypt.verify(secret=user.password, hash=query_user.password):
         raise PasswordValidateErrorException
-    # 用户为黑名单
-    if not query_user.is_active:
-        raise UserUnavailableException
     # 创建jwt
     access_token = create_access_token(data={"sub": query_user.username})
     # 更新用户jwt
@@ -82,7 +82,6 @@ async def logout(request: Request):
     dependencies=[Depends(check_jwt_auth)],
 )
 async def get_routers(current_user=Depends(current_user)):
-    log.debug(current_user.id)
     # 控制路由权限
     if current_user.id in [1, 2]:
         # 仅查询一级路由,并预取children(children里的meta)与meta
