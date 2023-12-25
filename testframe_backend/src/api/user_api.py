@@ -69,7 +69,6 @@ async def query_user_role(
     "/me",
     summary="获取当前用户信息",
     response_model=ResultResponse[user_schema.UserPy],
-    dependencies=[Depends(Authority("user", "add"))],
 )
 async def get_current_user(current_user: Users = Depends(current_user)):
     """获取当前用户"""
