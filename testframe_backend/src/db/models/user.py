@@ -56,6 +56,9 @@ class Permission(AbstractBaseModel):
     )
     menus = fields.ManyToManyField(model_name="models.Routes", related_name="menus")
 
+    class Meta:
+        ordering = ["-created_at"]
+
 
 class AccessControl(AbstractBaseModel):
     """api权限访问控制关联表模型"""

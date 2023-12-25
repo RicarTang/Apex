@@ -10,7 +10,7 @@ from ..core.security import (
 )
 from ..core.authentication import Authority
 from ...src.db.models import Users, Role
-from ..schemas import ResultResponse, user_schema
+from ..schemas import ResultResponse, user_schema, admin_schema
 from ..utils.log_util import log
 from ..utils.exceptions.user import (
     UserNotExistException,
@@ -55,14 +55,14 @@ async def get_users(
 @router.get(
     "/role",
     summary="获取当前用户角色",
-    response_model=ResultResponse[List[user_schema.RoleTo]],
+    response_model=ResultResponse[List[admin_schema.RoleTo]],
 )
 async def query_user_role(
     current_user: Users = Depends(current_user),
 ):
     """查询当前用户角色"""
     user = await Users.filter(id=current_user.id).prefetch_related("roles").first()
-    return ResultResponse[List[user_schema.RoleTo]](result=user.roles)
+    return ResultResponse[List[admin_schema.RoleTo]](result=user.roles)
 
 
 @router.get(

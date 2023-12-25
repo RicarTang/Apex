@@ -48,50 +48,6 @@ class UserPy(UserPydantic, extra=Extra.ignore):
     pass
 
 
-class RoleIn(BaseModel):
-    """角色req schema"""
-
-    name: str = Field(max_length=20, description="角色名称")
-    description: Optional[str] = Field(max_length=50, description="角色详情")
-
-
-class RoleTo(RolePydantic):
-    """角色res schema"""
-
-    pass
-
-
-class RolesTo(BaseModel):
-    """返回多角色res schema"""
-
-    data: List[RolePydantic]
-
-
-class UserAddRoleIn(BaseModel):
-    """用户添加角色req schema"""
-
-    user_id: int = Field(description="用户id",alias="userId")
-    role_id: str = Field(description="角色id",alias="roleId")
-
-
-# class UserAddRoleTo(BaseModel):
-#     """用户添加角色res schema"""
-
-#     pass
-
-
-class RolePermIn(BaseModel):
-    role: str = Field(..., description="角色")
-    model: str = Field(..., description="模块")
-    act: str = Field(..., description="权限行为")
-    # docs scheam添加example
-    model_config = {
-        "json_schema_extra": {
-            "example": {"role": "admin", "model": "admin", "act": "add"}
-        }
-    }
-
-
 class Login(BaseModel):
     """登录res schema"""
 

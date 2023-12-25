@@ -19,7 +19,7 @@ class ResultResponse(BaseModel, Generic[DataT]):
 
     success: bool = Field(default=True, description="成功状态")
     message: str = Field(default="success", description="消息内容")
-    result: Optional[DataT] = Field(description="返回数据主体")
+    result: Optional[DataT] = Field(default=None,description="返回数据主体")
 
 
 class PageParam(BaseModel):

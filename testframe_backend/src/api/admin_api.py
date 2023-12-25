@@ -19,8 +19,8 @@ router = APIRouter()
 
 @router.get(
     "/role/list",
-    summary="查询所有角色",
-    response_model=ResultResponse[user_schema.RolesTo],
+    summary="查询角色列表",
+    response_model=ResultResponse[admin_schema.RolesTo],
 )
 async def query_roles(
     limit: Optional[int] = Query(default=20, ge=10),
@@ -32,20 +32,49 @@ async def query_roles(
         limit (Optional[int], optional): 取值数. Defaults to 10.
         page (Optional[int], optional): 页数. Defaults to 0.
     """
-    roles = await Role.all().offset(limit * (page - 1)).limit(limit)
+    roles = (
+        await Role.all()
+        .prefetch_related("permissions")
+        .offset(limit * (page - 1))
+        .limit(limit)
+    )
     total = await Role.all().count()
-    return ResultResponse[user_schema.RolesTo](
-        result=user_schema.RolesTo(data=roles, page=page, limit=limit, total=total)
+    return ResultResponse[admin_schema.RolesTo](
+        result=admin_schema.RolesTo(data=roles, page=page, limit=limit, total=total)
+    )
+
+
+@router.get(
+    "/permission/list",
+    summary="查询权限列表",
+    response_model=ResultResponse[admin_schema.PermissionsTo],
+)
+async def query_permissions(
+    limit: Optional[int] = Query(default=20, ge=10),
+    page: Optional[int] = Query(default=1, gt=0),
+):
+    """查询所有权限"""
+    permissions = (
+        await Permission.all()
+        .prefetch_related("accesses")
+        .offset(limit * (page - 1))
+        .limit(limit)
+    )
+    total = await Permission.all().count()
+    return ResultResponse[admin_schema.PermissionsTo](
+        result=admin_schema.PermissionsTo(
+            data=permissions, page=page, limit=limit, total=total
+        )
     )
 
 
 @router.post(
     "/role",
     summary="新增角色",
-    response_model=ResultResponse[user_schema.RoleTo],
+    response_model=ResultResponse[admin_schema.RoleTo],
     # dependencies=[Depends(Authority("admin,add"))],
 )
-async def add_role(body: user_schema.RoleIn):
+async def add_role(body: admin_schema.RoleIn):
     """创建角色
 
     Args:
@@ -56,7 +85,7 @@ async def add_role(body: user_schema.RoleIn):
     """
     role_obj = await Role.create(**body.dict(exclude_unset=True))
     log.debug(f"role_name返回:{role_obj}")
-    return ResultResponse[user_schema.RoleTo](result=role_obj)
+    return ResultResponse[admin_schema.RoleTo](result=role_obj)
 
 
 @router.post(
@@ -73,14 +102,14 @@ async def add_role_permission(body: admin_schema.RolePermissionIn):
     if not permission:
         raise PermissionNotExistException
     await role.permissions.add(permission)
-    return ResultResponse[str](message="successful!")
+    return ResultResponse[str](result="Successfully added role permissions!")
 
 
 @router.delete(
     "/role/{role_id}",
     summary="删除角色",
     response_model=ResultResponse[str],
-    dependencies=[Depends(Authority("admin","delete"))],
+    dependencies=[Depends(Authority("admin", "delete"))],
 )
 async def delete_role(role_id: int):
     """删除角色
@@ -98,7 +127,7 @@ async def delete_role(role_id: int):
 @router.put(
     "/role/{role_id}",
     summary="更新角色",
-    response_model=ResultResponse[user_schema.RoleTo],
+    response_model=ResultResponse[admin_schema.RoleTo],
 )
 async def update_role(
     role_id: int,
@@ -116,9 +145,9 @@ async def update_role(
     summary="新增用户角色",
     response_model=ResultResponse[str],
 )
-async def add_user_role(body: user_schema.UserAddRoleIn):
+async def add_user_role(body: admin_schema.UserAddRoleIn):
     try:
-        user = await Users.get(id=body.user_id).prefetch_related("roles")
+        user = await Users.get(id=body.user_id)
     except DoesNotExist:
         raise UserNotExistException
     try:
@@ -126,7 +155,7 @@ async def add_user_role(body: user_schema.UserAddRoleIn):
     except DoesNotExist:
         raise RoleNotExistException
     await user.roles.add(role)
-    return ResultResponse[str](message="User role association successful!")
+    return ResultResponse[str](result="User role association successful!")
 
 
 @router.post(
@@ -169,7 +198,7 @@ async def add_permission_access(body: admin_schema.PermissionAccessIn):
     if not access:
         raise AccessNotExistException
     await permission.accesses.add(access)
-    return ResultResponse[str](message="success")
+    return ResultResponse[str](result="Successfully added permission access")
 
 
 @router.put("/permission/{permission_id}", summary="修改权限")
