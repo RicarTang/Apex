@@ -1,12 +1,12 @@
-import json
 from typing import List
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Request, HTTPException, status
 from ..core.security import (
     create_access_token,
     check_jwt_auth,
 )
 from passlib.hash import md5_crypt
 from tortoise.exceptions import DoesNotExist
+from tortoise.expressions import Q
 from ...src.db.models import Users, Routes
 from ..schemas import ResultResponse, user_schema, default_schema
 from ..utils.exceptions.user import (
@@ -82,14 +82,24 @@ async def logout(request: Request):
     dependencies=[Depends(check_jwt_auth)],
 )
 async def get_routers(current_user=Depends(current_user)):
-    # 控制路由权限
-    if current_user.id in [1, 2]:
-        # 仅查询一级路由,并预取children(children里的meta)与meta
-        route_list = await Routes.filter(parent_id__isnull=True).prefetch_related(
-            "children__meta", "meta"
+    user = (
+        await Users.filter(id=current_user.id)
+        .first()
+        .prefetch_related("roles__permissions__menus")
+    )
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="This user cannot access the routing menu!",
         )
-    else:
-        route_list = await Routes.filter(
-            parent_id__isnull=True, is_admin_visible__not=True
-        ).prefetch_related("children__meta", "meta")
+    route_ids = {
+        menu.id
+        for role in user.roles
+        for permission in role.permissions
+        for menu in permission.menus
+    }
+    route_list = await Routes.filter(id__in=route_ids).prefetch_related(
+        "children__meta", "meta"
+    )
     return ResultResponse[List[default_schema.RoutesTo]](result=route_list)

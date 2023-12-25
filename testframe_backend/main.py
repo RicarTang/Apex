@@ -26,7 +26,7 @@ from .config import config
 from .src.utils.background_task_util import scheduler
 from .src.utils.log_util import log
 from .src.db.settings import TORTOISE_ORM
-from .src.db import create_initial_users, initial_routes
+from .src.db import initial_data
 
 
 app = FastAPI(
@@ -37,7 +37,7 @@ app = FastAPI(
 )
 
 
-# 注册tortoise orm 需要在create_initial_users前面
+# 注册tortoise orm 需要在initial_data前面
 register_tortoise(
     app,
     config=TORTOISE_ORM,
@@ -70,9 +70,7 @@ async def app_startup():
             os.makedirs(config.ALLURE_REPORT)
 
     # 创建默认用户角色,需要在注册tortoise后面初始化默认用户
-    await create_initial_users()
-    # 初始化路由,前端渲染菜单需要
-    await initial_routes()
+    await initial_data()
     # 修改默认swagger参数，使用static文件
     sys.modules["fastapi.applications"].get_swagger_ui_html.__kwdefaults__[
         "swagger_js_url"

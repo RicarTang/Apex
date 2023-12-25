@@ -38,7 +38,6 @@ dependencies = [
     "python-jose<4.0.0,>=3.3.0",
     "apscheduler<4.0.0,>=3.10.4",
     "aerich<1.0.0,>=0.7.2",
-    "casbin-tortoise-adapter<2.0.0,>=1.2.1",
     "openpyxl<4.0.0,>=3.1.2",
     "aiofiles<24.0.0,>=23.2.1",
     "pyyaml<7.0.0,>=6.0.1",
@@ -60,7 +59,6 @@ dependencies = [
     "pendulum>=2.1.2",
     "httpx>=0.25.2",
     "pytest-assume>=2.4.3",
-    "casbin>=1.33.0",
 ]
 requires-python = ">=3.9"
 readme = "README.md"

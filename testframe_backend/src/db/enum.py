@@ -32,3 +32,19 @@ class RequestParamTypeEnum(str, Enum):
     BODY = "body"
     QUERY = "query"
     PATH = "path"
+
+
+class AccessActionEnum(str, Enum):
+    """访问控制action"""
+    ADD = "add"
+    DEL = "delete"
+    PUT = "update"
+    GET = "query"
+
+class AccessModelEnum(str, Enum):
+    """访问控制model"""
+    USER = "user"
+    ADMIN = "admin"
+    TESTENV = "testenv"
+    TESTCASE = "testcase"
+    TESTSUITE = "testsuite"

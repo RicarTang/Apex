@@ -1,15 +1,13 @@
 # TestFrameworkBackend
 
 ## 概述
-使用fastapi+tortoise-orm+mysql+casbin写的后台管理api，接口测试平台后端，用Vue构建前端。
+使用fastapi+tortoise-orm+mysql构建后台管理api，接口测试平台后端。
 前端github地址（开发中）：https://github.com/RicarTang/testframework_vue3
 ## 技术架构
 - 使用pythonweb异步框架fastapi
 - 包管理工具使用pdm
 - 使用异步ORMtortoise-orm，迁移工具使用aerich
-- casbin访问控制（参考@xingxingzaixian的FASTAPI-TORTOISE-CASBIN项目代码）
-    - 记录一下casbin踩坑：使用的豆瓣源下载的casbin竟然和清华源下载的不一样，豆瓣源casbin会报错；并且casbin包需要放在casbin-tortoise-adapter这个包的前面。
-    - casbin使用有问题时，pipenv uninstall asynccasbin,然后再重新安装pipenv install asynccasbin（asynccasbin与casbin都是import casbin,无语）；
+- 基于rbac的权限控制
 - 使用gunicorn+uvicorn守护程序运行(可选)
 - pydanticV2
 - 使用分布式队列celery运行pytest测试

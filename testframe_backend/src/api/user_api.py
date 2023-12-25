@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 from fastapi import APIRouter, Depends, Query, Response
 from passlib.hash import md5_crypt
 from tortoise.transactions import in_transaction
@@ -28,7 +28,7 @@ router = APIRouter()
     dependencies=[Depends(check_jwt_auth)],
 )
 async def get_users(
-    username: Optional[str] = Query(default=None, description="用户名",alias="userName"),
+    username: Optional[str] = Query(default=None, description="用户名", alias="userName"),
     limit: Optional[int] = Query(default=20, ge=10),
     page: Optional[int] = Query(default=1, gt=0),
 ):
@@ -55,28 +55,21 @@ async def get_users(
 @router.get(
     "/role",
     summary="获取当前用户角色",
-    response_model=ResultResponse[user_schema.RolesTo],
+    response_model=ResultResponse[List[user_schema.RoleTo]],
 )
 async def query_user_role(
-    limit: Optional[int] = Query(default=20, ge=10),
-    page: Optional[int] = Query(default=1, gt=0),
     current_user: Users = Depends(current_user),
 ):
     """查询当前用户角色"""
-    user = await Users.filter(id=current_user.id).first().prefetch_related("roles")
-    user_role_list = await user.roles.all().offset(limit * (page - 1)).limit(limit)
-    total = await user.roles.all().count()
-    return ResultResponse[user_schema.RolesTo](
-        result=user_schema.RolesTo(
-            data=user_role_list, page=page, limit=limit, total=total
-        )
-    )
+    user = await Users.filter(id=current_user.id).prefetch_related("roles").first()
+    return ResultResponse[List[user_schema.RoleTo]](result=user.roles)
 
 
 @router.get(
     "/me",
-    summary="获取当前用户",
+    summary="获取当前用户信息",
     response_model=ResultResponse[user_schema.UserPy],
+    dependencies=[Depends(Authority("user", "add"))],
 )
 async def get_current_user(current_user: Users = Depends(current_user)):
     """获取当前用户"""
@@ -87,7 +80,7 @@ async def get_current_user(current_user: Users = Depends(current_user)):
     "/create",
     summary="创建用户",
     response_model=ResultResponse[user_schema.UserOut],
-    dependencies=[Depends(check_jwt_auth), Depends(Authority("user,add"))],
+    dependencies=[Depends(check_jwt_auth), Depends(Authority("user","add"))],
 )
 async def create_user(user: user_schema.UserIn):
     """创建用户."""
@@ -142,7 +135,7 @@ async def get_user(user_id: int):
     response_model=ResultResponse[user_schema.UserOut],
     summary="更新用户",
     responses={404: {"model": HTTPNotFoundError}},
-    dependencies=[Depends(check_jwt_auth), Depends(Authority("user,update"))],
+    dependencies=[Depends(check_jwt_auth), Depends(Authority("user","update"))],
 )
 async def update_user(user_id: int, user: user_schema.UserIn):
     """更新用户信息."""
@@ -169,7 +162,7 @@ async def update_user(user_id: int, user: user_schema.UserIn):
     "/batchDelete",
     summary="批量删除用户",
     response_model=ResultResponse[str],
-    dependencies=[Depends(check_jwt_auth), Depends(Authority("user,delete"))],
+    dependencies=[Depends(check_jwt_auth), Depends(Authority("user","delete"))],
 )
 async def batch_delete_user(body: user_schema.BatchDelete):
     """批量删除用户
@@ -191,7 +184,7 @@ async def batch_delete_user(body: user_schema.BatchDelete):
     response_model=ResultResponse[str],
     summary="删除用户",
     responses={404: {"model": HTTPNotFoundError}},
-    dependencies=[Depends(check_jwt_auth), Depends(Authority("user,delete"))],
+    dependencies=[Depends(check_jwt_auth), Depends(Authority("user","delete"))],
 )
 async def delete_user(user_id: int, response: Response):
     """删除用户."""
