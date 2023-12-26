@@ -1,4 +1,5 @@
 from typing import Any
+from fastapi import HTTPException, status
 from tortoise.queryset import QuerySet
 from tortoise.exceptions import DoesNotExist, MultipleObjectsReturned
 from ..db.models import Users, Role, UserToken
@@ -21,22 +22,25 @@ class UserService:
         return await Users.create(**kwargs)
 
     @staticmethod
-    async def query_user(**kwargs: Any):
-        """
-        查询用户.
-        :param kwargs:
-            models字段,
-            example：
-                id = 1;
-                username = "jack"
-        :return: QuerySetSingle Type
+    async def query_user_by_username(username: str) -> Users:
+        """通过用户名查询用户
+
+        Raises:
+            UserNotExistException: _description_
+
+        Returns:
+            _type_: _description_
         """
         try:
-            query_result = await Users.get(**kwargs)
+            query_result = await Users.get(username=username).prefetch_related("roles")
         except DoesNotExist:
             raise UserNotExistException
         except MultipleObjectsReturned:
-            pass
+            log.error("查询出多个同样的用户名！")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Duplicate username!",
+            )
         else:
             return query_result
 
@@ -67,6 +71,25 @@ class UserService:
             _type_: _description_
         """
         user = await Users.filter(**kwargs).first().prefetch_related("roles")
+
+    @staticmethod
+    async def is_super_user(user_id: int) -> bool:
+        """判断是否是超级管理员
+
+        Args:
+            user_id (int): 用户id
+
+        Returns:
+            bool: _description_
+        """
+        user = (
+            await Users.filter(id=user_id, roles__name="superadmin")
+            .first()
+            .prefetch_related("roles")
+        )
+        if user:
+            return True
+        return False
 
 
 class UserTokenService:
@@ -112,6 +135,7 @@ class UserTokenService:
         if result := await UserToken.filter(token=token).first():
             return result.is_active
         else:
+            # 数据库未记录
             raise TokenInvalidException
 
     @staticmethod

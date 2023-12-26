@@ -26,34 +26,22 @@ class UserIn(User):
 class UserOut(UserPydantic):
     """单用户res schema"""
 
-    pass
-    # class Config:
-    #     orm_mode = True
+    roles: List[RolePydantic] = Field(description="用户角色")
 
 
 class UsersOut(PageParam):
     """用户集res schema"""
 
     # List[UserPydantic]
-    data: List[UserPydantic]
-
-
-class UserPy(UserPydantic, extra=Extra.ignore):
-    """
-    extra=Extra.ignore,表示忽略多的属性，
-    不加时，多了模型没有的属性会报错，
-    这里忽略password属性
-    """
-
-    pass
+    data: List[UserOut]
 
 
 class Login(BaseModel):
     """登录res schema"""
 
-    data: UserPy
-    access_token: str
-    token_type: str
+    data: UserOut = Field(description="用户信息主体")
+    access_token: str = Field(description="jwt")
+    token_type: str = Field(description="token类型")
 
 
 class LoginIn(BaseModel):

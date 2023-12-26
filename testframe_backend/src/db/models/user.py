@@ -28,6 +28,7 @@ class Users(AbstractBaseModel):
 
     class Meta:
         ordering = ["-created_at"]
+        indexes = ("username", "is_active", "created_at")  # 添加复合非唯一索引
 
     def __str__(self):
         return f"<{self.__class__.__name__},id:{self.id}>"

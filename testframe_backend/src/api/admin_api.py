@@ -34,7 +34,7 @@ async def query_roles(
     """
     roles = (
         await Role.all()
-        .prefetch_related("permissions")
+        .prefetch_related("permissions__accesses")
         .offset(limit * (page - 1))
         .limit(limit)
     )

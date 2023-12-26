@@ -96,6 +96,5 @@ async def get_current_user(
     if not username:
         raise TokenInvalidException
     # 查询用户
-    user = await UserService.query_user(username=username)
-    log.debug(f"当前用户：{user}")
+    user = await UserService.query_user_by_username(username=username)
     return user

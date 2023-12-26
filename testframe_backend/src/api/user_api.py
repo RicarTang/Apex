@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Optional, List
 from fastapi import APIRouter, Depends, Query, Response
 from passlib.hash import md5_crypt
@@ -25,28 +26,45 @@ router = APIRouter()
     "/list",
     summary="获取所有用户",
     response_model=ResultResponse[user_schema.UsersOut],
-    dependencies=[Depends(check_jwt_auth)],
 )
 async def get_users(
     username: Optional[str] = Query(default=None, description="用户名", alias="userName"),
+    is_active: Optional[str] = Query(default=None, description="用户状态"),
+    begin_time: Optional[str] = Query(
+        default=None, description="开始时间", alias="beginTime"
+    ),
+    end_time: Optional[str] = Query(default=None, description="结束时间", alias="endTime"),
     limit: Optional[int] = Query(default=20, ge=10),
     page: Optional[int] = Query(default=1, gt=0),
 ):
     """获取用户列表"""
-    # 查询用户名
+    # 筛选列表
+    filters = {}
     if username:
-        result = (
-            await Users.filter(username__contains=username)
-            .all()
-            .offset(limit * (page - 1))
-            .limit(limit)
+        filters["username__icontains"] = username
+    if is_active is not None:
+        filters["is_active"] = is_active
+    if begin_time:
+        begin_time = datetime.strptime(begin_time, "%Y-%m-%d")
+        filters["created_at__gte"] = begin_time
+    if end_time:
+        end_time = datetime.strptime(end_time, "%Y-%m-%d")
+        filters["created_at__lte"] = end_time
+    if begin_time and end_time:
+        filters["created_at__range"] = (
+            begin_time,
+            end_time,
         )
-        total = await Users.filter(username__contains=username).all().count()
-    # 默认查询
-    else:
-        result = await Users.all().offset(limit * (page - 1)).limit(limit)
-        # total
-        total = await Users.all().count()
+    # 执行查询
+    query = (
+        Users.filter(**filters)
+        .prefetch_related("roles")
+        .offset(limit * (page - 1))
+        .limit(limit)
+    )
+    result = await query.all()
+    # total
+    total = await query.count()
     return ResultResponse[user_schema.UsersOut](
         result=user_schema.UsersOut(data=result, page=page, limit=limit, total=total)
     )
@@ -61,64 +79,49 @@ async def query_user_role(
     current_user: Users = Depends(current_user),
 ):
     """查询当前用户角色"""
-    user = await Users.filter(id=current_user.id).prefetch_related("roles").first()
+    user = (
+        await Users.filter(id=current_user.id)
+        .first()
+        .prefetch_related("roles__permissions__accesses")
+    )
     return ResultResponse[List[admin_schema.RoleTo]](result=user.roles)
 
 
 @router.get(
     "/me",
     summary="获取当前用户信息",
-    response_model=ResultResponse[user_schema.UserPy],
+    response_model=ResultResponse[user_schema.UserOut],
 )
 async def get_current_user(current_user: Users = Depends(current_user)):
     """获取当前用户"""
-    return ResultResponse[user_schema.UserPy](result=current_user)
+    return ResultResponse[user_schema.UserOut](result=current_user)
 
 
 @router.post(
     "/create",
     summary="创建用户",
     response_model=ResultResponse[user_schema.UserOut],
-    dependencies=[Depends(check_jwt_auth), Depends(Authority("user","add"))],
+    dependencies=[Depends(Authority("user", "add"))],
 )
 async def create_user(user: user_schema.UserIn):
     """创建用户."""
     user.password = md5_crypt.hash(user.password)
-    user_obj = await Users(**user.dict(exclude_unset=True))
+    user_obj = await Users(**user.model_dump(exclude_unset=True))
     # 添加用户角色
     role = await Role.filter(name="member").first()
     if not role:
         raise RoleNotExistException
     await user_obj.save()
     await user_obj.roles.add(role)
-    log.info(f"成功创建用户：{user.dict(exclude_unset=True)}")
+    log.info(f"成功创建用户：{user.model_dump(exclude_unset=True)}")
     return ResultResponse[user_schema.UserOut](result=user_obj)
-
-
-@router.get(
-    "/query",
-    summary="查询用户",
-    response_model=ResultResponse[user_schema.UsersOut],
-    dependencies=[Depends(check_jwt_auth)],
-)
-async def query_user(
-    username: Optional[str] = Query(default=None, description="用户名"),
-    limit: Optional[int] = Query(default=20, ge=10),
-    page: Optional[int] = Query(default=1, gt=0),
-):
-    """查询用户"""
-    result = await Users.filter(username__contains=username).all()
-    total = len(result)
-    return ResultResponse[user_schema.UsersOut](
-        result=user_schema.UsersOut(data=result, page=page, limit=limit, total=total)
-    )
 
 
 @router.get(
     "/{user_id}",
     response_model=ResultResponse[user_schema.UserOut],
     summary="根据id查询用户",
-    dependencies=[Depends(check_jwt_auth)],
+    dependencies=[Depends(Authority("user", "query"))],
 )
 async def get_user(user_id: int):
     """根据id查询用户."""
@@ -134,7 +137,7 @@ async def get_user(user_id: int):
     response_model=ResultResponse[user_schema.UserOut],
     summary="更新用户",
     responses={404: {"model": HTTPNotFoundError}},
-    dependencies=[Depends(check_jwt_auth), Depends(Authority("user","update"))],
+    dependencies=[Depends(Authority("user", "update"))],
 )
 async def update_user(user_id: int, user: user_schema.UserIn):
     """更新用户信息."""
@@ -161,7 +164,7 @@ async def update_user(user_id: int, user: user_schema.UserIn):
     "/batchDelete",
     summary="批量删除用户",
     response_model=ResultResponse[str],
-    dependencies=[Depends(check_jwt_auth), Depends(Authority("user","delete"))],
+    dependencies=[Depends(Authority("user", "delete"))],
 )
 async def batch_delete_user(body: user_schema.BatchDelete):
     """批量删除用户
@@ -183,7 +186,7 @@ async def batch_delete_user(body: user_schema.BatchDelete):
     response_model=ResultResponse[str],
     summary="删除用户",
     responses={404: {"model": HTTPNotFoundError}},
-    dependencies=[Depends(check_jwt_auth), Depends(Authority("user","delete"))],
+    dependencies=[Depends(Authority("user", "delete"))],
 )
 async def delete_user(user_id: int, response: Response):
     """删除用户."""

@@ -16,7 +16,7 @@ from ..utils.exceptions.user import (
     TokenInvalidException,
 )
 from ..utils.log_util import log
-from ..services import UserTokenService
+from ..services import UserTokenService, UserService
 from ..core.security import (
     check_jwt_auth,
     get_current_user as current_user,
@@ -37,7 +37,7 @@ async def login(
     """用户登陆."""
     # 查询数据库有无此用户
     try:
-        query_user = await Users.get(username=user.username)
+        query_user = await UserService.query_user_by_username(username=user.username)
     except DoesNotExist:
         raise UserNotExistException
     # 用户为不可用状态

@@ -13,6 +13,7 @@ from .src.api import (
     config_api,
     sse_api,
     default_api,
+    system_api,
 )
 from .src.core.security import check_jwt_auth
 from .src.core.middleware import middleware
@@ -107,13 +108,14 @@ app.include_router(
     user_api,
     tags=["User"],
     prefix="/user",
-)
-app.include_router(
-    comment_api,
-    tags=["Comment"],
-    prefix="/comment",
     dependencies=[Depends(check_jwt_auth)],
 )
+# app.include_router(
+#     comment_api,
+#     tags=["Comment"],
+#     prefix="/comment",
+#     dependencies=[Depends(check_jwt_auth)],
+# )
 app.include_router(
     admin_api,
     tags=["Admin"],
@@ -145,11 +147,18 @@ app.include_router(
     # dependencies=[Depends(check_jwt_auth)],
 )
 app.include_router(
+    system_api,
+    tags=["System"],
+    prefix="/system",
+    dependencies=[Depends(check_jwt_auth)],
+)
+app.include_router(
     sse_api,
     tags=["SSE Demo"],
     prefix="/sse",
     # dependencies=[Depends(check_jwt_auth)],
 )
+
 
 # 注册自定义的exception(方式一)
 app.add_exception_handler(HTTPException, custom_http_exception_handler)

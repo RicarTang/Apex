@@ -3,6 +3,8 @@ from fastapi.exceptions import HTTPException
 from .security import get_current_user
 from .premission import PermissionAccess
 from ..db.models import Users
+from ..services.user_service import UserService
+
 
 
 class Authority:
@@ -24,7 +26,8 @@ class Authority:
         """
 
         # 超级用户拥有所有权限
-        if current_user.is_super:
+        is_super = await UserService.is_super_user(current_user.id)
+        if is_super:
             return
 
         if not await PermissionAccess.has_access(
