@@ -57,13 +57,8 @@ async def get_users(
             end_time,
         )
     # 执行查询
-    query = (
-        Users.filter(**filters)
-        .prefetch_related("roles")
-        .offset(limit * (page - 1))
-        .limit(limit)
-    )
-    result = await query.all()
+    query = Users.filter(**filters).prefetch_related("roles")
+    result = await query.offset(limit * (page - 1)).limit(limit).all()
     # total
     total = await query.count()
     return ResultResponse[user_schema.UsersTo](
@@ -143,6 +138,18 @@ async def batch_delete_user(body: user_schema.BatchDelete):
     return ResultResponse[str](message=f"successful deleted {users_to_delete} users!")
 
 
+@router.put(
+    "/resetPwd",
+    summary="重置用户密码",
+)
+async def reset_user_pwd(body: user_schema.UserResetPwdIn):
+    """更新用户密码"""
+    if not await Users.filter(id=body.user_id).exists():
+        raise UserNotExistException
+    await Users.filter(id=body.user_id).update(password=md5_crypt.hash(body.password))
+    return ResultResponse[str](result="successful reset user password!")
+
+
 @router.get(
     "/{user_id}",
     response_model=ResultResponse[user_schema.UserTo],
@@ -202,12 +209,11 @@ async def update_user(user_id: int, body: user_schema.UserUpdateIn):
     "/{user_id}",
     response_model=ResultResponse[str],
     summary="删除用户",
-    responses={404: {"model": HTTPNotFoundError}},
     dependencies=[Depends(Authority("user", "delete"))],
 )
-async def delete_user(user_id: int, response: Response):
+async def delete_user(user_id: int):
     """删除用户."""
     if not await Users.filter(id=user_id).exists():
         raise UserNotExistException
-    deleted_count = await Users.filter(id=user_id).delete()
-    return ResultResponse[str](message="successful deleted user!")
+    await Users.filter(id=user_id).delete()
+    return ResultResponse[str](result="successful deleted user!")

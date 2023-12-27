@@ -35,6 +35,12 @@ class UserUpdateIn(BaseModel):
     )
 
 
+class UserResetPwdIn(BaseModel):
+    """用户重置密码schema"""
+    user_id: int = Field(description="用户id",alias="userId")
+    password: str = Field(min_length=6, max_length=20, description="用户密码")
+
+
 class UserTo(UserPydantic):
     """单用户res schema"""
 
