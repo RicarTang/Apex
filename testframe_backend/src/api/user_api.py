@@ -166,19 +166,31 @@ async def get_user(user_id: int):
 )
 async def update_user(user_id: int, body: user_schema.UserUpdateIn):
     """更新用户信息."""
-    # 使用事务
+    # 查询用户是否存在
+    query_user = await Users.get_or_none(id=user_id).prefetch_related("roles")
+    if not query_user:
+        raise UserNotExistException
+    # 启用事务
     async with in_transaction():
-        # 查询用户是否存在
-        query_user = await Users.get_or_none(id=user_id).prefetch_related("roles")
-        if not query_user:
-            raise UserNotExistException
         # 判断角色修改
-        if hasattr(body, "user_roles") and len(body.user_roles) == 0:
-            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Role cannot be cleared!")
-        elif getattr(body, "user_roles"):
-            # 对角色进行处理
+        if body.user_roles is not None:
+            if body.user_roles == []:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="Role cannot be cleared!",
+                )
+            # 获取当前用户角色列表
+            current_user_role_list = await query_user.roles.all()
+            # 获取接口请求角色列表
             roles = await Role.filter(id__in=body.user_roles).all()
-            await query_user.roles.add(*roles)
+            # 确定需要添加和需要移除的角色 ID
+            role_ids_to_add = list(set(roles) - set(current_user_role_list))
+            role_ids_to_remove = list(set(current_user_role_list) - set(roles))
+            log.debug(f"toadd:{role_ids_to_add},toremove:{role_ids_to_remove}")
+            # 添加/删除
+            await query_user.roles.add(*role_ids_to_add)
+            if role_ids_to_remove:
+                await query_user.roles.remove(*role_ids_to_remove)
         # 更新指定字段
         await Users.filter(id=user_id).update(
             **body.model_dump(exclude_unset=True, exclude=["user_roles"])
