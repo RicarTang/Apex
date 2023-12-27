@@ -1,7 +1,7 @@
 from passlib.hash import md5_crypt
 from tortoise.transactions import in_transaction
 from .models import Users, Role, Routes, RouteMeta, Permission, AccessControl
-from .enum import AccessModelEnum, AccessActionEnum
+from .enum import AccessModelEnum, AccessActionEnum, BoolEnum
 from ..utils.log_util import log
 
 
@@ -13,7 +13,7 @@ async def initial_data():
         async with in_transaction():
             log.info("开始初始化用户，超级管理员：superadmin,12346".center(100, "-"))
             # 创建角色
-            super_role = await Role.create(name="superadmin", description="超级管理员角色")
+            super_role = await Role.create(name="superadmin", description="超级管理员角色",is_super=BoolEnum.TRUE)
             admin_role = await Role.create(name="admin", description="管理员角色")
             member_role = await Role.create(name="member", description="普通用户角色")
             # 创建默认用户，并添加角色
@@ -21,7 +21,6 @@ async def initial_data():
                 username="superadmin",
                 descriptions="超级管理员",
                 password=md5_crypt.hash("123456"),
-                is_super=1,
             )
             admin_user = await Users.create(
                 username="admin",
@@ -29,7 +28,7 @@ async def initial_data():
                 password=md5_crypt.hash("123456"),
             )
             member_user = await Users.create(
-                username="user",
+                username="tester",
                 descriptions="普通用户",
                 password=md5_crypt.hash("123456"),
             )

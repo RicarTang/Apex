@@ -7,39 +7,37 @@ from .common_schema import PageParam
 class User(BaseModel):
     """用户"""
 
-    username: Optional[str] = Field(default=None, max_length=20, description="用户名")
-    descriptions: Optional[str] = Field(default=None, max_length=50, description="用户描述")
-    is_active: Optional[DisabledEnum] = Field(
-        default=None, description="0:Disable,1:Enable"
+    username: str = Field(max_length=20, description="用户名", alias="userName")
+    descriptions: Optional[str] = Field(
+        default=None, max_length=50, description="用户描述", alias="remark"
     )
+    is_active: DisabledEnum = Field(description="0:Disable,1:Enable", alias="status")
 
 
 class UserIn(User):
     """用户req schema"""
 
-    password: Optional[str] = Field(
-        default=None, min_length=6, max_length=20, description="用户密码"
-    )
-    # user_role: str
+    password: str = Field(min_length=6, max_length=20, description="用户密码")
+    user_roles: list = Field(description="角色id列表",alias="roleIds")
 
 
-class UserOut(UserPydantic):
+class UserTo(UserPydantic):
     """单用户res schema"""
 
     roles: List[RolePydantic] = Field(description="用户角色")
 
 
-class UsersOut(PageParam):
+class UsersTo(PageParam):
     """用户集res schema"""
 
     # List[UserPydantic]
-    data: List[UserOut]
+    data: List[UserTo]
 
 
 class Login(BaseModel):
     """登录res schema"""
 
-    data: UserOut = Field(description="用户信息主体")
+    data: UserTo = Field(description="用户信息主体")
     access_token: str = Field(description="jwt")
     token_type: str = Field(description="token类型")
 

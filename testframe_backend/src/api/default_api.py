@@ -82,24 +82,33 @@ async def logout(request: Request):
     dependencies=[Depends(check_jwt_auth)],
 )
 async def get_routers(current_user=Depends(current_user)):
-    user = (
-        await Users.filter(id=current_user.id)
-        .first()
-        .prefetch_related("roles__permissions__menus")
-    )
-
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="This user cannot access the routing menu!",
+    # 判断是否是superadmin, superadmin获取所有一级路由
+    is_super = any(role.is_super for role in current_user.roles)
+    if is_super:
+        route_list = await Routes.filter(parent_id__isnull=True).prefetch_related(
+            "children__meta", "meta"
         )
-    route_ids = {
-        menu.id
-        for role in user.roles
-        for permission in role.permissions
-        for menu in permission.menus
-    }
-    route_list = await Routes.filter(id__in=route_ids).prefetch_related(
-        "children__meta", "meta"
-    )
+    # 根据menus权限获取
+    else:
+        user = (
+            await Users.filter(id=current_user.id)
+            .first()
+            .prefetch_related("roles__permissions__menus")
+        )
+
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="This user cannot access the routing menu!",
+            )
+        log.debug(user)
+        route_ids = {
+            menu.id
+            for role in user.roles
+            for permission in role.permissions
+            for menu in permission.menus
+        }
+        route_list = await Routes.filter(id__in=route_ids).prefetch_related(
+            "children__meta", "meta"
+        )
     return ResultResponse[List[default_schema.RoutesTo]](result=route_list)

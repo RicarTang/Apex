@@ -15,11 +15,6 @@ class Users(AbstractBaseModel):
         default=DisabledEnum.ENABLE,
         description="用户活动状态,0:disable,1:enabled",
     )
-    is_super = fields.IntEnumField(
-        enum_type=BoolEnum,
-        default=BoolEnum.FALSE,
-        description="用户时候是超级管理员,1: True,0: False",
-    )
     # 关联关系
     roles: fields.ManyToManyRelation["Role"] = fields.ManyToManyField(
         model_name="models.Role", related_name="roles"
@@ -39,7 +34,11 @@ class Role(AbstractBaseModel):
 
     name = fields.CharField(max_length=20, unique=True, description="角色名称")
     description = fields.CharField(max_length=50, null=True, description="角色详情")
-
+    is_super = fields.IntEnumField(
+        enum_type=BoolEnum,
+        default=BoolEnum.FALSE,
+        description="是否超级管理员角色,1: True,0: False",
+    )
     permissions: fields.ManyToManyRelation["Permission"] = fields.ManyToManyField(
         model_name="models.Permission", related_name="permissions"
     )

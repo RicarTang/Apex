@@ -17,6 +17,7 @@ from ..utils.exceptions.user import (
     UserNotExistException,
     RoleNotExistException,
 )
+from ..services import UserService
 
 
 router = APIRouter()
@@ -25,7 +26,7 @@ router = APIRouter()
 @router.get(
     "/list",
     summary="获取所有用户",
-    response_model=ResultResponse[user_schema.UsersOut],
+    response_model=ResultResponse[user_schema.UsersTo],
 )
 async def get_users(
     username: Optional[str] = Query(default=None, description="用户名", alias="userName"),
@@ -65,8 +66,8 @@ async def get_users(
     result = await query.all()
     # total
     total = await query.count()
-    return ResultResponse[user_schema.UsersOut](
-        result=user_schema.UsersOut(data=result, page=page, limit=limit, total=total)
+    return ResultResponse[user_schema.UsersTo](
+        result=user_schema.UsersTo(data=result, page=page, limit=limit, total=total)
     )
 
 
@@ -90,36 +91,61 @@ async def query_user_role(
 @router.get(
     "/me",
     summary="获取当前用户信息",
-    response_model=ResultResponse[user_schema.UserOut],
+    response_model=ResultResponse[user_schema.UserTo],
 )
 async def get_current_user(current_user: Users = Depends(current_user)):
     """获取当前用户"""
-    return ResultResponse[user_schema.UserOut](result=current_user)
+    return ResultResponse[user_schema.UserTo](result=current_user)
 
 
 @router.post(
     "/create",
     summary="创建用户",
-    response_model=ResultResponse[user_schema.UserOut],
+    response_model=ResultResponse[user_schema.UserTo],
     dependencies=[Depends(Authority("user", "add"))],
 )
-async def create_user(user: user_schema.UserIn):
+async def create_user(body: user_schema.UserIn):
     """创建用户."""
-    user.password = md5_crypt.hash(user.password)
-    user_obj = await Users(**user.model_dump(exclude_unset=True))
-    # 添加用户角色
-    role = await Role.filter(name="member").first()
-    if not role:
-        raise RoleNotExistException
-    await user_obj.save()
-    await user_obj.roles.add(role)
-    log.info(f"成功创建用户：{user.model_dump(exclude_unset=True)}")
-    return ResultResponse[user_schema.UserOut](result=user_obj)
+    async with in_transaction():
+        body.password = md5_crypt.hash(body.password)
+        user_obj = await Users.create(**body.model_dump(exclude_unset=True))
+        # 查询角色列表
+        roles = await Role.filter(id__in=body.user_roles).all()
+        log.debug(roles)
+        if not roles:
+            raise RoleNotExistException
+        # 添加角色关联
+        await user_obj.roles.add(*roles)
+    log.info(f"成功创建用户：{body.model_dump(exclude_unset=True)}")
+    return ResultResponse[user_schema.UserTo](
+        result=await UserService.query_user_by_id(user_obj.id)
+    )
+
+
+@router.delete(
+    "/batchDelete",
+    summary="批量删除用户",
+    response_model=ResultResponse[str],
+    dependencies=[Depends(Authority("user", "delete"))],
+)
+async def batch_delete_user(body: user_schema.BatchDelete):
+    """批量删除用户
+
+    Args:
+        body (user_schema.BatchDelete): _description_
+
+    Returns:
+        _type_: _description_
+    """
+    async with in_transaction():  # 事务
+        # 使用 filter 方法过滤出要删除的记录，然后delete删除
+        users_to_delete = await Users.filter(id__in=body.users_id).delete()
+    return ResultResponse[str](message=f"successful deleted {users_to_delete} users!")
 
 
 @router.get(
     "/{user_id}",
-    response_model=ResultResponse[user_schema.UserOut],
+    response_model=ResultResponse[user_schema.UserTo],
     summary="根据id查询用户",
     dependencies=[Depends(Authority("user", "query"))],
 )
@@ -129,12 +155,12 @@ async def get_user(user_id: int):
         user = await Users.get(id=user_id)
     except DoesNotExist:
         raise UserNotExistException
-    return ResultResponse[user_schema.UserOut](result=user)
+    return ResultResponse[user_schema.UserTo](result=user)
 
 
 @router.put(
     "/{user_id}",
-    response_model=ResultResponse[user_schema.UserOut],
+    response_model=ResultResponse[user_schema.UserTo],
     summary="更新用户",
     responses={404: {"model": HTTPNotFoundError}},
     dependencies=[Depends(Authority("user", "update"))],
@@ -157,28 +183,7 @@ async def update_user(user_id: int, user: user_schema.UserIn):
 
         # 获取更新后的用户信息
         updated_user = await Users.get(id=user_id)
-        return ResultResponse[user_schema.UserOut](result=updated_user)
-
-
-@router.delete(
-    "/batchDelete",
-    summary="批量删除用户",
-    response_model=ResultResponse[str],
-    dependencies=[Depends(Authority("user", "delete"))],
-)
-async def batch_delete_user(body: user_schema.BatchDelete):
-    """批量删除用户
-
-    Args:
-        body (user_schema.BatchDelete): _description_
-
-    Returns:
-        _type_: _description_
-    """
-    async with in_transaction():  # 事务
-        # 使用 filter 方法过滤出要删除的记录，然后delete删除
-        users_to_delete = await Users.filter(id__in=body.users_id).delete()
-    return ResultResponse[str](message=f"successful deleted {users_to_delete} users!")
+        return ResultResponse[user_schema.UserTo](result=updated_user)
 
 
 @router.delete(

@@ -12,16 +12,6 @@ class UserService:
     """用户服务."""
 
     @staticmethod
-    async def create_superadmin(**kwargs: Any) -> Users:
-        """创建超级管理员
-
-        Returns:
-            _type_: _description_
-        """
-        kwargs["is_super"] = 1
-        return await Users.create(**kwargs)
-
-    @staticmethod
     async def query_user_by_username(username: str) -> Users:
         """通过用户名查询用户
 
@@ -33,6 +23,28 @@ class UserService:
         """
         try:
             query_result = await Users.get(username=username).prefetch_related("roles")
+        except DoesNotExist:
+            raise UserNotExistException
+        except MultipleObjectsReturned:
+            log.error("查询出多个同样的用户名！")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Duplicate username!",
+            )
+        else:
+            return query_result
+    @staticmethod
+    async def query_user_by_id(id: int) -> Users:
+        """通过id查询用户
+
+        Raises:
+            UserNotExistException: _description_
+
+        Returns:
+            _type_: _description_
+        """
+        try:
+            query_result = await Users.get(id=id).prefetch_related("roles")
         except DoesNotExist:
             raise UserNotExistException
         except MultipleObjectsReturned:
@@ -83,7 +95,7 @@ class UserService:
             bool: _description_
         """
         user = (
-            await Users.filter(id=user_id, roles__name="superadmin")
+            await Users.filter(id=user_id, roles__is_super=True)
             .first()
             .prefetch_related("roles")
         )
