@@ -18,7 +18,21 @@ class UserIn(User):
     """用户req schema"""
 
     password: str = Field(min_length=6, max_length=20, description="用户密码")
-    user_roles: list = Field(description="角色id列表",alias="roleIds")
+    user_roles: list = Field(description="角色id列表", alias="roleIds")
+
+
+class UserUpdateIn(BaseModel):
+    """用户更新schema"""
+
+    user_roles: Optional[list] = Field(
+        default=None, description="角色id列表", alias="roleIds"
+    )
+    is_active: Optional[DisabledEnum] = Field(
+        default=None, description="0:Disable,1:Enable", alias="status"
+    )
+    descriptions: Optional[str] = Field(
+        default=None, max_length=50, description="用户描述", alias="remark"
+    )
 
 
 class UserTo(UserPydantic):

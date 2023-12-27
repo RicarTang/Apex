@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import Optional, List
-from fastapi import APIRouter, Depends, Query, Response
+from fastapi import APIRouter, Depends, Query, Response, HTTPException, status
 from passlib.hash import md5_crypt
 from tortoise.transactions import in_transaction
 from tortoise.contrib.fastapi import HTTPNotFoundError
@@ -152,7 +152,7 @@ async def batch_delete_user(body: user_schema.BatchDelete):
 async def get_user(user_id: int):
     """根据id查询用户."""
     try:
-        user = await Users.get(id=user_id)
+        user = await UserService.query_user_by_id(user_id)
     except DoesNotExist:
         raise UserNotExistException
     return ResultResponse[user_schema.UserTo](result=user)
@@ -160,30 +160,30 @@ async def get_user(user_id: int):
 
 @router.put(
     "/{user_id}",
-    response_model=ResultResponse[user_schema.UserTo],
+    response_model=ResultResponse[str],
     summary="更新用户",
-    responses={404: {"model": HTTPNotFoundError}},
     dependencies=[Depends(Authority("user", "update"))],
 )
-async def update_user(user_id: int, user: user_schema.UserIn):
+async def update_user(user_id: int, body: user_schema.UserUpdateIn):
     """更新用户信息."""
-    # 使用 atomic 事务
+    # 使用事务
     async with in_transaction():
         # 查询用户是否存在
-        existing_user = await Users.get_or_none(id=user_id)
-        if not existing_user:
+        query_user = await Users.get_or_none(id=user_id).prefetch_related("roles")
+        if not query_user:
             raise UserNotExistException
-        # 如果提供了密码，进行密码哈希
-        if user.password:
-            user.password = md5_crypt.hash(user.password)
-
-        # 使用 filter 更新指定字段
-        result = await Users.filter(id=user_id).update(**user.dict(exclude_unset=True))
-        log.debug(f"update 更新{result}条数据")
-
-        # 获取更新后的用户信息
-        updated_user = await Users.get(id=user_id)
-        return ResultResponse[user_schema.UserTo](result=updated_user)
+        # 判断角色修改
+        if hasattr(body, "user_roles") and len(body.user_roles) == 0:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Role cannot be cleared!")
+        elif getattr(body, "user_roles"):
+            # 对角色进行处理
+            roles = await Role.filter(id__in=body.user_roles).all()
+            await query_user.roles.add(*roles)
+        # 更新指定字段
+        await Users.filter(id=user_id).update(
+            **body.model_dump(exclude_unset=True, exclude=["user_roles"])
+        )
+    return ResultResponse[str](result=f"Update user information successfully!")
 
 
 @router.delete(
