@@ -211,14 +211,14 @@ class InitDbData:
             name="Dict",
             path="dict",
             hidden=False,
-            component="system/role/index",
+            component="system/dict/index",
         )
         # 系统管理菜单子菜单角色管理
         system_role_route = Routes(
             name="Role",
             path="role",
             hidden=False,
-            component="system/user/index",
+            component="system/role/index",
         )
         # 系统管理菜单子菜单菜单管理
         system_menu_route = Routes(
