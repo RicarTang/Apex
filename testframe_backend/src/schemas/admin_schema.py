@@ -5,11 +5,12 @@ from ..db.models import (
     AccessActionEnum,
     AccessModelEnum,
     AccessPydantic,
-    RolePydantic
+    RolePydantic,
+    RoutesPydantic,
+    RouteMetaPydantic,
 )
+from ..db.enum import BoolEnum
 from .common_schema import PageParam
-
-
 
 
 class PermissionIn(BaseModel):
@@ -66,8 +67,8 @@ class RolesTo(PageParam):
 class UserAddRoleIn(BaseModel):
     """用户添加角色req schema"""
 
-    user_id: int = Field(description="用户id",alias="userId")
-    role_id: int = Field(description="角色id",alias="roleId")
+    user_id: int = Field(description="用户id", alias="userId")
+    role_id: int = Field(description="角色id", alias="roleId")
 
 
 # class UserAddRoleTo(BaseModel):
@@ -86,3 +87,28 @@ class RolePermIn(BaseModel):
             "example": {"role": "admin", "model": "admin", "act": "add"}
         }
     }
+
+
+class MenuMeta(BaseModel):
+    title: str = Field(description="路由标题")
+    icon: str = Field(description="icon图标")
+    no_cache: BoolEnum = Field(description="不使用keepalive")
+    link: Optional[str] = Field(default=None, description="链接")
+
+
+class AddMenuIn(BaseModel):
+    """添加路由菜单schema"""
+
+    name: str = Field(description="菜单名称")
+    path: str = Field(description="菜单path")
+    hidden: BoolEnum = Field(description="是否隐藏")
+    redirect: Optional[str] = Field(default=None, description="重定向")
+    component: str = Field(description="组件path")
+    always_show: Optional[BoolEnum] = Field(default=None, description="是否总是显示")
+    parent_id: Optional[int] = Field(default=None, description="父菜单id")
+    meta: MenuMeta
+
+
+class AddMenuTo(RoutesPydantic):
+    meta: RouteMetaPydantic
+    children: Optional[RoutesPydantic] = Field(default=None)

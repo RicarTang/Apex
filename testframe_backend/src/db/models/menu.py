@@ -6,7 +6,7 @@ from ..base_models import AbstractBaseModel
 class Routes(AbstractBaseModel):
     """前端菜单路由表"""
 
-    name = fields.CharField(max_length=255)
+    name = fields.CharField(max_length=255, unique=True)
     path = fields.CharField(max_length=255)
     hidden = fields.BooleanField()
     redirect = fields.CharField(max_length=255, null=True)

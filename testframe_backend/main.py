@@ -2,6 +2,7 @@ import sys, os
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.exceptions import RequestValidationError
+from tortoise.exceptions import IntegrityError
 from tortoise.contrib.fastapi import register_tortoise
 from .src.api import (
     user_api,
@@ -20,6 +21,7 @@ from .src.core.middleware import middleware
 from .src.core.exception import (
     custom_http_exception_handler,
     custom_validation_exception_handler,
+    custom_integrity_exception_handler
 )
 from .config import config
 
@@ -27,7 +29,7 @@ from .config import config
 from .src.utils.background_task_util import scheduler
 from .src.utils.log_util import log
 from .src.db.settings import TORTOISE_ORM
-from .src.db import initial_data
+from .src.db import InitDbData
 
 
 app = FastAPI(
@@ -70,8 +72,8 @@ async def app_startup():
         except RuntimeError:
             os.makedirs(config.ALLURE_REPORT)
 
-    # 创建默认用户角色,需要在注册tortoise后面初始化默认用户
-    await initial_data()
+    # 初始化数据库,需要在注册tortoise后面初始化
+    await InitDbData().execute_init()
     # 修改默认swagger参数，使用static文件
     sys.modules["fastapi.applications"].get_swagger_ui_html.__kwdefaults__[
         "swagger_js_url"
@@ -163,6 +165,7 @@ app.include_router(
 # 注册自定义的exception(方式一)
 app.add_exception_handler(HTTPException, custom_http_exception_handler)
 app.add_exception_handler(RequestValidationError, custom_validation_exception_handler)
+app.add_exception_handler(IntegrityError, custom_integrity_exception_handler)
 
 # 注册自定义的exception(方式二)
 # @app.exception_handler(RequestValidationError)

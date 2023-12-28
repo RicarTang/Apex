@@ -1,8 +1,9 @@
 from typing import Optional
 from fastapi import APIRouter, HTTPException, Depends, Response, status, Query
 from tortoise.exceptions import DoesNotExist
+from tortoise.transactions import in_transaction
 from ..schemas import ResultResponse, user_schema, admin_schema
-from ...src.db.models import Role, Users, Permission, AccessControl
+from ...src.db.models import Role, Users, Permission, AccessControl, Routes, RouteMeta
 from ..services import UserService, RolePermissionService
 from ..utils.log_util import log
 from ..core.authentication import Authority
@@ -105,41 +106,6 @@ async def add_role_permission(body: admin_schema.RolePermissionIn):
     return ResultResponse[str](result="Successfully added role permissions!")
 
 
-@router.delete(
-    "/role/{role_id}",
-    summary="删除角色",
-    response_model=ResultResponse[str],
-    dependencies=[Depends(Authority("admin", "delete"))],
-)
-async def delete_role(role_id: int):
-    """删除角色
-
-    Args:
-        role_id (int): 角色id
-    """
-    deleted_count = await Role.filter(id=role_id).delete()
-    log.debug(f"删除角色id：{deleted_count}")
-    if not deleted_count:
-        raise RoleNotExistException
-    return ResultResponse[str](message=f"successful deleted role!")
-
-
-@router.put(
-    "/role/{role_id}",
-    summary="更新角色",
-    response_model=ResultResponse[admin_schema.RoleTo],
-)
-async def update_role(
-    role_id: int,
-):
-    """修改角色
-
-    Args:
-        role_id (int): 角色id
-    """
-    pass
-
-
 @router.post(
     "/user/role",
     summary="新增用户角色",
@@ -211,3 +177,58 @@ async def update_role_permission(permission_id: int):
 async def delete_role_permission(permission_id: int):
     """删除权限"""
     pass
+
+
+@router.post(
+    "/addMenu",
+    summary="添加菜单",
+    response_model=ResultResponse[admin_schema.AddMenuTo],
+)
+async def add_menu(body: admin_schema.AddMenuIn):
+    """添加前端路由菜单"""
+    async with in_transaction():
+        # 路由
+        route = await Routes.create(
+            **body.model_dump(exclude_unset=True, exclude=["meta"])
+        )
+        # 添加路由meta
+        await RouteMeta.create(**body.meta.model_dump(exclude_unset=True), route=route)
+        result = await Routes.filter(id=route.id).prefetch_related(
+            "children__meta", "meta"
+        ).first()
+    return ResultResponse[admin_schema.AddMenuTo](result=result)
+
+
+@router.put(
+    "/role/{role_id}",
+    summary="更新角色",
+    response_model=ResultResponse[admin_schema.RoleTo],
+)
+async def update_role(
+    role_id: int,
+):
+    """修改角色
+
+    Args:
+        role_id (int): 角色id
+    """
+    pass
+
+
+@router.delete(
+    "/role/{role_id}",
+    summary="删除角色",
+    response_model=ResultResponse[str],
+    dependencies=[Depends(Authority("admin", "delete"))],
+)
+async def delete_role(role_id: int):
+    """删除角色
+
+    Args:
+        role_id (int): 角色id
+    """
+    deleted_count = await Role.filter(id=role_id).delete()
+    log.debug(f"删除角色id：{deleted_count}")
+    if not deleted_count:
+        raise RoleNotExistException
+    return ResultResponse[str](message=f"successful deleted role!")

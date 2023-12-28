@@ -45,6 +45,4 @@ class AccessModelEnum(str, Enum):
     """访问控制model"""
     USER = "user"
     ADMIN = "admin"
-    TESTENV = "testenv"
-    TESTCASE = "testcase"
-    TESTSUITE = "testsuite"
+    APITEST = "apitest"
