@@ -10,7 +10,7 @@ class Users(AbstractBaseModel):
     username = fields.CharField(max_length=20, unique=True, description="用户名")
     descriptions = fields.CharField(max_length=30, null=True, description="个人描述")
     password = fields.CharField(max_length=128, index=True, description="密码")
-    is_active = fields.IntEnumField(
+    status = fields.IntEnumField(
         enum_type=DisabledEnum,
         default=DisabledEnum.ENABLE,
         description="用户活动状态,0:disable,1:enabled",
@@ -23,7 +23,7 @@ class Users(AbstractBaseModel):
 
     class Meta:
         ordering = ["-created_at"]
-        indexes = ("username", "is_active", "created_at")  # 添加复合非唯一索引
+        indexes = ("username", "status", "created_at")  # 添加复合非唯一索引
 
     def __str__(self):
         return f"<{self.__class__.__name__},id:{self.id}>"

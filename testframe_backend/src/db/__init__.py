@@ -301,7 +301,7 @@ class InitDbData:
         )
         # 接口测试meta
         test_meta = RouteMeta(
-            icon="test",
+            icon="swagger",
             no_cache=False,
             title="接口测试",
         )

@@ -11,7 +11,7 @@ class User(BaseModel):
     descriptions: Optional[str] = Field(
         default=None, max_length=50, description="用户描述", alias="remark"
     )
-    is_active: DisabledEnum = Field(description="0:Disable,1:Enable", alias="status")
+    status: DisabledEnum = Field(description="0:Disable,1:Enable")
 
 
 class UserIn(User):
@@ -27,8 +27,8 @@ class UserUpdateIn(BaseModel):
     user_roles: Optional[list] = Field(
         default=None, description="角色id列表", alias="roleIds"
     )
-    is_active: Optional[DisabledEnum] = Field(
-        default=None, description="0:Disable,1:Enable", alias="status"
+    status: Optional[DisabledEnum] = Field(
+        default=None, description="0:Disable,1:Enable"
     )
     descriptions: Optional[str] = Field(
         default=None, max_length=50, description="用户描述", alias="remark"

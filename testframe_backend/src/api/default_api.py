@@ -41,7 +41,7 @@ async def login(
     except DoesNotExist:
         raise UserNotExistException
     # 用户为不可用状态
-    if not query_user.is_active:
+    if not query_user.status:
         raise UserUnavailableException
     # 验证密码
     if not md5_crypt.verify(secret=user.password, hash=query_user.password):

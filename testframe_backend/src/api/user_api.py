@@ -30,7 +30,7 @@ router = APIRouter()
 )
 async def get_users(
     username: Optional[str] = Query(default=None, description="用户名", alias="userName"),
-    is_active: Optional[str] = Query(default=None, description="用户状态"),
+    status: Optional[str] = Query(default=None, description="用户状态"),
     begin_time: Optional[str] = Query(
         default=None, description="开始时间", alias="beginTime"
     ),
@@ -43,8 +43,8 @@ async def get_users(
     filters = {}
     if username:
         filters["username__icontains"] = username
-    if is_active is not None:
-        filters["is_active"] = is_active
+    if status is not None:
+        filters["status"] = status
     if begin_time:
         begin_time = datetime.strptime(begin_time, "%Y-%m-%d")
         filters["created_at__gte"] = begin_time
@@ -174,7 +174,7 @@ async def get_user(user_id: int):
 async def update_user(user_id: int, body: user_schema.UserUpdateIn):
     """更新用户信息."""
     # 查询用户是否存在
-    query_user = await Users.get_or_none(id=user_id).prefetch_related("roles")
+    query_user = await Users.filter(id=user_id).prefetch_related("roles").first()
     if not query_user:
         raise UserNotExistException
     # 启用事务
