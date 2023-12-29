@@ -1,9 +1,10 @@
+from datetime import datetime
 from typing import Optional
 from fastapi import APIRouter, HTTPException, Depends, Response, status, Query
 from tortoise.exceptions import DoesNotExist
 from tortoise.transactions import in_transaction
 from ..schemas import ResultResponse, user_schema, admin_schema
-from ...src.db.models import Role, Users, Permission, AccessControl, Routes, RouteMeta
+from ..db.models import Role, Users, Permission, AccessControl, Routes, RouteMeta
 from ..services import UserService, RolePermissionService
 from ..utils.log_util import log
 from ..core.authentication import Authority
@@ -20,28 +21,48 @@ router = APIRouter()
 
 @router.get(
     "/role/list",
-    summary="查询角色列表",
+    summary="角色列表",
     response_model=ResultResponse[admin_schema.RolesTo],
 )
 async def query_roles(
+    role_name: Optional[str] = Query(
+        default=None, description="角色名称", alias="roleName"
+    ),
+    role_key: Optional[str] = Query(
+        default=None, description="角色详情", alias="roleKey"
+    ),
+    begin_time: Optional[str] = Query(
+        default=None, description="开始时间", alias="beginTime"
+    ),
+    end_time: Optional[str] = Query(default=None, description="结束时间", alias="endTime"),
     limit: Optional[int] = Query(default=20, ge=10),
     page: Optional[int] = Query(default=1, gt=0),
 ):
-    """查询所有角色
-
-    Args:
-        limit (Optional[int], optional): 取值数. Defaults to 10.
-        page (Optional[int], optional): 页数. Defaults to 0.
-    """
-    roles = (
-        await Role.all()
-        .prefetch_related("permissions__accesses")
-        .offset(limit * (page - 1))
-        .limit(limit)
-    )
-    total = await Role.all().count()
+    """获取角色列表"""
+    # 筛选列表
+    filters = {}
+    if role_name:
+        filters["rolename__icontains"] = role_name
+    if role_key:
+        filters["rolekey__icontains"] = role_key
+    if begin_time:
+        begin_time = datetime.strptime(begin_time, "%Y-%m-%d")
+        filters["created_at__gte"] = begin_time
+    if end_time:
+        end_time = datetime.strptime(end_time, "%Y-%m-%d")
+        filters["created_at__lte"] = end_time
+    if begin_time and end_time:
+        filters["created_at__range"] = (
+            begin_time,
+            end_time,
+        )
+    # 执行查询
+    query = Role.filter(**filters).prefetch_related("permissions__accesses")
+    result = await query.offset(limit * (page - 1)).limit(limit).all()
+    # total
+    total = await query.count()
     return ResultResponse[admin_schema.RolesTo](
-        result=admin_schema.RolesTo(data=roles, page=page, limit=limit, total=total)
+        result=admin_schema.RolesTo(data=result, page=page, limit=limit, total=total)
     )
 
 
@@ -193,9 +214,11 @@ async def add_menu(body: admin_schema.AddMenuIn):
         )
         # 添加路由meta
         await RouteMeta.create(**body.meta.model_dump(exclude_unset=True), route=route)
-        result = await Routes.filter(id=route.id).prefetch_related(
-            "children__meta", "meta"
-        ).first()
+        result = (
+            await Routes.filter(id=route.id)
+            .prefetch_related("children__meta", "meta")
+            .first()
+        )
     return ResultResponse[admin_schema.AddMenuTo](result=result)
 
 

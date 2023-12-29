@@ -14,7 +14,8 @@ from .src.api import (
     config_api,
     sse_api,
     default_api,
-    system_api,
+    dict_api,
+    menu_api,
 )
 from .src.core.security import check_jwt_auth
 from .src.core.middleware import middleware
@@ -149,10 +150,16 @@ app.include_router(
     # dependencies=[Depends(check_jwt_auth)],
 )
 app.include_router(
-    system_api,
-    tags=["System"],
-    prefix="/system",
-    dependencies=[Depends(check_jwt_auth)],
+    dict_api,
+    tags=["Dict"],
+    prefix="/dict",
+    # dependencies=[Depends(check_jwt_auth)],
+)
+app.include_router(
+    menu_api,
+    tags=["Menu"],
+    prefix="/menu",
+    # dependencies=[Depends(check_jwt_auth)],
 )
 app.include_router(
     sse_api,

@@ -145,8 +145,8 @@ class InitDbData:
         """初始化角色"""
         log.info("开始初始化角色".center(100, "-"))
         # 创建默认角色
-        admin_role = Role(name="admin", description="管理员角色", is_super=True)
-        member_role = Role(name="member", description="普通用户角色", is_super=False)
+        admin_role = Role(rolename="admin",rolekey="管理员", description="管理员角色", is_super=True)
+        member_role = Role(rolename="member",rolekey="普通用户", description="普通用户角色", is_super=False)
         return admin_role, member_role
 
     async def init_permission(self) -> Tuple[Permission]:

@@ -10,7 +10,7 @@ from ..core.security import (
     get_current_user as current_user,
 )
 from ..core.authentication import Authority
-from ...src.db.models import Users, Role
+from ..db.models import Users, Role
 from ..schemas import ResultResponse, user_schema, admin_schema
 from ..utils.log_util import log
 from ..utils.exceptions.user import (
@@ -25,7 +25,7 @@ router = APIRouter()
 
 @router.get(
     "/list",
-    summary="获取所有用户",
+    summary="用户列表",
     response_model=ResultResponse[user_schema.UsersTo],
 )
 async def get_users(

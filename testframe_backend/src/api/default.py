@@ -7,7 +7,7 @@ from ..core.security import (
 from passlib.hash import md5_crypt
 from tortoise.exceptions import DoesNotExist
 from tortoise.expressions import Q
-from ...src.db.models import Users, Routes
+from ..db.models import Users, Routes
 from ..schemas import ResultResponse, user_schema, default_schema
 from ..utils.exceptions.user import (
     UserUnavailableException,

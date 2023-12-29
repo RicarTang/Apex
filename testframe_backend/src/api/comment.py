@@ -1,6 +1,6 @@
 from typing import List
 from fastapi import APIRouter, Depends, Request, HTTPException
-from ...src.db.models import Comments, Users
+from ..db.models import Comments, Users
 from ..schemas import ResultResponse, comment_schema
 from ..utils.log_util import log
 from ..core.security import check_jwt_auth, get_current_user

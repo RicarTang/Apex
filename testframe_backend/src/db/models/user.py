@@ -32,7 +32,8 @@ class Users(AbstractBaseModel):
 class Role(AbstractBaseModel):
     """角色表"""
 
-    name = fields.CharField(max_length=20, unique=True, description="角色名称")
+    rolename = fields.CharField(max_length=20, unique=True, description="角色名称")
+    rolekey = fields.CharField(max_length=20, unique=True, description="角色字符")
     description = fields.CharField(max_length=50, null=True, description="角色详情")
     is_super = fields.IntEnumField(
         enum_type=BoolEnum,
