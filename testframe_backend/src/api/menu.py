@@ -27,3 +27,8 @@ router = APIRouter()
 )
 async def get_treeselect():
     """查询菜单树结构"""
+    route_list = await Routes.filter(parent_id__isnull=True).prefetch_related(
+            "children__meta", "meta"
+        )
+    log.debug(route_list)
+    return 1

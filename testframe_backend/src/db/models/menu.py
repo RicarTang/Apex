@@ -45,10 +45,10 @@ class RouteMeta(AbstractBaseModel):
 RoutesPydantic = pydantic_model_creator(
     Routes,
     name="RoutesTo",
-    exclude=("is_delete", "id", "created_at", "update_at"),
+    exclude=("is_delete", "created_at", "update_at"),
 )
 RouteMetaPydantic = pydantic_model_creator(
     RouteMeta,
     name="RouteMetaTo",
-    exclude=("is_delete", "id", "created_at", "update_at"),
+    exclude=("is_delete", "created_at", "update_at"),
 )
