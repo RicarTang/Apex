@@ -8,12 +8,12 @@ from tortoise.exceptions import DoesNotExist
 from tortoise.transactions import in_transaction
 from celery.result import AsyncResult
 from ..db.models import TestSuite, TestCase, TestSuiteTaskId
-from ..schemas import ResultResponse, testsuite_schema
+from ..schemas import ResultResponse, testsuite
 from ..utils.log_util import log
 from ..utils.exceptions.testsuite import TestsuiteNotExistException
 from ..utils.exceptions.testenv import CurrentTestEnvNotSetException
 from ..autotest.utils.celery.task.testcase_task import task_test
-from ..services.testenv_service import TestEnvService
+from ..services.testenv import TestEnvService
 
 
 router = APIRouter()
@@ -22,16 +22,16 @@ router = APIRouter()
 @router.post(
     "/add",
     summary="添加测试套件",
-    response_model=ResultResponse[testsuite_schema.TestSuiteTo],
+    response_model=ResultResponse[testsuite.TestSuiteTo],
 )
-async def add_testsuite(body: testsuite_schema.TestSuiteIn):
+async def add_testsuite(body: testsuite.TestSuiteIn):
     """新增测试套件
 
     Args:
-        body (testsuite_schema.TestSuiteIn): 包含测试套件信息的请求体
+        body (testsuite.TestSuiteIn): 包含测试套件信息的请求体
 
     Returns:
-        ResultResponse[testsuite_schema.TestSuiteTo]: 添加成功后的测试套件信息
+        ResultResponse[testsuite.TestSuiteTo]: 添加成功后的测试套件信息
     """
     async with in_transaction():
         try:
@@ -41,13 +41,13 @@ async def add_testsuite(body: testsuite_schema.TestSuiteIn):
             await testsuite.fetch_related("testcases")
         except Exception as e:
             log.error(f"事务操作失败：{e}")
-    return ResultResponse[testsuite_schema.TestSuiteTo](result=testsuite)
+    return ResultResponse[testsuite.TestSuiteTo](result=testsuite)
 
 
 @router.get(
     "/getAll",
     summary="获取所有测试套件",
-    response_model=ResultResponse[testsuite_schema.TestSuitesTo],
+    response_model=ResultResponse[testsuite.TestSuitesTo],
 )
 async def get_all_testsuite(
     limit: Optional[int] = Query(default=20, ge=10),
@@ -68,8 +68,8 @@ async def get_all_testsuite(
     )
     total = await TestSuite.all().count()
     # return testsuites_list
-    return ResultResponse[testsuite_schema.TestSuitesTo](
-        result=testsuite_schema.TestSuitesTo(
+    return ResultResponse[testsuite.TestSuitesTo](
+        result=testsuite.TestSuitesTo(
             data=query_list,
             page=page,
             limit=limit,
@@ -92,7 +92,7 @@ async def test_run_result(task_id: str):
     summary="运行测试套件",
     response_model=ResultResponse[dict],
 )
-async def run_testsuite(body: testsuite_schema.TestSuiteId):
+async def run_testsuite(body: testsuite.TestSuiteId):
     try:
         result = await TestSuite.get(id=body.suite_id).prefetch_related("testcases")
     except DoesNotExist:
@@ -101,7 +101,7 @@ async def run_testsuite(body: testsuite_schema.TestSuiteId):
         raise CurrentTestEnvNotSetException
     task: AsyncResult = task_test.delay(
         testsuite_data=jsonable_encoder(
-            ResultResponse[testsuite_schema.TestSuiteTo](result=result).result.testcases
+            ResultResponse[testsuite.TestSuiteTo](result=result).result.testcases
         )
     )  # 将Celery任务发送到消息队列,并传递测试数据
     # 对应保存suite与task id
@@ -119,7 +119,7 @@ async def run_testsuite(body: testsuite_schema.TestSuiteId):
 @router.get(
     "/{suite_id}",
     summary="获取指定testsuite",
-    response_model=ResultResponse[testsuite_schema.TestSuiteTo],
+    response_model=ResultResponse[testsuite.TestSuiteTo],
 )
 async def get_testsuite(suite_id: int):
     """获取指定测试套件
@@ -133,26 +133,26 @@ async def get_testsuite(suite_id: int):
         )
     except DoesNotExist:
         raise TestsuiteNotExistException
-    return ResultResponse[testsuite_schema.TestSuiteTo](result=result)
+    return ResultResponse[testsuite.TestSuiteTo](result=result)
 
 
 @router.put(
     "/{suite_id}",
     summary="更新测试套件",
-    response_model=ResultResponse[testsuite_schema.TestSuiteTo],
+    response_model=ResultResponse[testsuite.TestSuiteTo],
 )
-async def update_testsuite(suite_id: int, body: testsuite_schema.TestSuiteIn):
+async def update_testsuite(suite_id: int, body: testsuite.TestSuiteIn):
     """更新测试套件数据
 
     Args:
         suite_id (int): _description_
-        body (testsuite_schema.TestSuiteIn): _description_
+        body (testsuite.TestSuiteIn): _description_
     """
     if not await TestSuite.filter(id=suite_id).exists():
         raise TestsuiteNotExistException
     result = await TestSuite.filter(id=suite_id).update(**body.dict(exclude_unset=True))
     log.debug(f"update更新{result}条数据")
-    return ResultResponse[testsuite_schema.TestSuiteTo](
+    return ResultResponse[testsuite.TestSuiteTo](
         result=await TestSuite.get(id=suite_id)
     )
 

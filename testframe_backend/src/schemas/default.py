@@ -1,7 +1,7 @@
 from typing import List, Optional
 from pydantic import BaseModel, Field, Extra
 from ..db.models import RouteMetaPydantic, RoutesPydantic
-from .common_schema import PageParam
+from .common import PageParam
 
 
 class Routes(RoutesPydantic):

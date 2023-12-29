@@ -1,8 +1,8 @@
 from typing import Optional, List, Union
 from pydantic import BaseModel, Field, field_validator
 from ..db.models import TestsuitePydantic, TestSuiteTaskId
-from .common_schema import PageParam
-from .testcase_schema import TestCaseTo
+from .common import PageParam
+from .testcase import TestCaseTo
 from ..utils.log_util import log
 
 

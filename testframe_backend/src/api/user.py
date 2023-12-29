@@ -11,7 +11,7 @@ from ..core.security import (
 )
 from ..core.authentication import Authority
 from ..db.models import Users, Role
-from ..schemas import ResultResponse, user_schema, admin_schema
+from ..schemas import ResultResponse, user, admin
 from ..utils.log_util import log
 from ..utils.exceptions.user import (
     UserNotExistException,
@@ -26,7 +26,7 @@ router = APIRouter()
 @router.get(
     "/list",
     summary="用户列表",
-    response_model=ResultResponse[user_schema.UsersTo],
+    response_model=ResultResponse[user.UsersTo],
 )
 async def get_users(
     username: Optional[str] = Query(default=None, description="用户名", alias="userName"),
@@ -61,15 +61,15 @@ async def get_users(
     result = await query.offset(limit * (page - 1)).limit(limit).all()
     # total
     total = await query.count()
-    return ResultResponse[user_schema.UsersTo](
-        result=user_schema.UsersTo(data=result, page=page, limit=limit, total=total)
+    return ResultResponse[user.UsersTo](
+        result=user.UsersTo(data=result, page=page, limit=limit, total=total)
     )
 
 
 @router.get(
     "/role",
     summary="获取当前用户角色",
-    response_model=ResultResponse[List[admin_schema.RoleTo]],
+    response_model=ResultResponse[List[admin.RoleTo]],
 )
 async def query_user_role(
     current_user: Users = Depends(current_user),
@@ -80,26 +80,26 @@ async def query_user_role(
         .first()
         .prefetch_related("roles__permissions__accesses")
     )
-    return ResultResponse[List[admin_schema.RoleTo]](result=user.roles)
+    return ResultResponse[List[admin.RoleTo]](result=user.roles)
 
 
 @router.get(
     "/me",
     summary="获取当前用户信息",
-    response_model=ResultResponse[user_schema.UserTo],
+    response_model=ResultResponse[user.UserTo],
 )
 async def get_current_user(current_user: Users = Depends(current_user)):
     """获取当前用户"""
-    return ResultResponse[user_schema.UserTo](result=current_user)
+    return ResultResponse[user.UserTo](result=current_user)
 
 
 @router.post(
     "/create",
     summary="创建用户",
-    response_model=ResultResponse[user_schema.UserTo],
+    response_model=ResultResponse[user.UserTo],
     dependencies=[Depends(Authority("user", "add"))],
 )
-async def create_user(body: user_schema.UserIn):
+async def create_user(body: user.UserIn):
     """创建用户."""
     async with in_transaction():
         body.password = md5_crypt.hash(body.password)
@@ -112,7 +112,7 @@ async def create_user(body: user_schema.UserIn):
         # 添加角色关联
         await user_obj.roles.add(*roles)
     log.info(f"成功创建用户：{body.model_dump(exclude_unset=True)}")
-    return ResultResponse[user_schema.UserTo](
+    return ResultResponse[user.UserTo](
         result=await UserService.query_user_by_id(user_obj.id)
     )
 
@@ -123,11 +123,11 @@ async def create_user(body: user_schema.UserIn):
     response_model=ResultResponse[str],
     dependencies=[Depends(Authority("user", "delete"))],
 )
-async def batch_delete_user(body: user_schema.BatchDelete):
+async def batch_delete_user(body: user.BatchDelete):
     """批量删除用户
 
     Args:
-        body (user_schema.BatchDelete): _description_
+        body (user.BatchDelete): _description_
 
     Returns:
         _type_: _description_
@@ -142,7 +142,7 @@ async def batch_delete_user(body: user_schema.BatchDelete):
     "/resetPwd",
     summary="重置用户密码",
 )
-async def reset_user_pwd(body: user_schema.UserResetPwdIn):
+async def reset_user_pwd(body: user.UserResetPwdIn):
     """更新用户密码"""
     if not await Users.filter(id=body.user_id).exists():
         raise UserNotExistException
@@ -152,7 +152,7 @@ async def reset_user_pwd(body: user_schema.UserResetPwdIn):
 
 @router.get(
     "/{user_id}",
-    response_model=ResultResponse[user_schema.UserTo],
+    response_model=ResultResponse[user.UserTo],
     summary="根据id查询用户",
     dependencies=[Depends(Authority("user", "query"))],
 )
@@ -162,7 +162,7 @@ async def get_user(user_id: int):
         user = await UserService.query_user_by_id(user_id)
     except DoesNotExist:
         raise UserNotExistException
-    return ResultResponse[user_schema.UserTo](result=user)
+    return ResultResponse[user.UserTo](result=user)
 
 
 @router.put(
@@ -171,7 +171,7 @@ async def get_user(user_id: int):
     summary="更新用户",
     dependencies=[Depends(Authority("user", "update"))],
 )
-async def update_user(user_id: int, body: user_schema.UserUpdateIn):
+async def update_user(user_id: int, body: user.UserUpdateIn):
     """更新用户信息."""
     # 查询用户是否存在
     query_user = await Users.filter(id=user_id).prefetch_related("roles").first()

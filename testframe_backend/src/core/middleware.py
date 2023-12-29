@@ -9,7 +9,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from fastapi.middleware.cors import CORSMiddleware
 from ..utils.log_util import log
 from ..utils.re_util import serach_filename
-from ..utils.exceptions.common_exception import IncorrectFileError
+from ..utils.exceptions.common import IncorrectFileError
 
 
 class LoggingMiddleware(BaseHTTPMiddleware):

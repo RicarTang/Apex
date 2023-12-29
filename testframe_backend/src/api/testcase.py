@@ -18,7 +18,7 @@ from ...config import config
 from ..core.cache import RedisService
 from ..services import TestCaseService
 from ..db.models import TestCase
-from ..schemas import ResultResponse, testcase_schema
+from ..schemas import ResultResponse, testcase
 from ..utils.log_util import log
 from ..utils.excel_util import save_file, read_all_testcase
 from ..utils.exceptions.testcase import TestcaseNotExistException
@@ -29,20 +29,20 @@ router = APIRouter()
 @router.post(
     "/add",
     summary="添加测试用例",
-    response_model=ResultResponse[testcase_schema.TestCaseTo],
+    response_model=ResultResponse[testcase.TestCaseTo],
 )
-async def add_testcase(body: testcase_schema.TestCaseIn):
+async def add_testcase(body: testcase.TestCaseIn):
     """添加单条测试用例到数据库
 
     Args:
-        body (testcase_schema.TestCaseIn): _description_
+        body (testcase.TestCaseIn): _description_
 
 
     Returns:
         _type_: _description_
     """
     result = await TestCaseService.add_testcase(body.dict())
-    return ResultResponse[testcase_schema.TestCaseTo](result=result)
+    return ResultResponse[testcase.TestCaseTo](result=result)
 
 
 @router.post(
@@ -99,7 +99,7 @@ async def get_testcase_template():
 @router.get(
     "/getAll",
     summary="获取所有测试用例",
-    response_model=ResultResponse[testcase_schema.TestCasesTo],
+    response_model=ResultResponse[testcase.TestCasesTo],
 )
 async def get_all_testcase(
     limit: Optional[int] = Query(default=20, ge=10),
@@ -113,8 +113,8 @@ async def get_all_testcase(
     """
     testcases = await TestCase.all().offset(limit * (page - 1)).limit(limit)
     total = await TestCase.all().count()
-    return ResultResponse[testcase_schema.TestCasesTo](
-        result=testcase_schema.TestCasesTo(
+    return ResultResponse[testcase.TestCasesTo](
+        result=testcase.TestCasesTo(
             data=testcases,
             page=page,
             limit=limit,
@@ -126,7 +126,7 @@ async def get_all_testcase(
 @router.get(
     "/query",
     summary="查询测试用例",
-    response_model=ResultResponse[testcase_schema.TestCasesTo],
+    response_model=ResultResponse[testcase.TestCasesTo],
     # dependencies=[Depends(check_jwt_auth)],
 )
 async def query_testcase(
@@ -137,8 +137,8 @@ async def query_testcase(
     """查询测试用例"""
     result = await TestCase.filter(case_title__contains=case_title).all()
     total = len(result)
-    return ResultResponse[testcase_schema.TestCasesTo](
-        result=testcase_schema.TestCasesTo(
+    return ResultResponse[testcase.TestCasesTo](
+        result=testcase.TestCasesTo(
             data=result, page=page, limit=limit, total=total
         )
     )
@@ -147,7 +147,7 @@ async def query_testcase(
 @router.get(
     "/{case_id}",
     summary="获取指定testcase",
-    response_model=ResultResponse[testcase_schema.TestCaseTo],
+    response_model=ResultResponse[testcase.TestCaseTo],
 )
 async def get_testcase(case_id: int):
     """获取指定testcase
@@ -159,13 +159,13 @@ async def get_testcase(case_id: int):
         testcase = await TestCase.get(id=case_id)
     except DoesNotExist:
         raise TestcaseNotExistException
-    return ResultResponse[testcase_schema.TestCaseTo](result=testcase)
+    return ResultResponse[testcase.TestCaseTo](result=testcase)
 
 
 @router.put(
     "/{case_id}",
     summary="更新测试用例",
-    response_model=ResultResponse[testcase_schema.TestCaseTo],
+    response_model=ResultResponse[testcase.TestCaseTo],
 )
 async def update_testcase(case_id: int, body: dict):
     """更新测试用例数据
@@ -177,7 +177,7 @@ async def update_testcase(case_id: int, body: dict):
         raise TestcaseNotExistException
     result = await TestCase.filter(id=case_id).update(**body.dict(exclude_unset=True))
     log.debug(f"update更新{result}条数据")
-    return ResultResponse[testcase_schema.TestCaseTo](
+    return ResultResponse[testcase.TestCaseTo](
         result=await TestCase.get(id=case_id)
     )
 
@@ -204,12 +204,12 @@ async def delete_testcase(case_id: int):
     summary="执行单条测试用例",
 )
 async def execute_testcase(
-    body: testcase_schema.ExecuteTestcaseIn,
+    body: testcase.ExecuteTestcaseIn,
 ):
     """执行测试用例
 
     Args:
-        body (testcase_schema.ExecuteTestcaseIn): 前端给case_id
+        body (testcase.ExecuteTestcaseIn): 前端给case_id
     Returns:
         _type_: _description_
     """

@@ -3,7 +3,7 @@ from typing import Optional
 from fastapi import APIRouter, HTTPException, Depends, Response, status, Query
 from tortoise.exceptions import DoesNotExist
 from tortoise.transactions import in_transaction
-from ..schemas import ResultResponse, user_schema, admin_schema
+from ..schemas import ResultResponse, user, admin
 from ..db.models import Role, Users, Permission, AccessControl, Routes, RouteMeta
 from ..services import UserService, RolePermissionService
 from ..utils.log_util import log
@@ -22,7 +22,7 @@ router = APIRouter()
 @router.get(
     "/role/list",
     summary="角色列表",
-    response_model=ResultResponse[admin_schema.RolesTo],
+    response_model=ResultResponse[admin.RolesTo],
 )
 async def query_roles(
     role_name: Optional[str] = Query(
@@ -61,15 +61,15 @@ async def query_roles(
     result = await query.offset(limit * (page - 1)).limit(limit).all()
     # total
     total = await query.count()
-    return ResultResponse[admin_schema.RolesTo](
-        result=admin_schema.RolesTo(data=result, page=page, limit=limit, total=total)
+    return ResultResponse[admin.RolesTo](
+        result=admin.RolesTo(data=result, page=page, limit=limit, total=total)
     )
 
 
 @router.get(
     "/permission/list",
     summary="查询权限列表",
-    response_model=ResultResponse[admin_schema.PermissionsTo],
+    response_model=ResultResponse[admin.PermissionsTo],
 )
 async def query_permissions(
     limit: Optional[int] = Query(default=20, ge=10),
@@ -83,8 +83,8 @@ async def query_permissions(
         .limit(limit)
     )
     total = await Permission.all().count()
-    return ResultResponse[admin_schema.PermissionsTo](
-        result=admin_schema.PermissionsTo(
+    return ResultResponse[admin.PermissionsTo](
+        result=admin.PermissionsTo(
             data=permissions, page=page, limit=limit, total=total
         )
     )
@@ -93,10 +93,10 @@ async def query_permissions(
 @router.post(
     "/role",
     summary="新增角色",
-    response_model=ResultResponse[admin_schema.RoleTo],
+    response_model=ResultResponse[admin.RoleTo],
     # dependencies=[Depends(Authority("admin,add"))],
 )
-async def add_role(body: admin_schema.RoleIn):
+async def add_role(body: admin.RoleIn):
     """创建角色
 
     Args:
@@ -107,7 +107,7 @@ async def add_role(body: admin_schema.RoleIn):
     """
     role_obj = await Role.create(**body.dict(exclude_unset=True))
     log.debug(f"role_name返回:{role_obj}")
-    return ResultResponse[admin_schema.RoleTo](result=role_obj)
+    return ResultResponse[admin.RoleTo](result=role_obj)
 
 
 @router.post(
@@ -115,7 +115,7 @@ async def add_role(body: admin_schema.RoleIn):
     summary="新增角色权限",
     response_model=ResultResponse[str],
 )
-async def add_role_permission(body: admin_schema.RolePermissionIn):
+async def add_role_permission(body: admin.RolePermissionIn):
     """新增角色权限关联"""
     role = await Role.get_or_none(id=body.role_id)
     permission = await Permission.get_or_none(id=body.permission_id)
@@ -132,7 +132,7 @@ async def add_role_permission(body: admin_schema.RolePermissionIn):
     summary="新增用户角色",
     response_model=ResultResponse[str],
 )
-async def add_user_role(body: admin_schema.UserAddRoleIn):
+async def add_user_role(body: admin.UserAddRoleIn):
     try:
         user = await Users.get(id=body.user_id)
     except DoesNotExist:
@@ -148,27 +148,27 @@ async def add_user_role(body: admin_schema.UserAddRoleIn):
 @router.post(
     "/permission",
     summary="新增权限",
-    response_model=ResultResponse[admin_schema.PermissionTo],
+    response_model=ResultResponse[admin.PermissionTo],
     # dependencies=[Depends(Authority("admin,add"))],
 )
-async def add_permission(body: admin_schema.PermissionIn):
+async def add_permission(body: admin.PermissionIn):
     """新增权限"""
     get_permission = await Permission.get_or_none(name=body.name)
     if get_permission:
         raise PermissionExistException
     permission = await Permission.create(**body.dict(exclude_unset=True))
-    return ResultResponse[admin_schema.PermissionTo](result=permission)
+    return ResultResponse[admin.PermissionTo](result=permission)
 
 
 @router.post(
     "/access",
     summary="新增访问控制",
-    response_model=ResultResponse[admin_schema.AccessTo],
+    response_model=ResultResponse[admin.AccessTo],
 )
-async def add_access(body: admin_schema.AccessIn):
+async def add_access(body: admin.AccessIn):
     """新增访问控制"""
     access = await AccessControl.create(**body.dict(exclude_unset=True))
-    return ResultResponse[admin_schema.AccessTo](result=access)
+    return ResultResponse[admin.AccessTo](result=access)
 
 
 @router.post(
@@ -176,7 +176,7 @@ async def add_access(body: admin_schema.AccessIn):
     summary="新增权限访问",
     response_model=ResultResponse[str],
 )
-async def add_permission_access(body: admin_schema.PermissionAccessIn):
+async def add_permission_access(body: admin.PermissionAccessIn):
     """新增权限访问控制"""
     permission = await Permission.get_or_none(id=body.permission_id)
     access = await AccessControl.get_or_none(id=body.access_id)
@@ -203,9 +203,9 @@ async def delete_role_permission(permission_id: int):
 @router.post(
     "/addMenu",
     summary="添加菜单",
-    response_model=ResultResponse[admin_schema.AddMenuTo],
+    response_model=ResultResponse[admin.AddMenuTo],
 )
-async def add_menu(body: admin_schema.AddMenuIn):
+async def add_menu(body: admin.AddMenuIn):
     """添加前端路由菜单"""
     async with in_transaction():
         # 路由
@@ -219,13 +219,13 @@ async def add_menu(body: admin_schema.AddMenuIn):
             .prefetch_related("children__meta", "meta")
             .first()
         )
-    return ResultResponse[admin_schema.AddMenuTo](result=result)
+    return ResultResponse[admin.AddMenuTo](result=result)
 
 
 @router.put(
     "/role/{role_id}",
     summary="更新角色",
-    response_model=ResultResponse[admin_schema.RoleTo],
+    response_model=ResultResponse[admin.RoleTo],
 )
 async def update_role(
     role_id: int,

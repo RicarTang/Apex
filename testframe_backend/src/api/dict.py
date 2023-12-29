@@ -7,7 +7,7 @@ from ..core.security import (
 from tortoise.exceptions import DoesNotExist
 from tortoise.expressions import Q
 from ..db.models import Users, Routes, DataDict
-from ..schemas import ResultResponse, system_schema
+from ..schemas import ResultResponse, system
 from ..utils.exceptions.user import (
     UserUnavailableException,
     PasswordValidateErrorException,
@@ -27,20 +27,20 @@ router = APIRouter()
 @router.get(
     "/dataDict",
     summary="获取数据字典",
-    response_model=ResultResponse[List[system_schema.DataDictTo]],
+    response_model=ResultResponse[List[system.DataDictTo]],
 )
 async def get_data_dict(dict_type: str = Query(alias="dictType")):
     """获取指定类型数据字典"""
     result = await SystemService.query_dict_by_type(dict_type)
-    return ResultResponse[List[system_schema.DataDictTo]](result=result)
+    return ResultResponse[List[system.DataDictTo]](result=result)
 
 
 @router.post(
     "/dataDict",
     summary="设置数据字典",
-    response_model=ResultResponse[system_schema.DataDictTo],
+    response_model=ResultResponse[system.DataDictTo],
 )
-async def set_data_dict(body: system_schema.DataDictIn):
+async def set_data_dict(body: system.DataDictIn):
     """新增数据字典"""
     result = await SystemService.add_data_dict(body)
-    return ResultResponse[system_schema.DataDictTo](result=result)
+    return ResultResponse[system.DataDictTo](result=result)

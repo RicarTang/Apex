@@ -10,7 +10,7 @@ from ..db.models import (
     RouteMetaPydantic,
 )
 from ..db.enum import BoolEnum
-from .common_schema import PageParam
+from .common import PageParam
 
 
 class PermissionIn(BaseModel):

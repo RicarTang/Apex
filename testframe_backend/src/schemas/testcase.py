@@ -2,7 +2,7 @@ from typing import Optional, List
 from pydantic import BaseModel, Field
 from ..db.enum import BoolEnum, ApiMethodEnum, RequestParamTypeEnum
 from ..db.models import TestcasePydantic
-from .common_schema import PageParam
+from .common import PageParam
 
 
 class TestCaseIn(BaseModel):

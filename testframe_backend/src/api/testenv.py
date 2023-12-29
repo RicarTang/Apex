@@ -2,8 +2,8 @@ from typing import Optional
 from fastapi import APIRouter, Query, Request, Body, Depends
 from tortoise.exceptions import DoesNotExist
 from ..db.models import TestEnv
-from ..services.testenv_service import TestEnvService
-from ..schemas import ResultResponse, testenv_schema
+from ..services.testenv import TestEnvService
+from ..schemas import ResultResponse, testenv
 from ..utils.exceptions.testenv import TestEnvNotExistException
 from ..utils.log_util import log
 
@@ -14,22 +14,22 @@ router = APIRouter()
 @router.post(
     "/add",
     summary="添加测试环境地址",
-    response_model=ResultResponse[testenv_schema.TestEnvTo],
+    response_model=ResultResponse[testenv.TestEnvTo],
 )
-async def add_test_env_ip(body: testenv_schema.TestEnvIn):
+async def add_test_env_ip(body: testenv.TestEnvIn):
     """添加测试环境地址
 
     Args:
-        body (testenv_schema.TestEnvIn): _description_
+        body (testenv.TestEnvIn): _description_
     """
     result = await TestEnv.create(**body.dict())
-    return ResultResponse[testenv_schema.TestEnvTo](result=result)
+    return ResultResponse[testenv.TestEnvTo](result=result)
 
 
 @router.get(
     "/getAll",
     summary="获取所有环境url",
-    response_model=ResultResponse[testenv_schema.TestEnvsTo],
+    response_model=ResultResponse[testenv.TestEnvsTo],
 )
 async def get_all_env(
     limit: Optional[int] = Query(default=20, ge=10),
@@ -43,8 +43,8 @@ async def get_all_env(
     """
     test_env_list = await TestEnv.all().offset(limit * (page - 1)).limit(limit)
     total = await TestEnv.all().count()
-    return ResultResponse[testenv_schema.TestEnvsTo](
-        result=testenv_schema.TestEnvsTo(
+    return ResultResponse[testenv.TestEnvsTo](
+        result=testenv.TestEnvsTo(
             data=test_env_list,
             page=page,
             limit=limit,
@@ -69,7 +69,7 @@ async def get_current_env():
     summary="设置当前环境变量",
 )
 async def set_current_env(
-    body: testenv_schema.CurrentEnvIn,
+    body: testenv.CurrentEnvIn,
 ):
     """设置当前环境变量
 
@@ -83,7 +83,7 @@ async def set_current_env(
 @router.get(
     "/{env_id}",
     summary="获取指定环境url",
-    response_model=ResultResponse[testenv_schema.TestEnvTo],
+    response_model=ResultResponse[testenv.TestEnvTo],
 )
 async def get_env(env_id: int):
     """获取指定环境
@@ -95,23 +95,23 @@ async def get_env(env_id: int):
         result = await TestEnv.get(id=env_id)
     except DoesNotExist:
         raise TestEnvNotExistException
-    return ResultResponse[testenv_schema.TestEnvTo](result=result)
+    return ResultResponse[testenv.TestEnvTo](result=result)
 
 
 @router.put(
     "/{env_id}",
     summary="更新env info",
-    response_model=ResultResponse[testenv_schema.TestEnvTo],
+    response_model=ResultResponse[testenv.TestEnvTo],
 )
 async def update_env(
     env_id: int,
-    body: testenv_schema.TestEnvIn,
+    body: testenv.TestEnvIn,
 ):
     """更新env数据信息
 
     Args:
         env_id (int): _description_
-        body (testenv_schema.TestEnvIn): _description_
+        body (testenv.TestEnvIn): _description_
 
     Returns:
         _type_: _description_
@@ -120,7 +120,7 @@ async def update_env(
         raise TestEnvNotExistException
     result = await TestEnv.filter(id=env_id).update(**body.dict(exclude_unset=True))
     log.debug(f"update更新{result}条数据")
-    return ResultResponse[testenv_schema.TestEnvTo](result=await TestEnv.get(id=env_id))
+    return ResultResponse[testenv.TestEnvTo](result=await TestEnv.get(id=env_id))
 
 
 @router.delete(

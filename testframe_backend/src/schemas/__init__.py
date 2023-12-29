@@ -1,1 +1,1 @@
-from .common_schema import ResultResponse
+from .common import ResultResponse

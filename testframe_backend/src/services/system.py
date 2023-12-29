@@ -2,7 +2,7 @@ from fastapi import HTTPException, status
 from tortoise.exceptions import DoesNotExist, MultipleObjectsReturned
 from ..db.models import DataDict
 from ..db.enum import DisabledEnum
-from ..schemas.system_schema import DataDictIn
+from ..schemas.system import DataDictIn
 from ..utils.log_util import log
 
 

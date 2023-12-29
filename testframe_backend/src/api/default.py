@@ -8,7 +8,7 @@ from passlib.hash import md5_crypt
 from tortoise.exceptions import DoesNotExist
 from tortoise.expressions import Q
 from ..db.models import Users, Routes
-from ..schemas import ResultResponse, user_schema, default_schema
+from ..schemas import ResultResponse, user, default
 from ..utils.exceptions.user import (
     UserUnavailableException,
     PasswordValidateErrorException,
@@ -28,11 +28,11 @@ router = APIRouter()
 @router.post(
     "/login",
     summary="登录",
-    response_model=ResultResponse[user_schema.Login],
+    response_model=ResultResponse[user.Login],
 )
 async def login(
     request: Request,
-    user: user_schema.LoginIn,
+    user: user.LoginIn,
 ):
     """用户登陆."""
     # 查询数据库有无此用户
@@ -52,8 +52,8 @@ async def login(
     await UserTokenService.add_jwt(
         current_user_id=query_user.id, token=access_token, client_ip=request.client.host
     )
-    return ResultResponse[user_schema.Login](
-        result=user_schema.Login(
+    return ResultResponse[user.Login](
+        result=user.Login(
             data=query_user,
             access_token=access_token,
             token_type="bearer",
@@ -78,7 +78,7 @@ async def logout(request: Request):
 @router.get(
     "/getRouters",
     summary="获取前端菜单路由",
-    response_model=ResultResponse[List[default_schema.RoutesTo]],
+    response_model=ResultResponse[List[default.RoutesTo]],
     dependencies=[Depends(check_jwt_auth)],
 )
 async def get_routers(current_user=Depends(current_user)):
@@ -111,4 +111,4 @@ async def get_routers(current_user=Depends(current_user)):
         route_list = await Routes.filter(id__in=route_ids).prefetch_related(
             "children__meta", "meta"
         )
-    return ResultResponse[List[default_schema.RoutesTo]](result=route_list)
+    return ResultResponse[List[default.RoutesTo]](result=route_list)

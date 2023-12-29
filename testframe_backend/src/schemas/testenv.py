@@ -1,7 +1,7 @@
 from typing import Optional, List
 from pydantic import BaseModel, HttpUrl, Field
 from ..db.models import TestenvPydantic
-from .common_schema import PageParam
+from .common import PageParam
 
 
 class TestEnvIn(BaseModel):

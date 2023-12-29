@@ -4,7 +4,7 @@ import allure
 import httpx
 import json
 from pytest_assume.plugin import assume
-from ...services.testenv_service import TestEnvService
+from ...services.testenv import TestEnvService
 from ...utils.log_util import log
 
 

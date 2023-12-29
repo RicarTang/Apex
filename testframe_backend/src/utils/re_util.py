@@ -1,5 +1,5 @@
 import re
-from .exceptions.common_exception import IncorrectFileError
+from .exceptions.common import IncorrectFileError
 
 
 def serach_filename(data: str) -> str:
