@@ -32,19 +32,19 @@ router = APIRouter()
 )
 async def login(
     request: Request,
-    user: user.LoginIn,
+    body: user.LoginIn,
 ):
     """用户登陆."""
     # 查询数据库有无此用户
     try:
-        query_user = await UserService.query_user_by_username(username=user.username)
+        query_user = await UserService.query_user_by_username(username=body.username)
     except DoesNotExist:
         raise UserNotExistException
     # 用户为不可用状态
     if not query_user.status:
         raise UserUnavailableException
     # 验证密码
-    if not md5_crypt.verify(secret=user.password, hash=query_user.password):
+    if not md5_crypt.verify(secret=body.password, hash=query_user.password):
         raise PasswordValidateErrorException
     # 创建jwt
     access_token = create_access_token(data={"sub": query_user.username})
@@ -82,7 +82,7 @@ async def logout(request: Request):
     dependencies=[Depends(check_jwt_auth)],
 )
 async def get_routers(current_user=Depends(current_user)):
-    # 判断是否是superadmin, superadmin获取所有一级路由
+    # 判断是否是admin角色, admin获取所有一级路由
     is_super = any(role.is_super for role in current_user.roles)
     if is_super:
         route_list = await Routes.filter(parent_id__isnull=True).prefetch_related(
