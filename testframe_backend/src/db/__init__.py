@@ -2,7 +2,7 @@ import asyncio
 from typing import Tuple
 from passlib.hash import md5_crypt
 from tortoise.transactions import in_transaction
-from .models import Users, Role, Routes, RouteMeta, Permission, AccessControl, DataDict
+from .models import Users, Role, Routes, RouteMeta, Permission, DataDict
 from .enum import AccessModelEnum, AccessActionEnum, BoolEnum, DisabledEnum
 from ..utils.log_util import log
 
@@ -28,27 +28,19 @@ class InitDbData:
                 await admin_user.roles.add(admin_role)
                 await member_user.roles.add(member_role)
                 # 初始化权限
-                admin_permission, member_permission = await self.init_permission()
-                # 插入权限
-                await admin_permission.save()
-                await member_permission.save()
-                # 添加角色权限关联
-                await admin_role.permissions.add(admin_permission)
-                await member_role.permissions.add(member_permission)
-                # 初始化访问控制
                 (
                     apitest_add_access,
                     apitest_del_access,
                     apitest_update_access,
                     apitest_query_access,
-                ) = await self.init_access()
-                # 插入访问控制
+                ) = await self.init_permission()
+                # 插入权限控制
                 await apitest_add_access.save()
                 await apitest_del_access.save()
                 await apitest_update_access.save()
                 await apitest_query_access.save()
-                # 添加member权限访问控制关联
-                await member_permission.accesses.add(
+                # 添加member角色权限关联
+                await member_role.permissions.add(
                     apitest_add_access,
                     apitest_del_access,
                     apitest_update_access,
@@ -115,8 +107,8 @@ class InitDbData:
                 await system_menu_meta.save()
                 await test_suite_meta.save()
                 await test_env_meta.save()
-                # 菜单权限关联
-                await member_permission.menus.add(test_route)
+                # 菜单角色关联
+                await member_role.menus.add(test_route)
                 # 初始化数据字典
                 await self.init_data_dict()
                 log.info("初始化完成!".center(100, "-"))
@@ -153,32 +145,32 @@ class InitDbData:
         )
         return admin_role, member_role
 
+    # async def init_permission(self) -> Tuple[Permission]:
+    #     """初始化权限"""
+    #     log.info("开始初始化权限".center(100, "-"))
+    #     admin_permission = Permission(name="admin权限")
+    #     member_permission = Permission(name="member权限")
+    #     return admin_permission, member_permission
+
     async def init_permission(self) -> Tuple[Permission]:
         """初始化权限"""
         log.info("开始初始化权限".center(100, "-"))
-        admin_permission = Permission(name="admin权限")
-        member_permission = Permission(name="member权限")
-        return admin_permission, member_permission
-
-    async def init_access(self) -> Tuple[AccessControl]:
-        """初始化访问控制"""
-        log.info("开始初始化访问控制".center(100, "-"))
-        apitest_add_access = AccessControl(
+        apitest_add_access = Permission(
             name="test模块添加权限",
             model=AccessModelEnum.APITEST,
             action=AccessActionEnum.ADD,
         )
-        apitest_del_access = AccessControl(
+        apitest_del_access = Permission(
             name="test模块删除权限",
             model=AccessModelEnum.APITEST,
             action=AccessActionEnum.DEL,
         )
-        apitest_update_access = AccessControl(
+        apitest_update_access = Permission(
             name="test模块更新权限",
             model=AccessModelEnum.APITEST,
             action=AccessActionEnum.PUT,
         )
-        apitest_query_access = AccessControl(
+        apitest_query_access = Permission(
             name="test模块查询权限",
             model=AccessModelEnum.APITEST,
             action=AccessActionEnum.GET,

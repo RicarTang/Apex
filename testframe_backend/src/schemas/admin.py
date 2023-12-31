@@ -4,7 +4,6 @@ from ..db.models import (
     PermissionPydantic,
     AccessActionEnum,
     AccessModelEnum,
-    AccessPydantic,
     RolePydantic,
     RoutesPydantic,
     RouteMetaPydantic,
@@ -28,7 +27,7 @@ class RolePermissionIn(BaseModel):
 
 
 class PermissionTo(PermissionPydantic):
-    accesses: List["AccessTo"] = Field(description="权限访问控制")
+    """权限schema"""
 
 
 class PermissionsTo(PageParam):
@@ -41,21 +40,30 @@ class AccessIn(BaseModel):
     action: AccessActionEnum = Field(description="权限能操作的动作")
 
 
-class AccessTo(AccessPydantic):
-    pass
-
-
 class RoleIn(BaseModel):
     """角色req schema"""
 
-    name: str = Field(max_length=20, description="角色名称")
-    description: Optional[str] = Field(max_length=50, description="角色详情")
+    rolename: str = Field(
+        max_length=20,
+        description="角色名称",
+        alias="roleName",
+    )
+    rolekey: str = Field(
+        max_length=20,
+        description="角色字符",
+        alias="roleKey",
+    )
+    menu_ids: List[int] = Field(description="菜单权限id列表", alias="menuIds")
+    permission_ids: List[int] = Field(description="权限控制id列表", alias="permissionIds")
+    description: Optional[str] = Field(
+        default=None, max_length=50, description="角色详情", alias="remark"
+    )
 
 
 class RoleTo(RolePydantic):
     """角色res schema"""
 
-    permissions: List[PermissionTo] = Field(description="角色的权限")
+    permissions: List[PermissionPydantic] = Field(description="角色的权限")
 
 
 class RolesTo(PageParam):
@@ -87,28 +95,3 @@ class RolePermIn(BaseModel):
             "example": {"role": "admin", "model": "admin", "act": "add"}
         }
     }
-
-
-class MenuMeta(BaseModel):
-    title: str = Field(description="路由标题")
-    icon: str = Field(description="icon图标")
-    no_cache: BoolEnum = Field(description="不使用keepalive")
-    link: Optional[str] = Field(default=None, description="链接")
-
-
-class AddMenuIn(BaseModel):
-    """添加路由菜单schema"""
-
-    name: str = Field(description="菜单名称")
-    path: str = Field(description="菜单path")
-    hidden: BoolEnum = Field(description="是否隐藏")
-    redirect: Optional[str] = Field(default=None, description="重定向")
-    component: str = Field(description="组件path")
-    always_show: Optional[BoolEnum] = Field(default=None, description="是否总是显示")
-    parent_id: Optional[int] = Field(default=None, description="父菜单id")
-    meta: MenuMeta
-
-
-class AddMenuTo(RoutesPydantic):
-    meta: RouteMetaPydantic
-    children: Optional[RoutesPydantic] = Field(default=None)

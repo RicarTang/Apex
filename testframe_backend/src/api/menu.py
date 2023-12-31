@@ -6,7 +6,8 @@ from ..core.security import (
 )
 from tortoise.exceptions import DoesNotExist
 from tortoise.expressions import Q
-from ..db.models import Users, Routes, DataDict
+from tortoise.transactions import in_transaction
+from ..db.models import Routes, RouteMeta
 from ..schemas import ResultResponse, menu
 from ..core.security import (
     check_jwt_auth,
@@ -27,3 +28,25 @@ async def get_treeselect():
         "children__meta", "meta"
     )
     return ResultResponse[List[menu.TreeSelectTo]](result=route_list)
+
+
+@router.post(
+    "/addMenu",
+    summary="添加菜单",
+    response_model=ResultResponse[menu.AddMenuTo],
+)
+async def add_menu(body: menu.AddMenuIn):
+    """添加前端路由菜单"""
+    async with in_transaction():
+        # 路由
+        route = await Routes.create(
+            **body.model_dump(exclude_unset=True, exclude=["meta"])
+        )
+        # 添加路由meta
+        await RouteMeta.create(**body.meta.model_dump(exclude_unset=True), route=route)
+        result = (
+            await Routes.filter(id=route.id)
+            .prefetch_related("children__meta", "meta")
+            .first()
+        )
+    return ResultResponse[menu.AddMenuTo](result=result)

@@ -93,7 +93,7 @@ async def get_routers(current_user=Depends(current_user)):
         user = (
             await Users.filter(id=current_user.id)
             .first()
-            .prefetch_related("roles__permissions__menus")
+            .prefetch_related("roles__menus")
         )
 
         if not user:
@@ -105,8 +105,7 @@ async def get_routers(current_user=Depends(current_user)):
         route_ids = {
             menu.id
             for role in user.roles
-            for permission in role.permissions
-            for menu in permission.menus
+            for menu in role.menus
         }
         route_list = await Routes.filter(id__in=route_ids).prefetch_related(
             "children__meta", "meta"

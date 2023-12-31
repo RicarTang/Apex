@@ -10,16 +10,16 @@ class PermissionAccess:
         # 获取用户角色权限访问控制
         user = await Users.filter(
                 id=user_id,
-                roles__permissions__accesses__model=model,
-                roles__permissions__accesses__action=action,
-            ).first().prefetch_related("roles__permissions__accesses")
+                roles__permissions__model=model,
+                roles__permissions__action=action,
+            ).first().prefetch_related("roles__permissions")
         if user:
             return True
         else:
             return False
 
-    @staticmethod
-    async def get_menus(user_id: int):
-        user = await Users.filter(
-            id=user_id
-        ).first().prefetch_related("roles__permissions__menus")
+    # @staticmethod
+    # async def get_menus(user_id: int):
+    #     user = await Users.filter(
+    #         id=user_id
+    #     ).first().prefetch_related("roles__menus")

@@ -67,23 +67,6 @@ async def get_users(
 
 
 @router.get(
-    "/role",
-    summary="获取当前用户角色",
-    response_model=ResultResponse[List[admin.RoleTo]],
-)
-async def query_user_role(
-    current_user: Users = Depends(current_user),
-):
-    """查询当前用户角色"""
-    user = (
-        await Users.filter(id=current_user.id)
-        .first()
-        .prefetch_related("roles__permissions__accesses")
-    )
-    return ResultResponse[List[admin.RoleTo]](result=user.roles)
-
-
-@router.get(
     "/me",
     summary="获取当前用户信息",
     response_model=ResultResponse[user.UserTo],
@@ -141,6 +124,7 @@ async def batch_delete_user(body: user.BatchDelete):
 @router.put(
     "/resetPwd",
     summary="重置用户密码",
+    dependencies=[Depends(Authority("user", "update"))],
 )
 async def reset_user_pwd(body: user.UserResetPwdIn):
     """更新用户密码"""

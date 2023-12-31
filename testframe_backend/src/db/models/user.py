@@ -17,7 +17,7 @@ class Users(AbstractBaseModel):
     )
     # 关联关系
     roles: fields.ManyToManyRelation["Role"] = fields.ManyToManyField(
-        model_name="models.Role", related_name="roles"
+        model_name="models.Role", related_name="roles", through="user_role"
     )
     tokens: fields.ReverseRelation["UserToken"]
 
@@ -43,6 +43,9 @@ class Role(AbstractBaseModel):
     permissions: fields.ManyToManyRelation["Permission"] = fields.ManyToManyField(
         model_name="models.Permission", related_name="permissions"
     )
+    menus = fields.ManyToManyField(
+        model_name="models.Routes", related_name="menus", through="role_menu"
+    )
 
     class Meta:
         ordering = ["-created_at"]
@@ -50,19 +53,6 @@ class Role(AbstractBaseModel):
 
 class Permission(AbstractBaseModel):
     """权限表模型"""
-
-    name = fields.CharField(max_length=50, description="权限名称", unique=True)
-    accesses: fields.ManyToManyRelation["AccessControl"] = fields.ManyToManyField(
-        model_name="models.AccessControl", related_name="accesses"
-    )
-    menus = fields.ManyToManyField(model_name="models.Routes", related_name="menus")
-
-    class Meta:
-        ordering = ["-created_at"]
-
-
-class AccessControl(AbstractBaseModel):
-    """api权限访问控制关联表模型"""
 
     name = fields.CharField(max_length=50, description="access summary", unique=True)
     model = fields.CharEnumField(
@@ -76,6 +66,7 @@ class AccessControl(AbstractBaseModel):
     )
 
     class Meta:
+        ordering = ["-created_at"]
         # 复合唯一索引
         unique_together = ("model", "action")
 
@@ -115,7 +106,4 @@ PermissionPydantic = pydantic_model_creator(
     Permission,
     name="PermissionTo",
     exclude=("is_delete",),
-)
-AccessPydantic = pydantic_model_creator(
-    AccessControl, name="AccessTo", exclude=("is_delete",)
 )
