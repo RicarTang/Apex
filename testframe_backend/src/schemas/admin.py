@@ -53,8 +53,12 @@ class RoleIn(BaseModel):
         description="角色字符",
         alias="roleKey",
     )
-    menu_ids: List[int] = Field(description="菜单权限id列表", alias="menuIds")
-    permission_ids: List[int] = Field(description="权限控制id列表", alias="permissionIds")
+    menu_ids: Optional[List[int]] = Field(
+        default=None, description="菜单权限id列表", alias="menuIds"
+    )
+    permission_ids: Optional[List[int]] = Field(
+        default=None, description="权限控制id列表", alias="permissionIds"
+    )
     description: Optional[str] = Field(
         default=None, max_length=50, description="角色详情", alias="remark"
     )

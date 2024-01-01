@@ -124,14 +124,6 @@ async def add_role(body: admin.RoleIn):
     Returns:
         _type_: _description_
     """
-    # 查询permissino
-    permission_list = await Permission.filter(id__in=body.permission_ids).all()
-    if not permission_list:
-        pass
-    # 查询route
-    menu_list = await Routes.filter(id__in=body.menu_ids).all()
-    if not menu_list:
-        pass
     async with in_transaction():
         # 新增role
         role_obj = await Role.create(
@@ -139,11 +131,26 @@ async def add_role(body: admin.RoleIn):
                 include=["rolename", "rolekey", "description"], exclude_unset=True
             )
         )
-        # 新增role_permission
-        role_obj.permissions.add(*permission_list)
-        # 新增role_menu
-        role_obj.menus.add(*menu_list)
-    return ResultResponse[admin.RoleTo](result=role_obj)
+        # 查询permissino
+        if body.permission_ids:
+            permission_list = await Permission.filter(id__in=body.permission_ids).all()
+            if not permission_list:
+                log.debug("无permission")
+            # 新增role_permission
+            await role_obj.permissions.add(*permission_list)
+        # 查询route
+        if body.menu_ids:
+            menu_list = await Routes.filter(id__in=body.menu_ids).all()
+            if not menu_list:
+                log.debug("无menu")
+            # 新增role_menu
+            await role_obj.menus.add(*menu_list)
+        query = (
+            await Role.filter(id=role_obj.id)
+            .prefetch_related("permissions", "menus")
+            .first()
+        )
+        return ResultResponse[admin.RoleTo](result=query)
 
 
 @router.post(

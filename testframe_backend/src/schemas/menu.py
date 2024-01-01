@@ -12,9 +12,8 @@ class TreeSelectTo(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     id: Optional[int] = Field(default=None)
     label: Optional[str] = Field(
-        default=None, validation_alias="meta", description="树形菜单label"
+        default=None, validation_alias="route_meta", description="树形菜单label"
     )
-    # children: Optional[List[Routes]] = Field(default=None)
     children: Optional[List["TreeSelectTo"]] = Field(default=None)
 
     @field_validator("label", mode="before")
@@ -22,10 +21,13 @@ class TreeSelectTo(BaseModel):
     def modify_label_before_validation(cls, value):
         """模型验证前修改入参"""
         try:
-            return value.title
+            label = value[0].title
+        except TypeError:
+            label = value.title
         except AttributeError as e:
             # orm对象返回空，不做处理
             log.error(e)
+        return label
 
     @field_validator("children", mode="before")
     @classmethod
@@ -34,6 +36,7 @@ class TreeSelectTo(BaseModel):
 
         try:
             res = [Routes.from_orm(children) for children in value]
+            log.debug(res)
             return res
         except AttributeError as e:
             # orm对象返回空，不做处理

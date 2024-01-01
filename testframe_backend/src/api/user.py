@@ -143,10 +143,10 @@ async def reset_user_pwd(body: user.UserResetPwdIn):
 async def get_user(user_id: int):
     """根据id查询用户."""
     try:
-        user = await UserService.query_user_by_id(user_id)
+        q_user = await UserService.query_user_by_id(user_id)
     except DoesNotExist:
         raise UserNotExistException
-    return ResultResponse[user.UserTo](result=user)
+    return ResultResponse[user.UserTo](result=q_user)
 
 
 @router.put(
