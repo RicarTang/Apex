@@ -138,10 +138,10 @@ class InitDbData:
         log.info("开始初始化角色".center(100, "-"))
         # 创建默认角色
         admin_role = Role(
-            rolename="管理员", rolekey="admin", description="管理员角色", is_super=True
+            roleName="管理员", roleKey="admin", remark="管理员角色", is_super=True
         )
         member_role = Role(
-            rolename="普通用户", rolekey="member", description="普通用户角色", is_super=False
+            roleName="普通用户", roleKey="member", remark="普通用户角色", is_super=False
         )
         return admin_role, member_role
 
