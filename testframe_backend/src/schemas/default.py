@@ -12,7 +12,6 @@ class Routes(RoutesPydantic):
     @classmethod
     def modify_route_meta_befor_validator(cls, v: ReverseRelation) -> RouteMeta:
         """返回第一个meta(meta要求一对一)"""
-        log.debug([meta for meta in v][0])
         return [meta for meta in v][0]
 
 

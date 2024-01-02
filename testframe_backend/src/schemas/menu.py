@@ -35,7 +35,7 @@ class TreeSelectTo(BaseModel):
         """模型验证前修改入参"""
 
         try:
-            res = [Routes.from_orm(children) for children in value]
+            res = [Routes.model_validate(children) for children in value]
             log.debug(res)
             return res
         except AttributeError as e:

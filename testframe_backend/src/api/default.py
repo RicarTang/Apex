@@ -7,7 +7,8 @@ from ..core.security import (
 from passlib.hash import md5_crypt
 from tortoise.exceptions import DoesNotExist
 from tortoise.expressions import Q
-from ..db.models import Users, Routes, Role
+from tortoise.query_utils import Prefetch
+from ..db.models import Users, Routes, Role, RouteMeta
 from ..schemas import ResultResponse, user, default
 from ..utils.exceptions.user import (
     UserUnavailableException,
@@ -82,7 +83,7 @@ async def logout(request: Request):
     dependencies=[Depends(check_jwt_auth)],
 )
 async def get_routers(current_user=Depends(current_user)):
-    # 判断是否是admin角色, admin获取所有一级路由
+    # 判断是否是admin角色用户, admin获取所有一级路由
     is_super = any(role.is_super for role in current_user.roles)
     if is_super:
         route_list = await Routes.filter(parent_id__isnull=True).prefetch_related(
@@ -102,27 +103,22 @@ async def get_routers(current_user=Depends(current_user)):
                 detail="This user cannot access the routing menu!",
             )
         # 获取角色关联的所有菜单
-        all_menus = [menu for role in user.roles for menu in role.menus]
+        all_menus = {menu for role in user.roles for menu in role.menus}
         log.debug(all_menus)
         # 获取当前角色有权限的子路由的 ID 列表
-        sub_menus = []
-        parent_menus = []
-        for menu in all_menus:
-            # 子路由
-            if menu.parent_id:
-                sub_menus.append(menu.id)
-            # 父路由
-            else:
-                parent_menus.append(menu)
+        # 子路由
+        sub_menus = [menu.id for menu in all_menus if menu.parent_id]
+        # 父路由
+        parent_menus = [menu.id for menu in all_menus if not menu.parent_id]
         log.debug(f"子路由：{sub_menus},父路由：{parent_menus}")
-        # 父路由筛选当前角色有权限的子路由
-        route_list = []
-        for item in parent_menus:
-            route = await item.filter(children__id__in=sub_menus).prefetch_related(
-                "children__route_meta", "route_meta"
-            )
-            log.debug([i for i in route[0].children])
-            # route_list.append(route)
-            # log.debug([i for i in route.children])
+        # 使用Prefetch对预取进行复杂的查询，查询当前角色的子菜单
+        route_list = await Routes.filter(id__in=parent_menus).prefetch_related(
+            # 使用Prefetch时，正常的prefetch_related操作也要查询
+            Prefetch(
+                "children", queryset=Routes.filter(id__in=sub_menus).prefetch_related()
+            ),
+            "children__route_meta",
+            "route_meta",
+        )
 
     return ResultResponse[List[default.RoutesTo]](result=route_list)
