@@ -202,7 +202,11 @@ async def update_role(
     role = (
         await Role.filter(id=role_id)
         .prefetch_related(
-            "permissions", "menus__children__route_meta", "menus__route_meta"
+            "permissions",
+            "menus__children__route_meta",
+            "menus__route_meta",
+            # 只查询子菜单
+            Prefetch("menus", queryset=Routes.filter(parent_id__isnull=False).prefetch_related()),
         )
         .first()
     )
