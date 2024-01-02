@@ -128,7 +128,9 @@ async def add_role(body: admin.RoleIn):
         # 新增role
         role_obj = await Role.create(
             **body.model_dump(
-                include=["rolename", "rolekey", "description"], exclude_unset=True
+                include=["role_name", "role_key", "remark"],
+                exclude_unset=True,
+                by_alias=True,
             )
         )
         # 查询permissino
@@ -164,7 +166,7 @@ async def add_permission(body: admin.PermissionIn):
     get_permission = await Permission.get_or_none(name=body.name)
     if get_permission:
         raise PermissionExistException
-    permission = await Permission.create(**body.dict(exclude_unset=True))
+    permission = await Permission.create(**body.model_dump(exclude_unset=True))
     return ResultResponse[admin.PermissionTo](result=permission)
 
 
@@ -180,20 +182,64 @@ async def delete_role_permission(permission_id: int):
     pass
 
 
-@router.put(
+@router.get(
     "/role/{role_id}",
-    summary="更新角色",
+    summary="获取角色",
     response_model=ResultResponse[admin.RoleTo],
 )
 async def update_role(
     role_id: int,
 ):
+    """获取角色
+
+    Args:
+        role_id (int): 角色id
+    """
+    role = await Role.filter(id=role_id).prefetch_related("permissions").first()
+    if not role:
+        raise RoleNotExistException
+    return ResultResponse[admin.RoleTo](result=role)
+
+
+@router.put(
+    "/role/{role_id}",
+    summary="更新角色",
+    response_model=ResultResponse[admin.RoleTo],
+)
+async def update_role(role_id: int, body: admin.RoleIn):
     """修改角色
 
     Args:
         role_id (int): 角色id
     """
-    pass
+    role = await Role.filter(id=role_id).prefetch_related("permissions", "menus").first()
+    if not role:
+        raise RoleNotExistException
+    async with in_transaction():
+        # 更新role
+        await Role.filter(id=role_id).update(
+            **body.model_dump(
+                include=["role_name", "role_key", "remark"],
+                exclude_unset=True,
+                by_alias=True,
+            )
+        )
+        # 查询permissino
+        if body.permission_ids:
+            permission_list = await Permission.filter(id__in=body.permission_ids).all()
+            if not permission_list:
+                log.debug("无permission")
+            # 新增role_permission
+            await role.permissions.add(*permission_list)
+        # 查询route
+        if body.menu_ids:
+            menu_list = await Routes.filter(id__in=body.menu_ids).all()
+            if not menu_list:
+                log.debug("无menu")
+            # 新增role_menu
+            await role.menus.add(*menu_list)
+        
+        return ResultResponse[admin.RoleTo](result=role)
 
 
 @router.delete(

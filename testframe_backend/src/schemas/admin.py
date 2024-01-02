@@ -1,5 +1,6 @@
 from typing import List, Optional
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
+from pydantic.alias_generators import to_camel
 from ..db.models import (
     PermissionPydantic,
     AccessActionEnum,
@@ -43,29 +44,21 @@ class AccessIn(BaseModel):
 class RoleIn(BaseModel):
     """角色req schema"""
 
-    rolename: str = Field(
-        max_length=20,
-        description="角色名称",
-        alias="roleName",
-    )
-    rolekey: str = Field(
-        max_length=20,
-        description="角色字符",
-        alias="roleKey",
-    )
+    role_name: str = Field(max_length=20, description="角色名称", alias="roleName")
+    role_key: str = Field(max_length=20, description="角色字符", alias="roleKey")
     menu_ids: Optional[List[int]] = Field(
         default=None, description="菜单权限id列表", alias="menuIds"
     )
     permission_ids: Optional[List[int]] = Field(
         default=None, description="权限控制id列表", alias="permissionIds"
     )
-    description: Optional[str] = Field(
-        default=None, max_length=50, description="角色详情", alias="remark"
-    )
+    remark: Optional[str] = Field(default=None, max_length=50, description="角色详情")
 
 
 class RoleTo(RolePydantic):
     """角色res schema"""
+
+    # model_config = ConfigDict(alias_generator=to_camel)
 
     permissions: List[PermissionPydantic] = Field(description="角色的权限")
 

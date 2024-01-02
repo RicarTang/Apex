@@ -18,10 +18,3 @@ class RolePermissionService:
         except DoesNotExist:
             return None
         return role
-
-    @staticmethod
-    async def add_role_permission(**kwargs):
-        """新增角色权限(casbin_rule)"""
-        # 查询role是否存在
-        # 保存casbin policy
-        pass

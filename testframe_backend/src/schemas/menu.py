@@ -36,7 +36,6 @@ class TreeSelectTo(BaseModel):
 
         try:
             res = [Routes.model_validate(children) for children in value]
-            log.debug(res)
             return res
         except AttributeError as e:
             # orm对象返回空，不做处理
