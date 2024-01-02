@@ -1,5 +1,5 @@
 from typing import List, Optional
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import BaseModel, Field, field_validator
 from pydantic.alias_generators import to_camel
 from ..db.models import (
     PermissionPydantic,
@@ -9,6 +9,7 @@ from ..db.models import (
     RoutesPydantic,
     RouteMetaPydantic,
 )
+from ..utils.log_util import log
 from ..db.enum import BoolEnum
 from .common import PageParam
 
@@ -58,9 +59,27 @@ class RoleIn(BaseModel):
 class RoleTo(RolePydantic):
     """角色res schema"""
 
-    # model_config = ConfigDict(alias_generator=to_camel)
+    permission_ids: Optional[List[int]] = Field(
+        default=None,
+        description="角色的权限",
+        validation_alias="permissions",
+        alias="permissionIds",
+    )
+    menu_ids: Optional[List[int]] = Field(
+        default=None, description="角色的菜单", alias="menuIds", validation_alias="menus"
+    )
 
-    permissions: List[PermissionPydantic] = Field(description="角色的权限")
+    @field_validator("menu_ids", mode="before")
+    @classmethod
+    def modify_menus_before_validation(cls, v):
+        """返回menu id"""
+        return [menu.id for menu in v]
+
+    @field_validator("permission_ids", mode="before")
+    @classmethod
+    def modify_permission_before_validation(cls, v):
+        """返回permission id"""
+        return [permission.id for permission in v]
 
 
 class RolesTo(PageParam):

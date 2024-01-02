@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import Optional
 from fastapi import APIRouter, Depends, Query
 from tortoise.transactions import in_transaction
+from tortoise.query_utils import Prefetch
 from ..schemas import ResultResponse, admin
 from ..db.models import Role, Permission, Routes
 from ..utils.log_util import log
@@ -49,7 +50,9 @@ async def query_roles(
             end_time,
         )
     # 执行查询
-    query = Role.filter(**filters).prefetch_related("permissions")
+    query = Role.filter(**filters).prefetch_related(
+        "permissions", "menus__children__route_meta", "menus__route_meta"
+    )
     result = await query.offset(limit * (page - 1)).limit(limit).all()
     # total
     total = await query.count()
@@ -195,7 +198,14 @@ async def update_role(
     Args:
         role_id (int): 角色id
     """
-    role = await Role.filter(id=role_id).prefetch_related("permissions").first()
+    # role = await Role.filter(id=role_id).prefetch_related("permissions","menus__children__route_meta","menus__route_meta").first()
+    role = (
+        await Role.filter(id=role_id)
+        .prefetch_related(
+            "permissions", "menus__children__route_meta", "menus__route_meta"
+        )
+        .first()
+    )
     if not role:
         raise RoleNotExistException
     return ResultResponse[admin.RoleTo](result=role)
@@ -212,7 +222,9 @@ async def update_role(role_id: int, body: admin.RoleIn):
     Args:
         role_id (int): 角色id
     """
-    role = await Role.filter(id=role_id).prefetch_related("permissions", "menus").first()
+    role = (
+        await Role.filter(id=role_id).prefetch_related("permissions", "menus").first()
+    )
     if not role:
         raise RoleNotExistException
     async with in_transaction():
@@ -224,21 +236,23 @@ async def update_role(role_id: int, body: admin.RoleIn):
                 by_alias=True,
             )
         )
-        # 查询permissino
-        if body.permission_ids:
-            permission_list = await Permission.filter(id__in=body.permission_ids).all()
-            if not permission_list:
-                log.debug("无permission")
-            # 新增role_permission
-            await role.permissions.add(*permission_list)
-        # 查询route
+        # 更新关联菜单
         if body.menu_ids:
+            # 获取接口请求菜单列表
             menu_list = await Routes.filter(id__in=body.menu_ids).all()
-            if not menu_list:
-                log.debug("无menu")
-            # 新增role_menu
-            await role.menus.add(*menu_list)
-        
+            # 获取请求角色菜单列表
+            current_role_menu_list = await role.menus.all()
+            log.debug(current_role_menu_list)
+
+            # 确定需要添加和需要移除的菜单 ID
+            menu_ids_to_add = list(set(menu_list) - set(current_role_menu_list))
+            menu_ids_to_remove = list(set(current_role_menu_list) - set(menu_list))
+            log.debug(f"toadd:{menu_ids_to_add},toremove:{menu_ids_to_remove}")
+            # 添加/删除
+            await role.menus.add(*menu_ids_to_add)
+            if menu_ids_to_remove:
+                await role.menus.remove(*menu_ids_to_remove)
+
         return ResultResponse[admin.RoleTo](result=role)
 
 
