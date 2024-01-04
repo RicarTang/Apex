@@ -108,7 +108,7 @@ class InitDbData:
                 await test_suite_meta.save()
                 await test_env_meta.save()
                 # 菜单角色关联
-                await member_role.menus.add(test_route)
+                await member_role.menus.add(test_route,test_case_route,test_suite_route,test_env_route)
                 # 初始化数据字典
                 await self.init_data_dict()
                 log.info("初始化完成!".center(100, "-"))

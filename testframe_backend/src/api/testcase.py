@@ -97,22 +97,49 @@ async def get_testcase_template():
 
 
 @router.get(
-    "/getAll",
-    summary="获取所有测试用例",
+    "/list",
+    summary="获取测试用例列表",
     response_model=ResultResponse[testcase.TestCasesTo],
 )
 async def get_all_testcase(
+    case_title: Optional[str] = Query(
+        default=None, alias="caseTitle", description="用例筛选"
+    ),
+    case_suite: Optional[str] = Query(
+        default=None, alias="caseSuite", description="用例所属套件筛选"
+    ),
+    case_module: Optional[str] = Query(
+        default=None, alias="caseModule", description="用例所属套件筛选"
+    ),
+    begin_time: Optional[str] = Query(
+        default=None, description="开始时间", alias="beginTime"
+    ),
+    end_time: Optional[str] = Query(default=None, description="结束时间", alias="endTime"),
     limit: Optional[int] = Query(default=20, ge=10),
     page: Optional[int] = Query(default=1, gt=0),
 ):
-    """获取所有测试用例
-
-    Args:
-        limit (Optional[int], optional): _description_. Defaults to Query(default=20, ge=10).
-        page (Optional[int], optional): _description_. Defaults to Query(default=1, gt=0).
-    """
-    testcases = await TestCase.all().offset(limit * (page - 1)).limit(limit)
-    total = await TestCase.all().count()
+    """获取测试用例列表"""
+    filters = {}
+    if case_title:
+        filters["case_title__icontains"] = case_title
+    if case_suite:
+        filters["testsuites__suite_title__icontains"] = case_suite
+    if case_module:
+        filters["case_module__icontains"] = case_module
+    if begin_time:
+        begin_time = datetime.strptime(begin_time, "%Y-%m-%d")
+        filters["created_at__gte"] = begin_time
+    if end_time:
+        end_time = datetime.strptime(end_time, "%Y-%m-%d")
+        filters["created_at__lte"] = end_time
+    if begin_time and end_time:
+        filters["created_at__range"] = (
+            begin_time,
+            end_time,
+        )
+    query = TestCase.filter(**filters)
+    testcases = await query.offset(limit * (page - 1)).limit(limit).all()
+    total = await query.count()
     return ResultResponse[testcase.TestCasesTo](
         result=testcase.TestCasesTo(
             data=testcases,
@@ -138,9 +165,7 @@ async def query_testcase(
     result = await TestCase.filter(case_title__contains=case_title).all()
     total = len(result)
     return ResultResponse[testcase.TestCasesTo](
-        result=testcase.TestCasesTo(
-            data=result, page=page, limit=limit, total=total
-        )
+        result=testcase.TestCasesTo(data=result, page=page, limit=limit, total=total)
     )
 
 
@@ -177,9 +202,7 @@ async def update_testcase(case_id: int, body: dict):
         raise TestcaseNotExistException
     result = await TestCase.filter(id=case_id).update(**body.dict(exclude_unset=True))
     log.debug(f"update更新{result}条数据")
-    return ResultResponse[testcase.TestCaseTo](
-        result=await TestCase.get(id=case_id)
-    )
+    return ResultResponse[testcase.TestCaseTo](result=await TestCase.get(id=case_id))
 
 
 @router.delete(

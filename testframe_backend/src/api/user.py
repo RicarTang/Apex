@@ -57,8 +57,8 @@ async def get_users(
             end_time,
         )
     # 执行查询
-    query = Users.filter(**filters).prefetch_related("roles")
-    result = await query.offset(limit * (page - 1)).limit(limit).all()
+    query = Users.filter(**filters)
+    result = await query.prefetch_related("roles").offset(limit * (page - 1)).limit(limit).all()
     # total
     total = await query.count()
     return ResultResponse[user.UsersTo](

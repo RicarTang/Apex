@@ -68,7 +68,7 @@ class TestSuite(AbstractBaseModel):
     suite_title = fields.CharField(max_length=50, index=True, description="套件名称/标题")
     remark = fields.CharField(max_length=100, null=True, description="备注")
     testcases: fields.ManyToManyRelation["TestCase"] = fields.ManyToManyField(
-        model_name="models.TestCase"
+        model_name="models.TestCase", related_name="testsuites"
     )
     task_id: fields.ReverseRelation["TestSuiteTaskId"]
 

@@ -1,4 +1,5 @@
 from typing import Optional
+from datetime import datetime
 from fastapi import (
     APIRouter,
     Query,
@@ -45,32 +46,52 @@ async def add_testsuite(body: testsuite.TestSuiteIn):
 
 
 @router.get(
-    "/getAll",
-    summary="获取所有测试套件",
+    "/list",
+    summary="获取测试套件列表",
     response_model=ResultResponse[testsuite.TestSuitesTo],
 )
 async def get_all_testsuite(
+    suite_title: Optional[str] = Query(
+        default=None, alias="suiteTitle", description="套件名称筛选"
+    ),
+    suite_no: Optional[str] = Query(
+        default=None, alias="suiteNo", description="套件编号筛选"
+    ),
+    begin_time: Optional[str] = Query(
+        default=None, description="开始时间", alias="beginTime"
+    ),
+    end_time: Optional[str] = Query(default=None, description="结束时间", alias="endTime"),
     limit: Optional[int] = Query(default=20, ge=10),
     page: Optional[int] = Query(default=1, gt=0),
 ):
-    """获取所有测试套件
-
-    Args:
-        limit (Optional[int], optional): _description_. Defaults to Query(default=20, ge=10).
-        page (Optional[int], optional): _description_. Defaults to Query(default=1, gt=0).
-    """
-    # 使用prefetch_related预取关联的testcase列表
-    query_list = (
-        await TestSuite.all()
-        .prefetch_related("testcases", "task_id")
+    """获取所有测试套件"""
+    filters = {}
+    if suite_title:
+        filters["suite_title__icontains"] = suite_title
+    if suite_no:
+        filters["suite_no__icontains"] = suite_no
+    if begin_time:
+        begin_time = datetime.strptime(begin_time, "%Y-%m-%d")
+        filters["created_at__gte"] = begin_time
+    if end_time:
+        end_time = datetime.strptime(end_time, "%Y-%m-%d")
+        filters["created_at__lte"] = end_time
+    if begin_time and end_time:
+        filters["created_at__range"] = (
+            begin_time,
+            end_time,
+        )
+    query = TestSuite.filter(**filters)  
+    suite_list = (
+        await query.prefetch_related("testcases", "task_id")  # 使用prefetch_related预取关联的testcase列表
         .offset(limit * (page - 1))
         .limit(limit)
+        .all()
     )
-    total = await TestSuite.all().count()
-    # return testsuites_list
+    total = await query.count()
     return ResultResponse[testsuite.TestSuitesTo](
         result=testsuite.TestSuitesTo(
-            data=query_list,
+            data=suite_list,
             page=page,
             limit=limit,
             total=total,

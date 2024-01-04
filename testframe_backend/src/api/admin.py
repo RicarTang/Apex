@@ -50,10 +50,15 @@ async def query_roles(
             end_time,
         )
     # 执行查询
-    query = Role.filter(**filters).prefetch_related(
-        "permissions", "menus__children__route_meta", "menus__route_meta"
+    query = Role.filter(**filters)
+    result = (
+        await query.prefetch_related(
+            "permissions", "menus__children__route_meta", "menus__route_meta"
+        )
+        .offset(limit * (page - 1))
+        .limit(limit)
+        .all()
     )
-    result = await query.offset(limit * (page - 1)).limit(limit).all()
     # total
     total = await query.count()
     return ResultResponse[admin.RolesTo](
@@ -206,7 +211,10 @@ async def update_role(
             "menus__children__route_meta",
             "menus__route_meta",
             # 只查询子菜单
-            Prefetch("menus", queryset=Routes.filter(parent_id__isnull=False).prefetch_related()),
+            Prefetch(
+                "menus",
+                queryset=Routes.filter(parent_id__isnull=False).prefetch_related(),
+            ),
         )
         .first()
     )
