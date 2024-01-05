@@ -22,7 +22,8 @@ class UserService:
             _type_: _description_
         """
         try:
-            query_result = await Users.get(username=username).prefetch_related("roles")
+            query_result = await Users.get(user_name=username).prefetch_related("roles")
+            log.debug(query_result)
         except DoesNotExist:
             raise UserNotExistException
         except MultipleObjectsReturned:

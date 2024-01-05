@@ -22,8 +22,3 @@ class DataDict(AbstractBaseModel):
     class Meta:
         table = "dict"
         ordering = ["-created_at"]
-
-
-DataDictPydantic = pydantic_model_creator(
-    DataDict, name="DataDictTo", exclude=("is_delete",)
-)

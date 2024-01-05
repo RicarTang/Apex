@@ -45,7 +45,7 @@ class TreeSelectTo(BaseModel):
 class MenuMeta(BaseModel):
     title: str = Field(description="路由标题")
     icon: str = Field(description="icon图标")
-    no_cache: BoolEnum = Field(description="不使用keepalive")
+    no_cache: BoolEnum = Field(description="不使用keepalive",serialization_alias="noCache")
     link: Optional[str] = Field(default=None, description="链接")
 
 
@@ -57,8 +57,8 @@ class AddMenuIn(BaseModel):
     hidden: BoolEnum = Field(description="是否隐藏")
     redirect: Optional[str] = Field(default=None, description="重定向")
     component: str = Field(description="组件path")
-    always_show: Optional[BoolEnum] = Field(default=None, description="是否总是显示")
-    parent_id: Optional[int] = Field(default=None, description="父菜单id")
+    always_show: Optional[BoolEnum] = Field(default=None, description="是否总是显示",serialization_alias="alwaysShow")
+    parent_id: Optional[int] = Field(default=None, description="父菜单id",serialization_alias="parentId")
     meta: MenuMeta
 
 

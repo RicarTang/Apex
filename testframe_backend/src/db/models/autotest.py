@@ -93,29 +93,10 @@ class TestSuiteTaskId(AbstractBaseModel):
 class TestEnv(AbstractBaseModel):
     """测试环境表"""
 
-    summary = fields.CharField(max_length=30, description="测试环境名称")
-    test_env_url = fields.CharField(max_length=50, index=True, description="测试环境地址")
+    env_name = fields.CharField(max_length=30, description="测试环境名称")
+    env_url = fields.CharField(max_length=50, index=True, description="测试环境地址")
     remark = fields.CharField(max_length=100, null=True, description="备注")
 
     class Meta:
         table = "test_environment"
         ordering = ["-created_at"]
-
-
-TestcasePydantic = pydantic_model_creator(
-    TestCase,
-    name="TestCaseTo",
-    exclude=("is_delete",),
-)
-# 测试套件schema
-TestsuitePydantic = pydantic_model_creator(
-    TestSuite,
-    name="TestSuiteTo",
-    exclude=("is_delete",),
-)
-# 测试环境schema
-TestenvPydantic = pydantic_model_creator(
-    TestEnv,
-    name="TestEnvTo",
-    exclude=("is_delete",),
-)

@@ -1,16 +1,14 @@
 from typing import List, Optional
-from pydantic import BaseModel, Field, Extra
-from ..db.models import UserPydantic, RolePydantic, DisabledEnum
-from .common import PageParam
+from pydantic import BaseModel, Field, ConfigDict
+from ..db.models import DisabledEnum
+from .common import PageParam, DefaultModel
 
 
 class User(BaseModel):
     """用户"""
 
     username: str = Field(max_length=20, description="用户名", alias="userName")
-    descriptions: Optional[str] = Field(
-        default=None, max_length=50, description="用户描述", alias="remark"
-    )
+    remark: Optional[str] = Field(default=None, max_length=50, description="用户描述")
     status: DisabledEnum = Field(description="0:Disable,1:Enable")
 
 
@@ -37,20 +35,36 @@ class UserUpdateIn(BaseModel):
 
 class UserResetPwdIn(BaseModel):
     """用户重置密码schema"""
-    user_id: int = Field(description="用户id",alias="userId")
+
+    user_id: int = Field(description="用户id", alias="userId")
     password: str = Field(min_length=6, max_length=20, description="用户密码")
 
 
-class UserTo(UserPydantic):
-    """单用户res schema"""
+class UserTo(DefaultModel):
+    """用户res schema"""
 
-    roles: List[RolePydantic] = Field(description="用户角色")
+    model_config = ConfigDict(from_attributes=True)
+
+    user_name: Optional[str] = Field(default=None, serialization_alias="userName")
+    password: Optional[str] = Field(default=None)
+    status: Optional[int] = Field(default=None)
+    remark: Optional[str] = Field(default=None)
+    roles: List["RoleTo"] = Field(description="用户角色")
+
+
+class RoleTo(DefaultModel):
+    """角色res schema"""
+
+    model_config = ConfigDict(from_attributes=True)
+    role_name: Optional[str] = Field(default=None, serialization_alias="roleName")
+    role_key: Optional[str] = Field(default=None, serialization_alias="roleKey")
+    remark: Optional[str] = Field(default=None)
+    is_super: Optional[int] = Field(default=None, serialization_alias="isSuper")
 
 
 class UsersTo(PageParam):
-    """用户集res schema"""
+    """用户列表res schema"""
 
-    # List[UserPydantic]
     data: List[UserTo]
 
 

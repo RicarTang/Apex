@@ -122,13 +122,13 @@ class InitDbData:
         log.info("开始初始化用户,管理员: admin,12346".center(100, "-"))
         # 创建默认用户
         admin_user = Users(
-            username="admin",
-            descriptions="管理员",
+            user_name="admin",
+            remark="管理员",
             password=md5_crypt.hash("123456"),
         )
         member_user = Users(
-            username="tester",
-            descriptions="普通用户",
+            user_name="tester",
+            remark="普通用户",
             password=md5_crypt.hash("123456"),
         )
         return admin_user, member_user
@@ -138,19 +138,13 @@ class InitDbData:
         log.info("开始初始化角色".center(100, "-"))
         # 创建默认角色
         admin_role = Role(
-            roleName="管理员", roleKey="admin", remark="管理员角色", is_super=True
+            role_name="管理员", role_key="admin", remark="管理员角色", is_super=True
         )
         member_role = Role(
-            roleName="普通用户", roleKey="member", remark="普通用户角色", is_super=False
+            role_name="普通用户", role_key="member", remark="普通用户角色", is_super=False
         )
         return admin_role, member_role
 
-    # async def init_permission(self) -> Tuple[Permission]:
-    #     """初始化权限"""
-    #     log.info("开始初始化权限".center(100, "-"))
-    #     admin_permission = Permission(name="admin权限")
-    #     member_permission = Permission(name="member权限")
-    #     return admin_permission, member_permission
 
     async def init_permission(self) -> Tuple[Permission]:
         """初始化权限"""

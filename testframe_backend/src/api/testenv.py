@@ -17,13 +17,13 @@ router = APIRouter()
     summary="添加测试环境地址",
     response_model=ResultResponse[testenv.TestEnvTo],
 )
-async def add_test_env_ip(body: testenv.TestEnvIn):
+async def add_test_env(body: testenv.TestEnvIn):
     """添加测试环境地址
 
     Args:
         body (testenv.TestEnvIn): _description_
     """
-    result = await TestEnv.create(**body.dict())
+    result = await TestEnv.create(**body.model_dump())
     return ResultResponse[testenv.TestEnvTo](result=result)
 
 
@@ -105,7 +105,7 @@ async def set_current_env(
 
 @router.get(
     "/{env_id}",
-    summary="获取指定环境url",
+    summary="获取指定环境变量",
     response_model=ResultResponse[testenv.TestEnvTo],
 )
 async def get_env(env_id: int):

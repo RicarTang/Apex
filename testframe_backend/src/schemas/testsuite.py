@@ -1,9 +1,8 @@
 from typing import Optional, List, Union
-from pydantic import BaseModel, Field, field_validator
-from ..db.models import TestsuitePydantic, TestSuiteTaskId
-from .common import PageParam
+from pydantic import BaseModel, Field, field_validator, ConfigDict
+from ..db.models import TestSuiteTaskId
+from .common import PageParam, DefaultModel
 from .testcase import TestCaseTo
-from ..utils.log_util import log
 
 
 class TestSuiteIn(BaseModel):
@@ -17,11 +16,18 @@ class TestSuiteIn(BaseModel):
     )
 
 
-class TestSuiteTo(TestsuitePydantic):
+class TestSuiteTo(DefaultModel):
     """测试套件response schema"""
 
+    model_config = ConfigDict(from_attributes=True)
+
+    suite_no: Optional[str] = Field(default=None, serialization_alias="suiteNo")
+    suite_title: Optional[str] = Field(default=None, serialization_alias="suiteTitle")
+    remark: Optional[str] = Field(default=None)
     testcases: List[TestCaseTo] = Field(description="套件包含的用例")
-    task_id: Optional[str] = Field(description="运行测试的task id")
+    task_id: Optional[str] = Field(
+        description="运行测试的task id", serialization_alias="taskId"
+    )
 
     @field_validator("task_id", mode="before")
     @classmethod

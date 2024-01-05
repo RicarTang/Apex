@@ -1,3 +1,5 @@
+from pydantic import ConfigDict
+from pydantic.alias_generators import to_camel
 from tortoise import fields
 from tortoise.contrib.pydantic import pydantic_model_creator
 from ..base_models import AbstractBaseModel
@@ -7,8 +9,8 @@ from ..enum import DisabledEnum, BoolEnum, AccessActionEnum, AccessModelEnum
 class Users(AbstractBaseModel):
     """用户模型"""
 
-    username = fields.CharField(max_length=20, unique=True, description="用户名")
-    descriptions = fields.CharField(max_length=30, null=True, description="个人描述")
+    user_name = fields.CharField(max_length=20, unique=True, description="用户名")
+    remark = fields.CharField(max_length=30, null=True, description="个人描述")
     password = fields.CharField(max_length=128, index=True, description="密码")
     status = fields.IntEnumField(
         enum_type=DisabledEnum,
@@ -22,8 +24,9 @@ class Users(AbstractBaseModel):
     tokens: fields.ReverseRelation["UserToken"]
 
     class Meta:
+        table = "user"
         ordering = ["-created_at"]
-        indexes = ("username", "status", "created_at")  # 添加复合非唯一索引
+        indexes = ("user_name", "status", "created_at")  # 添加复合非唯一索引
 
     def __str__(self):
         return f"<{self.__class__.__name__},id:{self.id}>"
@@ -32,8 +35,8 @@ class Users(AbstractBaseModel):
 class Role(AbstractBaseModel):
     """角色表"""
 
-    roleName = fields.CharField(max_length=20, unique=True, description="角色名称")
-    roleKey = fields.CharField(max_length=20, unique=True, description="角色字符")
+    role_name = fields.CharField(max_length=20, unique=True, description="角色名称")
+    role_key = fields.CharField(max_length=20, unique=True, description="角色字符")
     remark = fields.CharField(max_length=50, null=True, description="角色详情")
     is_super = fields.IntEnumField(
         enum_type=BoolEnum,
@@ -87,23 +90,3 @@ class UserToken(AbstractBaseModel):
 
     class Meta:
         table = "user_token"
-
-
-# 用户schema
-UserPydantic = pydantic_model_creator(
-    Users,
-    name="UserTo",
-    exclude=("password", "is_delete"),
-)
-
-# 角色schema
-RolePydantic = pydantic_model_creator(
-    Role,
-    name="RoleTo",
-    exclude=("is_delete",),
-)
-PermissionPydantic = pydantic_model_creator(
-    Permission,
-    name="PermissionTo",
-    exclude=("is_delete",),
-)

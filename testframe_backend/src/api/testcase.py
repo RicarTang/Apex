@@ -150,23 +150,44 @@ async def get_all_testcase(
     )
 
 
-@router.get(
-    "/query",
-    summary="查询测试用例",
-    response_model=ResultResponse[testcase.TestCasesTo],
-    # dependencies=[Depends(check_jwt_auth)],
+@router.post(
+    "/executeOne",
+    summary="执行单条测试用例",
 )
-async def query_testcase(
-    case_title: Optional[str] = Query(default=None, description="用例标题"),
-    limit: Optional[int] = Query(default=20, ge=10),
-    page: Optional[int] = Query(default=1, gt=0),
+async def execute_testcase(
+    body: testcase.ExecuteTestcaseIn,
 ):
-    """查询测试用例"""
-    result = await TestCase.filter(case_title__contains=case_title).all()
-    total = len(result)
-    return ResultResponse[testcase.TestCasesTo](
-        result=testcase.TestCasesTo(data=result, page=page, limit=limit, total=total)
-    )
+    """执行测试用例
+
+    Args:
+        body (testcase.ExecuteTestcaseIn): 前端给case_id
+    Returns:
+        _type_: _description_
+    """
+    testcase = await TestCase.filter(id=body.case_id).first()
+    current_env = await RedisService().get("currentEnv")
+    if not testcase:
+        raise TestcaseNotExistException
+    async with AsyncClient(base_url=current_env) as client:
+        try:
+            res = await client.request(
+                method=testcase.api_method,
+                url=testcase.api_path,
+            )
+            assert res.status_code == testcase.expect_code
+        except AssertionError:
+            pass
+        else:
+            return res
+
+
+@router.post(
+    "/executeAll",
+    summary="执行所有测试用例",
+)
+async def execute_all_testcase():
+    """待完善"""
+    return
 
 
 @router.get(
@@ -220,43 +241,3 @@ async def delete_testcase(case_id: int):
         raise TestcaseNotExistException
     result = await TestCase.filter(id=case_id).delete()
     return ResultResponse[str](message="successful deleted testcase!")
-
-
-@router.post(
-    "/executeOne",
-    summary="执行单条测试用例",
-)
-async def execute_testcase(
-    body: testcase.ExecuteTestcaseIn,
-):
-    """执行测试用例
-
-    Args:
-        body (testcase.ExecuteTestcaseIn): 前端给case_id
-    Returns:
-        _type_: _description_
-    """
-    testcase = await TestCase.filter(id=body.case_id).first()
-    current_env = await RedisService().get("currentEnv")
-    if not testcase:
-        raise TestcaseNotExistException
-    async with AsyncClient(base_url=current_env) as client:
-        try:
-            res = await client.request(
-                method=testcase.api_method,
-                url=testcase.api_path,
-            )
-            assert res.status_code == testcase.expect_code
-        except AssertionError:
-            pass
-        else:
-            return res
-
-
-@router.post(
-    "/executeAll",
-    summary="执行所有测试用例",
-)
-async def execute_all_testcase():
-    """待完善"""
-    return

@@ -1,17 +1,10 @@
 from typing import List, Optional
-from pydantic import BaseModel, Field, field_validator
-from pydantic.alias_generators import to_camel
+from pydantic import BaseModel, Field, field_validator, ConfigDict
 from ..db.models import (
-    PermissionPydantic,
     AccessActionEnum,
     AccessModelEnum,
-    RolePydantic,
-    RoutesPydantic,
-    RouteMetaPydantic,
 )
-from ..utils.log_util import log
-from ..db.enum import BoolEnum
-from .common import PageParam
+from .common import PageParam, DefaultModel
 
 
 class PermissionIn(BaseModel):
@@ -28,8 +21,14 @@ class RolePermissionIn(BaseModel):
     role_id: int = Field(description="角色id", alias="roleId")
 
 
-class PermissionTo(PermissionPydantic):
-    """权限schema"""
+class PermissionTo(DefaultModel):
+    """权限 res schema"""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    name: Optional[str] = Field(default=None)
+    model: Optional[str] = Field(default=None)
+    action: Optional[str] = Field(default=None)
 
 
 class PermissionsTo(PageParam):
@@ -56,9 +55,15 @@ class RoleIn(BaseModel):
     remark: Optional[str] = Field(default=None, max_length=50, description="角色详情")
 
 
-class RoleTo(RolePydantic):
+class RoleTo(DefaultModel):
     """角色res schema"""
 
+    model_config = ConfigDict(from_attributes=True)
+
+    role_name: Optional[str] = Field(default=None, serialization_alias="roleName")
+    role_key: Optional[str] = Field(default=None, serialization_alias="roleKey")
+    is_super: Optional[int] = Field(default=None, serialization_alias="isSuper")
+    remark: Optional[str] = Field(default=None)
     permission_ids: Optional[List[int]] = Field(
         default=None,
         description="角色的权限",

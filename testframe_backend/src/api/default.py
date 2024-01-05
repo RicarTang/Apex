@@ -48,7 +48,7 @@ async def login(
     if not md5_crypt.verify(secret=body.password, hash=query_user.password):
         raise PasswordValidateErrorException
     # 创建jwt
-    access_token = create_access_token(data={"sub": query_user.username})
+    access_token = create_access_token(data={"sub": query_user.user_name})
     # 更新用户jwt
     await UserTokenService.add_jwt(
         current_user_id=query_user.id, token=access_token, client_ip=request.client.host
