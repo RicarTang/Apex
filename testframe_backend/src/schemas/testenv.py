@@ -6,8 +6,8 @@ from .common import PageParam, DefaultModel
 class TestEnvIn(BaseModel):
     """测试环境request schema"""
 
-    summary: str = Field(max_length=30, description="测试环境远端地址", alias="envName")
-    test_env_url: HttpUrl = Field(description="测试环境远端地址", alias="envUrl")
+    env_name: str = Field(max_length=30, description="测试环境远端地址", alias="envName")
+    env_url: HttpUrl = Field(description="测试环境远端地址", alias="envUrl")
     remark: Optional[str] = Field(default=None, max_length=100, description="备注")
 
 

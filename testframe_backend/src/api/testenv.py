@@ -49,9 +49,9 @@ async def get_all_env(
     """获取环境变量列表"""
     filters = {}
     if env_name:
-        filters["summary__icontains"] = env_name
+        filters["env_name__icontains"] = env_name
     if env_url:
-        filters["test_env_url__icontains"] = env_url
+        filters["env_url__icontains"] = env_url
     if begin_time:
         begin_time = datetime.strptime(begin_time, "%Y-%m-%d")
         filters["created_at__gte"] = begin_time
