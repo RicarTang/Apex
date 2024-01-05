@@ -35,9 +35,9 @@ async def query_roles(
     # 筛选列表
     filters = {}
     if role_name:
-        filters["rolename__icontains"] = role_name
+        filters["role_name__icontains"] = role_name
     if role_key:
-        filters["rolekey__icontains"] = role_key
+        filters["role_key__icontains"] = role_key
     if begin_time:
         begin_time = datetime.strptime(begin_time, "%Y-%m-%d")
         filters["created_at__gte"] = begin_time

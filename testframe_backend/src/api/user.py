@@ -42,7 +42,7 @@ async def get_users(
     # 筛选列表
     filters = {}
     if username:
-        filters["username__icontains"] = username
+        filters["user_name__icontains"] = username
     if status is not None:
         filters["status"] = status
     if begin_time:

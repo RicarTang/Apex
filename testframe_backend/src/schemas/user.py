@@ -28,7 +28,7 @@ class UserUpdateIn(BaseModel):
     status: Optional[DisabledEnum] = Field(
         default=None, description="0:Disable,1:Enable"
     )
-    descriptions: Optional[str] = Field(
+    remark: Optional[str] = Field(
         default=None, max_length=50, description="用户描述", alias="remark"
     )
 
