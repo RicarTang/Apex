@@ -11,6 +11,12 @@ class TestEnvIn(BaseModel):
     remark: Optional[str] = Field(default=None, max_length=100, description="备注")
 
 
+class DeleteEnvIn(BaseModel):
+    """删除env schema"""
+
+    env_ids: List[int] = Field(alias="envIds")
+
+
 class TestEnvTo(DefaultModel):
     """response schema"""
 

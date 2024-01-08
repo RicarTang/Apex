@@ -195,7 +195,7 @@ async def delete_role_permission(permission_id: int):
     summary="获取角色",
     response_model=ResultResponse[admin.RoleTo],
 )
-async def update_role(
+async def get_role(
     role_id: int,
 ):
     """获取角色
@@ -229,14 +229,8 @@ async def update_role(
     response_model=ResultResponse[admin.RoleTo],
 )
 async def update_role(role_id: int, body: admin.RoleIn):
-    """修改角色
-
-    Args:
-        role_id (int): 角色id
-    """
-    role = (
-        await Role.filter(id=role_id).prefetch_related("permissions", "menus").first()
-    )
+    """修改角色"""
+    role = await Role.get_or_none(id=role_id).prefetch_related("permissions", "menus")
     if not role:
         raise RoleNotExistException
     async with in_transaction():
@@ -245,7 +239,7 @@ async def update_role(role_id: int, body: admin.RoleIn):
             **body.model_dump(
                 include=["role_name", "role_key", "remark"],
                 exclude_unset=True,
-                by_alias=True,
+                # by_alias=True,
             )
         )
         # 更新关联菜单
@@ -264,7 +258,8 @@ async def update_role(role_id: int, body: admin.RoleIn):
             await role.menus.add(*menu_ids_to_add)
             if menu_ids_to_remove:
                 await role.menus.remove(*menu_ids_to_remove)
-
+        # 刷新
+        await role.refresh_from_db()
         return ResultResponse[admin.RoleTo](result=role)
 
 

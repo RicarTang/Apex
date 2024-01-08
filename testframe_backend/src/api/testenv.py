@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Union
 from datetime import datetime
 from fastapi import APIRouter, Query, Request, Body, Depends
 from tortoise.exceptions import DoesNotExist
@@ -124,40 +124,27 @@ async def get_env(env_id: int):
 @router.put(
     "/{env_id}",
     summary="更新env info",
-    response_model=ResultResponse[testenv.TestEnvTo],
+    response_model=ResultResponse[str],
 )
 async def update_env(
     env_id: int,
     body: testenv.TestEnvIn,
 ):
-    """更新env数据信息
-
-    Args:
-        env_id (int): _description_
-        body (testenv.TestEnvIn): _description_
-
-    Returns:
-        _type_: _description_
-    """
+    """更新env数据信息"""
     if not await TestEnv.filter(id=env_id).exists():
         raise TestEnvNotExistException
-    result = await TestEnv.filter(id=env_id).update(**body.dict(exclude_unset=True))
-    log.debug(f"update更新{result}条数据")
-    return ResultResponse[testenv.TestEnvTo](result=await TestEnv.get(id=env_id))
+    await TestEnv.filter(id=env_id).update(**body.model_dump(exclude_unset=True))
+    return ResultResponse[str](result="successful update environment!")
 
 
 @router.delete(
-    "/{env_id}",
-    summary="删除指定环境",
+    "",
+    summary="删除环境变量",
     response_model=ResultResponse[str],
 )
-async def delete_env(env_id: int):
-    """删除指定环境
-
-    Args:
-        env_id (int): _description_
-    """
-    if not await TestEnv.filter(id=env_id).exists():
+async def delete_env(body: testenv.DeleteEnvIn):
+    """删除指定环境"""
+    if not await TestEnv.filter(id__in=body.env_ids).exists():
         raise TestEnvNotExistException
-    result = await TestEnv.filter(id=env_id).delete()
-    return ResultResponse[str](message="successful deleted environment!")
+    await TestEnv.filter(id__in=body.env_ids).delete()
+    return ResultResponse[str](result="successful deleted environment!")

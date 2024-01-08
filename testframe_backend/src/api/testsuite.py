@@ -26,23 +26,19 @@ router = APIRouter()
     response_model=ResultResponse[testsuite.TestSuiteTo],
 )
 async def add_testsuite(body: testsuite.TestSuiteIn):
-    """新增测试套件
-
-    Args:
-        body (testsuite.TestSuiteIn): 包含测试套件信息的请求体
-
-    Returns:
-        ResultResponse[testsuite.TestSuiteTo]: 添加成功后的测试套件信息
-    """
+    """新增测试套件"""
     async with in_transaction():
-        try:
-            testsuite = await TestSuite.create(**body.dict())
-            testcases_result = await TestCase.filter(id__in=body.testcase_id).all()
-            await testsuite.testcases.add(*testcases_result)
-            await testsuite.fetch_related("testcases")
-        except Exception as e:
-            log.error(f"事务操作失败：{e}")
-    return ResultResponse[testsuite.TestSuiteTo](result=testsuite)
+        # 新增
+        result = await TestSuite.create(
+            **body.model_dump(exclude_unset=True, exclude=["testcase_ids"])
+        )
+        # 判断关联用例
+        if body.testcase_ids:
+            testcases_result = await TestCase.filter(id__in=body.testcase_ids).all()
+            await result.testcases.add(*testcases_result)
+            # 查询关联用例
+            await result.fetch_related("testcases")
+    return ResultResponse[testsuite.TestSuiteTo](result=result)
 
 
 @router.get(
@@ -81,9 +77,11 @@ async def get_all_testsuite(
             begin_time,
             end_time,
         )
-    query = TestSuite.filter(**filters)  
+    query = TestSuite.filter(**filters)
     suite_list = (
-        await query.prefetch_related("testcases", "task_id")  # 使用prefetch_related预取关联的testcase列表
+        await query.prefetch_related(
+            "testcases", "task_id"
+        )  # 使用prefetch_related预取关联的testcase列表
         .offset(limit * (page - 1))
         .limit(limit)
         .all()
@@ -143,11 +141,7 @@ async def run_testsuite(body: testsuite.TestSuiteId):
     response_model=ResultResponse[testsuite.TestSuiteTo],
 )
 async def get_testsuite(suite_id: int):
-    """获取指定测试套件
-
-    Args:
-        suite_id (int): _description_
-    """
+    """获取指定测试套件"""
     try:
         result = await TestSuite.get(id=suite_id).prefetch_related(
             "testcases", "task_id"
@@ -163,33 +157,48 @@ async def get_testsuite(suite_id: int):
     response_model=ResultResponse[testsuite.TestSuiteTo],
 )
 async def update_testsuite(suite_id: int, body: testsuite.TestSuiteIn):
-    """更新测试套件数据
-
-    Args:
-        suite_id (int): _description_
-        body (testsuite.TestSuiteIn): _description_
-    """
-    if not await TestSuite.filter(id=suite_id).exists():
+    """更新测试套件数据"""
+    suite = await TestSuite.get_or_none(id=suite_id).prefetch_related("testcases")
+    if not suite:
         raise TestsuiteNotExistException
-    result = await TestSuite.filter(id=suite_id).update(**body.dict(exclude_unset=True))
-    log.debug(f"update更新{result}条数据")
-    return ResultResponse[testsuite.TestSuiteTo](
-        result=await TestSuite.get(id=suite_id)
-    )
+    async with in_transaction():
+        # 更新
+        await TestSuite.filter(id=suite_id).update(
+            **body.model_dump(
+                exclude_unset=True,
+                exclude=["testcase_ids"]
+                # by_alias=True,
+            )
+        )
+        # 更新关联用例
+        if body.testcase_ids:
+            # 获取接口请求用例列表
+            case_list = await TestCase.filter(id__in=body.testcase_ids).all()
+            # 获取请求套件的用例列表
+            current_suite_case_list = await suite.testcases.all()
+            log.debug(current_suite_case_list)
+
+            # 确定需要添加和需要移除的ID
+            case_ids_to_add = list(set(case_list) - set(current_suite_case_list))
+            case_ids_to_remove = list(set(current_suite_case_list) - set(case_list))
+            log.debug(f"toadd:{case_ids_to_add},toremove:{case_ids_to_remove}")
+            # 添加/删除
+            await suite.testcases.add(*case_ids_to_add)
+            if case_ids_to_remove:
+                await suite.testcases.remove(*case_ids_to_remove)
+        # 刷新
+        await suite.refresh_from_db()
+        return ResultResponse[testsuite.TestSuiteTo](result=suite)
 
 
 @router.delete(
-    "/{suite_id}",
+    "",
     summary="删除测试套件",
     response_model=ResultResponse[str],
 )
-async def delete_testsuite(suite_id: int):
-    """删除指定id测试套件
-
-    Args:
-        suite_id (int): _description_
-    """
-    if not await TestSuite.filter(id=suite_id).exists():
+async def delete_testsuite(body: testsuite.DeleteSuiteIn):
+    """删除测试套件"""
+    if not await TestSuite.filter(id__in=body.suite_ids).exists():
         raise TestsuiteNotExistException
-    result = await TestSuite.filter(id=suite_id).delete()
-    return ResultResponse[str](message="successful deleted testsuite!")
+    await TestSuite.filter(id__in=body.suite_ids).delete()
+    return ResultResponse[str](result="successful deleted testsuite!")

@@ -7,7 +7,7 @@ from .common import PageParam, DefaultModel
 class User(BaseModel):
     """用户"""
 
-    username: str = Field(max_length=20, description="用户名", alias="userName")
+    user_name: str = Field(max_length=20, description="用户名", alias="userName")
     remark: Optional[str] = Field(default=None, max_length=50, description="用户描述")
     status: DisabledEnum = Field(description="0:Disable,1:Enable")
 
@@ -46,7 +46,7 @@ class UserTo(DefaultModel):
     model_config = ConfigDict(from_attributes=True)
 
     user_name: Optional[str] = Field(default=None, serialization_alias="userName")
-    password: Optional[str] = Field(default=None)
+    # password: Optional[str] = Field(default=None)
     status: Optional[int] = Field(default=None)
     remark: Optional[str] = Field(default=None)
     roles: List["RoleTo"] = Field(description="用户角色")

@@ -8,12 +8,18 @@ from .testcase import TestCaseTo
 class TestSuiteIn(BaseModel):
     """添加测试套件request schema"""
 
-    suite_no: str = Field(max_length=10, description="套件编号")
-    suite_title: str = Field(max_length=50, description="套件名称/标题")
-    remark: Optional[str] = Field(description="备注")
-    testcase_id: Optional[List[int]] = Field(
-        gt=0, description="测试用例id", alias="testcase_id_list"
+    suite_no: str = Field(max_length=10, description="套件编号", alias="suiteNo")
+    suite_title: str = Field(max_length=50, description="套件名称/标题", alias="suiteTitle")
+    remark: Optional[str] = Field(default=None, description="备注")
+    testcase_ids: Optional[List[int]] = Field(
+        default=None, description="测试用例id", alias="testcaseIds"
     )
+
+
+class DeleteSuiteIn(BaseModel):
+    """删除suite list"""
+
+    suite_ids: List[int] = Field(alias="suiteIds")
 
 
 class TestSuiteTo(DefaultModel):
