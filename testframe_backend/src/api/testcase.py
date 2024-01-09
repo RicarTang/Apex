@@ -32,16 +32,8 @@ router = APIRouter()
     response_model=ResultResponse[testcase.TestCaseTo],
 )
 async def add_testcase(body: testcase.TestCaseIn):
-    """添加单条测试用例到数据库
-
-    Args:
-        body (testcase.TestCaseIn): _description_
-
-
-    Returns:
-        _type_: _description_
-    """
-    result = await TestCaseService.add_testcase(body.dict())
+    """添加测试用例"""
+    result = await TestCaseService.add_testcase(body.model_dump(exclude_unset=True))
     return ResultResponse[testcase.TestCaseTo](result=result)
 
 

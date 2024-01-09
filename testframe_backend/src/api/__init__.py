@@ -7,5 +7,4 @@ from .testenv import router as testenv_api
 from .config import router as config_api
 from .sse import router as sse_api
 from .default import router as default_api
-from .dict import router as dict_api
 from .menu import router as menu_api

@@ -2,7 +2,7 @@ import asyncio
 from typing import Tuple
 from passlib.hash import md5_crypt
 from tortoise.transactions import in_transaction
-from .models import Users, Role, Routes, RouteMeta, Permission, DataDict
+from .models import Users, Role, Routes, RouteMeta, Permission
 from .enum import AccessModelEnum, AccessActionEnum, BoolEnum, DisabledEnum
 from ..utils.log_util import log
 
@@ -52,7 +52,7 @@ class InitDbData:
                     test_route,
                     system_user_route,
                     test_case_route,
-                    system_dict_route,
+                    # system_dict_route,
                     system_role_route,
                     system_menu_route,
                     test_suite_route,
@@ -64,14 +64,14 @@ class InitDbData:
                 # 添加外键
                 system_user_route.parent_id = system_route.id
                 test_case_route.parent_id = test_route.id
-                system_dict_route.parent_id = system_route.id
+                # system_dict_route.parent_id = system_route.id
                 system_role_route.parent_id = system_route.id
                 system_menu_route.parent_id = system_route.id
                 test_suite_route.parent_id = test_route.id
                 test_env_route.parent_id = test_route.id
                 await system_user_route.save()
                 await test_case_route.save()
-                await system_dict_route.save()
+                # await system_dict_route.save()
                 await system_role_route.save()
                 await system_menu_route.save()
                 await test_suite_route.save()
@@ -82,7 +82,7 @@ class InitDbData:
                     test_meta,
                     system_user_meta,
                     test_case_meta,
-                    system_dict_meta,
+                    # system_dict_meta,
                     system_role_meta,
                     system_menu_meta,
                     test_suite_meta,
@@ -93,7 +93,7 @@ class InitDbData:
                 test_meta.route = test_route
                 system_user_meta.route = system_user_route
                 test_case_meta.route = test_case_route
-                system_dict_meta.route = system_dict_route
+                # system_dict_meta.route = system_dict_route
                 system_role_meta.route = system_role_route
                 system_menu_meta.route = system_menu_route
                 test_suite_meta.route = test_suite_route
@@ -102,7 +102,7 @@ class InitDbData:
                 await test_meta.save()
                 await system_user_meta.save()
                 await test_case_meta.save()
-                await system_dict_meta.save()
+                # await system_dict_meta.save()
                 await system_role_meta.save()
                 await system_menu_meta.save()
                 await test_suite_meta.save()
@@ -110,7 +110,7 @@ class InitDbData:
                 # 菜单角色关联
                 await member_role.menus.add(test_route,test_case_route,test_suite_route,test_env_route)
                 # 初始化数据字典
-                await self.init_data_dict()
+                # await self.init_data_dict()
                 log.info("初始化完成!".center(100, "-"))
 
     async def db_has_data(self) -> bool:

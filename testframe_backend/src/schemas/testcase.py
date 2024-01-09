@@ -10,43 +10,51 @@ class TestCaseIn(BaseModel):
     case_no: str = Field(max_length=10, description="用例编号", alias="caseNo")
     case_title: str = Field(max_length=50, description="用例名称/标题", alias="caseTitle")
     case_description: Optional[str] = Field(
-        max_length=100, description="用例说明", alias="caseDescription"
+        default=None, max_length=100, description="用例说明", alias="caseDescription"
     )
     case_module: str = Field(max_length=20, description="用例所属模块", alias="caseModule")
     case_sub_module: Optional[str] = Field(
-        max_length=20, description="用例子模块", alias="caseSubModule"
+        default=None, max_length=20, description="用例子模块", alias="caseSubModule"
     )
-    case_is_execute: BoolEnum = Field(
+    case_is_execute: Optional[BoolEnum] = Field(
         default=BoolEnum.TRUE,
         description="用例是否执行;1: True, 0: False",
         alias="caseIsExecute",
     )
     api_path: str = Field(description="用例接口地址path", alias="apiPath")
-    api_method: ApiMethodEnum = Field(
+    api_method: Optional[ApiMethodEnum] = Field(
         default=ApiMethodEnum.GET, description="api请求方法", alias="apiMethod"
     )
-    request_headers: Optional[dict] = Field(description="请求头", alias="requestHeaders")
-    request_param_type: RequestParamTypeEnum = Field(
+    request_headers: Optional[dict] = Field(
+        default=None, description="请求头", alias="requestHeaders"
+    )
+    request_param_type: Optional[RequestParamTypeEnum] = Field(
         default=RequestParamTypeEnum.BODY,
         description="请求参数类型;body: json类型;query: 查询参数;path: 路径参数",
         alias="requestParamType",
     )
     request_param: str = Field(description="请求参数", alias="requestParam")
     expect_code: int = Field(description="预期网络状态码", alias="expectCode")
-    expect_result: Optional[str] = Field(description="预期结果", alias="expectResult")
-    expect_data: Optional[str] = Field(description="预期返回数据", alias="expectData")
-    request_to_redis: BoolEnum = Field(
+    expect_result: Optional[str] = Field(
+        default=None, description="预期结果", alias="expectResult"
+    )
+    expect_data: Optional[str] = Field(
+        default=None, escription="预期返回数据", alias="expectData"
+    )
+    request_to_redis: Optional[BoolEnum] = Field(
         default=BoolEnum.FALSE,
         description="是否保存请求体到redis;1: True, 0: False",
         alias="requestToRedis",
     )
-    response_to_redis: BoolEnum = Field(
+    response_to_redis: Optional[BoolEnum] = Field(
         default=BoolEnum.FALSE,
         description="是否保存响应体到redis;1: True, 0: False",
         alias="responseToRedis",
     )
-    case_editor: Optional[str] = Field(description="用例编写者", alias="caseEditor")
-    remark: Optional[str] = Field(description="备注")
+    case_editor: Optional[str] = Field(
+        default=None, description="用例编写者", alias="caseEditor"
+    )
+    remark: Optional[str] = Field(default=None, description="备注")
 
 
 class TestCaseTo(DefaultModel):

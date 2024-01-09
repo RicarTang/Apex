@@ -14,7 +14,6 @@ from .src.api import (
     config_api,
     sse_api,
     default_api,
-    dict_api,
     menu_api,
 )
 from .src.core.security import check_jwt_auth
@@ -147,12 +146,6 @@ app.include_router(
     config_api,
     tags=["Config"],
     prefix="/config",
-    # dependencies=[Depends(check_jwt_auth)],
-)
-app.include_router(
-    dict_api,
-    tags=["Dict"],
-    prefix="/dict",
     # dependencies=[Depends(check_jwt_auth)],
 )
 app.include_router(
