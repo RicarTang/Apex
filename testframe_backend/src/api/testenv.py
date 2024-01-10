@@ -103,6 +103,20 @@ async def set_current_env(
     return 1
 
 
+@router.delete(
+    "/delete",
+    summary="删除环境变量",
+    response_model=ResultResponse[str],
+)
+async def delete_env(body: testenv.DeleteEnvIn):
+    """删除指定环境"""
+
+    delete_count = await TestEnv.filter(id__in=body.env_ids).delete()
+    if not delete_count:
+        raise TestEnvNotExistException
+    return ResultResponse[str](result="successful deleted environment!")
+
+
 @router.get(
     "/{env_id}",
     summary="获取指定环境变量",
@@ -135,16 +149,3 @@ async def update_env(
         raise TestEnvNotExistException
     await TestEnv.filter(id=env_id).update(**body.model_dump(exclude_unset=True))
     return ResultResponse[str](result="successful update environment!")
-
-
-@router.delete(
-    "",
-    summary="删除环境变量",
-    response_model=ResultResponse[str],
-)
-async def delete_env(body: testenv.DeleteEnvIn):
-    """删除指定环境"""
-    if not await TestEnv.filter(id__in=body.env_ids).exists():
-        raise TestEnvNotExistException
-    await TestEnv.filter(id__in=body.env_ids).delete()
-    return ResultResponse[str](result="successful deleted environment!")

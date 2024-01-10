@@ -182,22 +182,32 @@ async def execute_all_testcase():
     return
 
 
+@router.delete(
+    "/delete",
+    summary="删除测试用例",
+    response_model=ResultResponse[str],
+)
+async def delete_testcase(body: testcase.DeleteCaseIn):
+    """删除测试用例"""
+
+    delete_count = await TestCase.filter(id__in=body.case_ids).delete()
+    if not delete_count:
+        raise TestcaseNotExistException
+    return ResultResponse[str](result="successful deleted testcase!")
+
+
 @router.get(
     "/{case_id}",
     summary="获取指定testcase",
     response_model=ResultResponse[testcase.TestCaseTo],
 )
 async def get_testcase(case_id: int):
-    """获取指定testcase
-
-    Args:
-        case_id (int): _description_. Defaults to Query(gt=0).
-    """
+    """获取指定testcase"""
     try:
-        testcase = await TestCase.get(id=case_id)
+        case = await TestCase.get(id=case_id)
     except DoesNotExist:
         raise TestcaseNotExistException
-    return ResultResponse[testcase.TestCaseTo](result=testcase)
+    return ResultResponse[testcase.TestCaseTo](result=case)
 
 
 @router.put(
@@ -216,20 +226,3 @@ async def update_testcase(case_id: int, body: dict):
     result = await TestCase.filter(id=case_id).update(**body.dict(exclude_unset=True))
     log.debug(f"update更新{result}条数据")
     return ResultResponse[testcase.TestCaseTo](result=await TestCase.get(id=case_id))
-
-
-@router.delete(
-    "/{case_id}",
-    summary="删除测试用例",
-    response_model=ResultResponse[str],
-)
-async def delete_testcase(case_id: int):
-    """删除指定id的测试用例
-
-    Args:
-        case_id (int): _description_
-    """
-    if not await TestCase.filter(id=case_id).exists():
-        raise TestcaseNotExistException
-    result = await TestCase.filter(id=case_id).delete()
-    return ResultResponse[str](message="successful deleted testcase!")

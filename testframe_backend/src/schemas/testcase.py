@@ -139,3 +139,9 @@ class ExecuteTestcaseIn(BaseModel):
     """执行单条测试用例request schema"""
 
     case_id: int
+
+
+class DeleteCaseIn(BaseModel):
+    """删除用例schema"""
+
+    case_ids: List[int] = Field(alias="caseIds")

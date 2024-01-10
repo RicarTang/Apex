@@ -135,6 +135,20 @@ async def run_testsuite(body: testsuite.TestSuiteId):
     )
 
 
+@router.delete(
+    "/delete",
+    summary="删除测试套件",
+    response_model=ResultResponse[str],
+)
+async def delete_testsuite(body: testsuite.DeleteSuiteIn):
+    """删除测试套件"""
+
+    delete_count = await TestSuite.filter(id__in=body.suite_ids).delete()
+    if not delete_count:
+        raise TestsuiteNotExistException
+    return ResultResponse[str](result="successful deleted testsuite!")
+
+
 @router.get(
     "/{suite_id}",
     summary="获取指定testsuite",
@@ -189,16 +203,3 @@ async def update_testsuite(suite_id: int, body: testsuite.TestSuiteIn):
         # 刷新
         await suite.refresh_from_db()
         return ResultResponse[testsuite.TestSuiteTo](result=suite)
-
-
-@router.delete(
-    "",
-    summary="删除测试套件",
-    response_model=ResultResponse[str],
-)
-async def delete_testsuite(body: testsuite.DeleteSuiteIn):
-    """删除测试套件"""
-    if not await TestSuite.filter(id__in=body.suite_ids).exists():
-        raise TestsuiteNotExistException
-    await TestSuite.filter(id__in=body.suite_ids).delete()
-    return ResultResponse[str](result="successful deleted testsuite!")

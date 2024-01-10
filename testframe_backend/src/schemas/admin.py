@@ -116,3 +116,7 @@ class RolePermIn(BaseModel):
             "example": {"role": "admin", "model": "admin", "act": "add"}
         }
     }
+
+
+class DeleteRoleIn(BaseModel):
+    role_ids: List[int] = Field(alias="roleIds")

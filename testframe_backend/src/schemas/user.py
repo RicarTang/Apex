@@ -87,7 +87,7 @@ class LoginIn(BaseModel):
     }
 
 
-class BatchDelete(BaseModel):
+class DeleteUserIn(BaseModel):
     """批量删除用户 req schema"""
 
-    users_id: List[int]
+    user_ids: List[int] = Field(alias="userIds")

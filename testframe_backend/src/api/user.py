@@ -58,7 +58,12 @@ async def get_users(
         )
     # 执行查询
     query = Users.filter(**filters)
-    result = await query.prefetch_related("roles").offset(limit * (page - 1)).limit(limit).all()
+    result = (
+        await query.prefetch_related("roles")
+        .offset(limit * (page - 1))
+        .limit(limit)
+        .all()
+    )
     # total
     total = await query.count()
     return ResultResponse[user.UsersTo](
@@ -77,7 +82,7 @@ async def get_current_user(current_user: Users = Depends(current_user)):
 
 
 @router.post(
-    "/create",
+    "/add",
     summary="创建用户",
     response_model=ResultResponse[user.UserTo],
     dependencies=[Depends(Authority("user", "add"))],
@@ -100,27 +105,6 @@ async def create_user(body: user.UserIn):
     )
 
 
-@router.delete(
-    "/batchDelete",
-    summary="批量删除用户",
-    response_model=ResultResponse[str],
-    dependencies=[Depends(Authority("user", "delete"))],
-)
-async def batch_delete_user(body: user.BatchDelete):
-    """批量删除用户
-
-    Args:
-        body (user.BatchDelete): _description_
-
-    Returns:
-        _type_: _description_
-    """
-    async with in_transaction():  # 事务
-        # 使用 filter 方法过滤出要删除的记录，然后delete删除
-        users_to_delete = await Users.filter(id__in=body.users_id).delete()
-    return ResultResponse[str](message=f"successful deleted {users_to_delete} users!")
-
-
 @router.put(
     "/resetPwd",
     summary="重置用户密码",
@@ -132,6 +116,21 @@ async def reset_user_pwd(body: user.UserResetPwdIn):
         raise UserNotExistException
     await Users.filter(id=body.user_id).update(password=md5_crypt.hash(body.password))
     return ResultResponse[str](result="successful reset user password!")
+
+
+@router.delete(
+    "/delete",
+    response_model=ResultResponse[str],
+    summary="删除用户",
+    dependencies=[Depends(Authority("user", "delete"))],
+)
+async def delete_user(body: user.DeleteUserIn):
+    """删除用户."""
+
+    delete_count = await Users.filter(id__in=body.user_ids).delete()
+    if not delete_count:
+        raise UserNotExistException
+    return ResultResponse[str](result="successful deleted user!")
 
 
 @router.get(
@@ -187,17 +186,3 @@ async def update_user(user_id: int, body: user.UserUpdateIn):
             **body.model_dump(exclude_unset=True, exclude=["user_roles"])
         )
     return ResultResponse[str](result=f"Update user information successfully!")
-
-
-@router.delete(
-    "/{user_id}",
-    response_model=ResultResponse[str],
-    summary="删除用户",
-    dependencies=[Depends(Authority("user", "delete"))],
-)
-async def delete_user(user_id: int):
-    """删除用户."""
-    if not await Users.filter(id=user_id).exists():
-        raise UserNotExistException
-    await Users.filter(id=user_id).delete()
-    return ResultResponse[str](result="successful deleted user!")

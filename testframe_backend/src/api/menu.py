@@ -1,9 +1,6 @@
-from typing import List
-from fastapi import APIRouter, Depends, Request, HTTPException, status, Query
-from ..core.security import (
-    create_access_token,
-    check_jwt_auth,
-)
+from typing import List, Optional
+from datetime import datetime
+from fastapi import APIRouter, Query
 from tortoise.exceptions import DoesNotExist
 from tortoise.expressions import Q
 from tortoise.transactions import in_transaction
@@ -15,6 +12,39 @@ from ..core.security import (
 )
 
 router = APIRouter()
+
+
+@router.get(
+    "/list",
+    summary="菜单列表",
+)
+async def menu_list(
+    # username: Optional[str] = Query(default=None, description="用户名", alias="userName"),
+    # status: Optional[str] = Query(default=None, description="用户状态"),
+    begin_time: Optional[str] = Query(
+        default=None, description="开始时间", alias="beginTime"
+    ),
+    end_time: Optional[str] = Query(default=None, description="结束时间", alias="endTime"),
+    limit: Optional[int] = Query(default=20, ge=10),
+    page: Optional[int] = Query(default=1, gt=0),
+):
+    """获取菜单列表"""
+    filters = {}
+    if begin_time:
+        begin_time = datetime.strptime(begin_time, "%Y-%m-%d")
+        filters["created_at__gte"] = begin_time
+    if end_time:
+        end_time = datetime.strptime(end_time, "%Y-%m-%d")
+        filters["created_at__lte"] = end_time
+    if begin_time and end_time:
+        filters["created_at__range"] = (
+            begin_time,
+            end_time,
+        )
+    query = Routes.filter(**filters)
+    menu_list = await query.prefetch_related("children__route_meta", "route_meta")
+    total = await query.count()
+    # return ResultResponse[]
 
 
 @router.get(

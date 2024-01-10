@@ -138,7 +138,7 @@ async def add_role(body: admin.RoleIn):
             **body.model_dump(
                 include=["role_name", "role_key", "remark"],
                 exclude_unset=True,
-                by_alias=True,
+                # by_alias=True,
             )
         )
         # 查询permissino
@@ -190,6 +190,20 @@ async def delete_role_permission(permission_id: int):
     pass
 
 
+@router.delete(
+    "/role/delete",
+    summary="删除角色",
+    response_model=ResultResponse[str],
+    dependencies=[Depends(Authority("admin", "delete"))],
+)
+async def delete_role(body: admin.DeleteRoleIn):
+    """删除角色"""
+    deleted_count = await Role.filter(id__in=body.role_ids).delete()
+    if not deleted_count:
+        raise RoleNotExistException
+    return ResultResponse[str](message=f"successful deleted role!")
+
+
 @router.get(
     "/role/{role_id}",
     summary="获取角色",
@@ -226,7 +240,7 @@ async def get_role(
 @router.put(
     "/role/{role_id}",
     summary="更新角色",
-    response_model=ResultResponse[admin.RoleTo],
+    response_model=ResultResponse[str],
 )
 async def update_role(role_id: int, body: admin.RoleIn):
     """修改角色"""
@@ -259,24 +273,5 @@ async def update_role(role_id: int, body: admin.RoleIn):
             if menu_ids_to_remove:
                 await role.menus.remove(*menu_ids_to_remove)
         # 刷新
-        await role.refresh_from_db()
-        return ResultResponse[admin.RoleTo](result=role)
-
-
-@router.delete(
-    "/role/{role_id}",
-    summary="删除角色",
-    response_model=ResultResponse[str],
-    dependencies=[Depends(Authority("admin", "delete"))],
-)
-async def delete_role(role_id: int):
-    """删除角色
-
-    Args:
-        role_id (int): 角色id
-    """
-    deleted_count = await Role.filter(id=role_id).delete()
-    log.debug(f"删除角色id：{deleted_count}")
-    if not deleted_count:
-        raise RoleNotExistException
-    return ResultResponse[str](message=f"successful deleted role!")
+        # await role.refresh_from_db()
+        return ResultResponse[str](result="successful updated role!")
