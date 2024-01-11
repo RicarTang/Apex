@@ -1,15 +1,10 @@
 from typing import List, Optional
 from datetime import datetime
 from fastapi import APIRouter, Query
-from tortoise.exceptions import DoesNotExist
-from tortoise.expressions import Q
 from tortoise.transactions import in_transaction
 from ..db.models import Routes, RouteMeta
 from ..schemas import ResultResponse, menu
-from ..core.security import (
-    check_jwt_auth,
-    get_current_user as current_user,
-)
+from ..utils.exceptions.menu import MenuNotExistException
 
 router = APIRouter()
 
@@ -20,8 +15,10 @@ router = APIRouter()
     response_model=ResultResponse[menu.MenuListTo],
 )
 async def menu_list(
-    # username: Optional[str] = Query(default=None, description="用户名", alias="userName"),
-    # status: Optional[str] = Query(default=None, description="用户状态"),
+    menuname: Optional[str] = Query(
+        default=None, description="菜单label", alias="menuName"
+    ),
+    status: Optional[str] = Query(default=None, description="菜单状态"),
     begin_time: Optional[str] = Query(
         default=None, description="开始时间", alias="beginTime"
     ),
@@ -31,6 +28,10 @@ async def menu_list(
 ):
     """获取菜单列表"""
     filters = {}
+    if menuname:
+        filters["route_meta__title__icontains"] = menuname
+    if status:
+        filters["status"] = status
     if begin_time:
         begin_time = datetime.strptime(begin_time, "%Y-%m-%d")
         filters["created_at__gte"] = begin_time
@@ -69,7 +70,7 @@ async def get_treeselect():
 
 
 @router.post(
-    "/addMenu",
+    "/add",
     summary="添加菜单",
     response_model=ResultResponse[menu.MenuTo],
 )
@@ -88,3 +89,16 @@ async def add_menu(body: menu.AddMenuIn):
             .first()
         )
     return ResultResponse[menu.MenuTo](result=result)
+
+
+@router.delete(
+    "/{menu_id}",
+    summary="删除菜单",
+    response_model=ResultResponse[None],
+)
+async def del_menu(menu_id: int):
+    """删除菜单"""
+    delete_count = await Routes.filter(id=menu_id).delete()
+    if not delete_count:
+        raise MenuNotExistException
+    return ResultResponse[None](message="successful deleted menu!")

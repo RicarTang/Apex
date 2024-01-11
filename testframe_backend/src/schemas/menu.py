@@ -2,7 +2,7 @@ from typing import Optional, List, Union, Any
 from pydantic import BaseModel, Field, field_validator, ConfigDict
 from tortoise.fields.relational import ReverseRelation
 from ..db.models import Routes, RouteMeta
-from ..db.enum import BoolEnum
+from ..db.enum import BoolEnum, DisabledEnum
 
 # from ..schemas.default import Routes
 from .common import PageParam, DefaultModel
@@ -16,15 +16,16 @@ class Menu(BaseModel):
     redirect: Optional[str] = Field(default=None, description="重定向")
     component: str = Field(description="组件path")
     always_show: Optional[BoolEnum] = Field(
-        default=None, description="是否总是显示", serialization_alias="alwaysShow"
+        default=None, description="是否总是显示", alias="alwaysShow"
     )
+    status: DisabledEnum = Field(description="菜单状态")
 
 
 class MenuMeta(BaseModel):
     title: str = Field(description="路由标题")
     icon: str = Field(description="icon图标")
     no_cache: BoolEnum = Field(
-        description="不使用keepalive", serialization_alias="noCache"
+        description="不使用keepalive", alias="noCache"
     )
     link: Optional[str] = Field(default=None, description="链接")
 

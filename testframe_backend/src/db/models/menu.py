@@ -1,6 +1,6 @@
 from tortoise import fields
-from tortoise.contrib.pydantic import pydantic_model_creator
 from ..base_models import AbstractBaseModel
+from ..enum import DisabledEnum
 
 
 class Routes(AbstractBaseModel):
@@ -12,7 +12,11 @@ class Routes(AbstractBaseModel):
     redirect = fields.CharField(max_length=255, null=True)
     component = fields.CharField(max_length=255)
     always_show = fields.BooleanField(null=True)
-
+    status = fields.IntEnumField(
+        enum_type=DisabledEnum,
+        default=DisabledEnum.ENABLE,
+        description="菜单可用状态,0:disable,1:enabled",
+    )
     parent: fields.ReverseRelation["Routes"] = fields.ForeignKeyField(
         "models.Routes", related_name="children", null=True
     )
