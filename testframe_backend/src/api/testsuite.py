@@ -138,7 +138,7 @@ async def run_testsuite(body: testsuite.TestSuiteId):
 @router.delete(
     "/delete",
     summary="删除测试套件",
-    response_model=ResultResponse[str],
+    response_model=ResultResponse[None],
 )
 async def delete_testsuite(body: testsuite.DeleteSuiteIn):
     """删除测试套件"""
@@ -146,7 +146,7 @@ async def delete_testsuite(body: testsuite.DeleteSuiteIn):
     delete_count = await TestSuite.filter(id__in=body.suite_ids).delete()
     if not delete_count:
         raise TestsuiteNotExistException
-    return ResultResponse[str](result="successful deleted testsuite!")
+    return ResultResponse[None](message="successful deleted testsuite!")
 
 
 @router.get(

@@ -1,6 +1,6 @@
 from typing import Optional, TypeVar, Generic
 from datetime import datetime
-from pydantic import Field, BaseModel
+from pydantic import Field, BaseModel, ConfigDict
 
 
 DataT = TypeVar("DataT")
@@ -33,6 +33,7 @@ class PageParam(BaseModel):
 
 class DefaultModel(BaseModel):
     """默认返回schema"""
+    model_config = ConfigDict(from_attributes=True)
 
     id: Optional[int] = Field(default=None)
     created_at: Optional[datetime] = Field(

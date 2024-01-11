@@ -17,6 +17,7 @@ router = APIRouter()
 @router.get(
     "/list",
     summary="菜单列表",
+    response_model=ResultResponse[menu.MenuListTo],
 )
 async def menu_list(
     # username: Optional[str] = Query(default=None, description="用户名", alias="userName"),
@@ -41,10 +42,17 @@ async def menu_list(
             begin_time,
             end_time,
         )
-    query = Routes.filter(**filters)
-    menu_list = await query.prefetch_related("children__route_meta", "route_meta")
+    query = Routes.filter(**filters, parent_id__isnull=True)
+    menu_list = (
+        await query.prefetch_related("children__route_meta", "route_meta")
+        .offset(limit * (page - 1))
+        .limit(limit)
+        .all()
+    )
     total = await query.count()
-    # return ResultResponse[]
+    return ResultResponse[menu.MenuListTo](
+        result=menu.MenuListTo(data=menu_list, page=page, limit=limit, total=total)
+    )
 
 
 @router.get(
@@ -63,7 +71,7 @@ async def get_treeselect():
 @router.post(
     "/addMenu",
     summary="添加菜单",
-    response_model=ResultResponse[menu.AddMenuTo],
+    response_model=ResultResponse[menu.MenuTo],
 )
 async def add_menu(body: menu.AddMenuIn):
     """添加前端路由菜单"""
@@ -79,4 +87,4 @@ async def add_menu(body: menu.AddMenuIn):
             .prefetch_related("children__meta", "meta")
             .first()
         )
-    return ResultResponse[menu.AddMenuTo](result=result)
+    return ResultResponse[menu.MenuTo](result=result)

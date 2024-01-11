@@ -39,15 +39,3 @@ class RouteMeta(AbstractBaseModel):
 
     def __str__(self):
         return f"<{self.__class__.__name__},id:{self.id}>"
-
-
-RoutesPydantic = pydantic_model_creator(
-    Routes,
-    name="RoutesTo",
-    exclude=("is_delete", "created_at", "update_at"),
-)
-RouteMetaPydantic = pydantic_model_creator(
-    RouteMeta,
-    name="RouteMetaTo",
-    exclude=("is_delete", "created_at", "update_at"),
-)

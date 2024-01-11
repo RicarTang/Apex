@@ -1,21 +1,21 @@
-from typing import List
-from pydantic import Field, field_validator
-from tortoise.fields.relational import ReverseRelation
-from ..db.models import RouteMetaPydantic, RoutesPydantic, RouteMeta
-from ..utils.log_util import log
+from pydantic import Field, BaseModel
+from ..schemas.user import UserTo
 
 
-class Routes(RoutesPydantic):
-    route_meta: RouteMetaPydantic = Field(alias="meta",validation_alias="route_meta")
+class Login(BaseModel):
+    """登录res schema"""
 
-    @field_validator("route_meta", mode="before")
-    @classmethod
-    def modify_route_meta_befor_validator(cls, v: ReverseRelation) -> RouteMeta:
-        """返回第一个meta(meta要求一对一)"""
-        return [meta for meta in v][0]
+    data: UserTo = Field(description="用户信息主体")
+    access_token: str = Field(description="jwt")
+    token_type: str = Field(description="token类型")
 
 
-class RoutesTo(Routes):
-    """routes res"""
+class LoginIn(BaseModel):
+    """登录req schema"""
 
-    children: List[Routes]
+    username: str = Field(min_length=2, max_length=20)
+    password: str = Field(min_length=6, max_length=20)
+    # docs scheam添加example
+    model_config = {
+        "json_schema_extra": {"example": {"username": "admin", "password": "123456"}}
+    }

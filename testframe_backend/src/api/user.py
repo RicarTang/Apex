@@ -115,12 +115,12 @@ async def reset_user_pwd(body: user.UserResetPwdIn):
     if not await Users.filter(id=body.user_id).exists():
         raise UserNotExistException
     await Users.filter(id=body.user_id).update(password=md5_crypt.hash(body.password))
-    return ResultResponse[str](result="successful reset user password!")
+    return ResultResponse[None](message="successful reset user password!")
 
 
 @router.delete(
     "/delete",
-    response_model=ResultResponse[str],
+    response_model=ResultResponse[None],
     summary="删除用户",
     dependencies=[Depends(Authority("user", "delete"))],
 )
@@ -130,7 +130,7 @@ async def delete_user(body: user.DeleteUserIn):
     delete_count = await Users.filter(id__in=body.user_ids).delete()
     if not delete_count:
         raise UserNotExistException
-    return ResultResponse[str](result="successful deleted user!")
+    return ResultResponse[None](message="successful deleted user!")
 
 
 @router.get(
@@ -150,7 +150,7 @@ async def get_user(user_id: int):
 
 @router.put(
     "/{user_id}",
-    response_model=ResultResponse[str],
+    response_model=ResultResponse[None],
     summary="更新用户",
     dependencies=[Depends(Authority("user", "update"))],
 )
@@ -185,4 +185,4 @@ async def update_user(user_id: int, body: user.UserUpdateIn):
         await Users.filter(id=user_id).update(
             **body.model_dump(exclude_unset=True, exclude=["user_roles"])
         )
-    return ResultResponse[str](result=f"Update user information successfully!")
+    return ResultResponse[None](message=f"Update user information successfully!")

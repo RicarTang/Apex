@@ -43,8 +43,6 @@ class UserResetPwdIn(BaseModel):
 class UserTo(DefaultModel):
     """用户res schema"""
 
-    model_config = ConfigDict(from_attributes=True)
-
     user_name: Optional[str] = Field(default=None, serialization_alias="userName")
     # password: Optional[str] = Field(default=None)
     status: Optional[int] = Field(default=None)
@@ -55,7 +53,6 @@ class UserTo(DefaultModel):
 class RoleTo(DefaultModel):
     """角色res schema"""
 
-    model_config = ConfigDict(from_attributes=True)
     role_name: Optional[str] = Field(default=None, serialization_alias="roleName")
     role_key: Optional[str] = Field(default=None, serialization_alias="roleKey")
     remark: Optional[str] = Field(default=None)
@@ -66,25 +63,6 @@ class UsersTo(PageParam):
     """用户列表res schema"""
 
     data: List[UserTo]
-
-
-class Login(BaseModel):
-    """登录res schema"""
-
-    data: UserTo = Field(description="用户信息主体")
-    access_token: str = Field(description="jwt")
-    token_type: str = Field(description="token类型")
-
-
-class LoginIn(BaseModel):
-    """登录req schema"""
-
-    username: str = Field(min_length=2, max_length=20)
-    password: str = Field(min_length=6, max_length=20)
-    # docs scheam添加example
-    model_config = {
-        "json_schema_extra": {"example": {"username": "admin", "password": "123456"}}
-    }
 
 
 class DeleteUserIn(BaseModel):

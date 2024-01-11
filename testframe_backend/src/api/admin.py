@@ -193,7 +193,7 @@ async def delete_role_permission(permission_id: int):
 @router.delete(
     "/role/delete",
     summary="删除角色",
-    response_model=ResultResponse[str],
+    response_model=ResultResponse[None],
     dependencies=[Depends(Authority("admin", "delete"))],
 )
 async def delete_role(body: admin.DeleteRoleIn):
@@ -201,7 +201,7 @@ async def delete_role(body: admin.DeleteRoleIn):
     deleted_count = await Role.filter(id__in=body.role_ids).delete()
     if not deleted_count:
         raise RoleNotExistException
-    return ResultResponse[str](message=f"successful deleted role!")
+    return ResultResponse[None](message=f"successful deleted role!")
 
 
 @router.get(
@@ -240,7 +240,7 @@ async def get_role(
 @router.put(
     "/role/{role_id}",
     summary="更新角色",
-    response_model=ResultResponse[str],
+    response_model=ResultResponse[None],
 )
 async def update_role(role_id: int, body: admin.RoleIn):
     """修改角色"""
@@ -274,4 +274,4 @@ async def update_role(role_id: int, body: admin.RoleIn):
                 await role.menus.remove(*menu_ids_to_remove)
         # 刷新
         # await role.refresh_from_db()
-        return ResultResponse[str](result="successful updated role!")
+        return ResultResponse[None](message="successful updated role!")

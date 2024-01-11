@@ -6,7 +6,6 @@ from tortoise.exceptions import IntegrityError
 from tortoise.contrib.fastapi import register_tortoise
 from .src.api import (
     user_api,
-    comment_api,
     admin_api,
     testcase_api,
     testsuite_api,
@@ -112,12 +111,6 @@ app.include_router(
     prefix="/user",
     dependencies=[Depends(check_jwt_auth)],
 )
-# app.include_router(
-#     comment_api,
-#     tags=["Comment"],
-#     prefix="/comment",
-#     dependencies=[Depends(check_jwt_auth)],
-# )
 app.include_router(
     admin_api,
     tags=["Admin"],

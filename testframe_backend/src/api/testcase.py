@@ -40,7 +40,7 @@ async def add_testcase(body: testcase.TestCaseIn):
 @router.post(
     "/import",
     summary="导入excel测试用例",
-    response_model=ResultResponse[str],
+    response_model=ResultResponse[None],
 )
 async def add_testcases(excel: UploadFile):
     """导入测试用例
@@ -71,7 +71,7 @@ async def add_testcases(excel: UploadFile):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="template suffix is error!"
         )
-    return ResultResponse[str](message=f"Successful import {excel.filename}!")
+    return ResultResponse[None](message=f"Successful import {excel.filename}!")
 
 
 @router.get(
@@ -185,7 +185,7 @@ async def execute_all_testcase():
 @router.delete(
     "/delete",
     summary="删除测试用例",
-    response_model=ResultResponse[str],
+    response_model=ResultResponse[None],
 )
 async def delete_testcase(body: testcase.DeleteCaseIn):
     """删除测试用例"""
@@ -193,7 +193,7 @@ async def delete_testcase(body: testcase.DeleteCaseIn):
     delete_count = await TestCase.filter(id__in=body.case_ids).delete()
     if not delete_count:
         raise TestcaseNotExistException
-    return ResultResponse[str](result="successful deleted testcase!")
+    return ResultResponse[None](message="successful deleted testcase!")
 
 
 @router.get(
