@@ -5,6 +5,7 @@ from tortoise.transactions import in_transaction
 from ..db.models import Routes, RouteMeta
 from ..schemas import ResultResponse, menu
 from ..utils.exceptions.menu import MenuNotExistException
+from ..utils.log_util import log
 
 router = APIRouter()
 
@@ -85,10 +86,10 @@ async def add_menu(body: menu.AddMenuIn):
         await RouteMeta.create(**body.meta.model_dump(exclude_unset=True), route=route)
         result = (
             await Routes.filter(id=route.id)
-            .prefetch_related("children__meta", "meta")
+            .prefetch_related("children__route_meta", "route_meta")
             .first()
         )
-    return ResultResponse[menu.MenuTo](result=result)
+        return ResultResponse[menu.MenuTo](result=result)
 
 
 @router.delete(

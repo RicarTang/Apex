@@ -16,7 +16,9 @@ class Menu(BaseModel):
     redirect: Optional[str] = Field(default=None, description="重定向")
     component: str = Field(description="组件path")
     always_show: Optional[BoolEnum] = Field(
-        default=None, description="是否总是显示", alias="alwaysShow"
+        default=None,
+        description="是否总是显示",
+        alias="alwaysShow",
     )
     status: DisabledEnum = Field(description="菜单状态")
 
@@ -24,23 +26,26 @@ class Menu(BaseModel):
 class MenuMeta(BaseModel):
     title: str = Field(description="路由标题")
     icon: str = Field(description="icon图标")
-    no_cache: BoolEnum = Field(
-        description="不使用keepalive", alias="noCache"
-    )
     link: Optional[str] = Field(default=None, description="链接")
 
 
+class MenuMetaIn(MenuMeta):
+    no_cache: BoolEnum = Field(description="不使用keepalive", alias="noCache")
+
+
 class MenuMetaTo(DefaultModel, MenuMeta):
-    pass
+    no_cache: BoolEnum = Field(
+        description="不使用keepalive", serialization_alias="noCache"
+    )
 
 
 class AddMenuIn(Menu):
     """添加路由菜单schema"""
 
     parent_id: Optional[int] = Field(
-        default=None, description="父菜单id", serialization_alias="parentId"
+        default=None, description="父菜单id", alias="parentId"
     )
-    meta: MenuMeta
+    meta: MenuMetaIn
 
 
 class MenuTo(DefaultModel, Menu):
