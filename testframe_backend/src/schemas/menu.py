@@ -51,6 +51,12 @@ class AddMenuIn(Menu):
 class MenuTo(DefaultModel, Menu):
     """res schmea"""
 
+    parent_id: Optional[int] = Field(default=None, serialization_alias="parentId")
+    always_show: Optional[BoolEnum] = Field(
+        default=None,
+        description="是否总是显示",
+        serialization_alias="alwaysShow",
+    )
     children: Optional[Union[List["MenuTo"], List[None]]] = Field(default=None)
     route_meta: MenuMetaTo = Field(alias="meta", validation_alias="route_meta")
 
@@ -69,11 +75,13 @@ class MenuTo(DefaultModel, Menu):
             result = []
         return result
 
-    @field_validator("route_meta", mode="before")
-    @classmethod
-    def modify_route_meta_befor_validator(cls, v: ReverseRelation) -> RouteMeta:
-        """返回第一个meta(meta要求一对一)"""
-        return [meta for meta in v][0]
+    # @field_validator("route_meta", mode="before")
+    # @classmethod
+    # def modify_route_meta_befor_validator(cls, v: ReverseRelation) -> RouteMeta:
+    #     """返回第一个meta(meta要求一对一)"""
+    #     log.debug(v)
+    #     log.debug([meta for meta in v][0])
+    #     return [meta for meta in v][0]
 
 
 class TreeSelectTo(BaseModel):
@@ -114,3 +122,28 @@ class TreeSelectTo(BaseModel):
 
 class MenuListTo(PageParam):
     data: List[MenuTo]
+
+
+class MetaUpdate(BaseModel):
+    title: Optional[str] = Field(default=None, description="路由标题")
+    icon: Optional[str] = Field(default=None, description="icon图标")
+    link: Optional[str] = Field(default=None, description="链接")
+    no_cache: Optional[BoolEnum] = Field(
+        default=None, description="不使用keepalive", alias="noCache"
+    )
+
+
+class MenuUpdateIn(BaseModel):
+    name: Optional[str] = Field(default=None, description="菜单名称")
+    path: Optional[str] = Field(default=None, description="菜单path")
+    hidden: Optional[BoolEnum] = Field(default=None, description="是否隐藏")
+    redirect: Optional[str] = Field(default=None, description="重定向")
+    component: Optional[str] = Field(default=None, description="组件path")
+    always_show: Optional[BoolEnum] = Field(
+        default=None,
+        description="是否总是显示",
+        alias="alwaysShow",
+    )
+    status: Optional[DisabledEnum] = Field(default=None, description="菜单状态")
+    parent_id: int = Field(default=None,alias="parentId")
+    meta: Optional[MetaUpdate] = Field(default=None)

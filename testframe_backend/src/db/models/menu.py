@@ -20,7 +20,10 @@ class Routes(AbstractBaseModel):
     parent: fields.ReverseRelation["Routes"] = fields.ForeignKeyField(
         "models.Routes", related_name="children", null=True
     )
-    route_meta: fields.ReverseRelation["RouteMeta"]
+    # route_meta: fields.ReverseRelation["RouteMeta"]
+    route_meta: fields.ForeignKeyRelation["RouteMeta"] = fields.ForeignKeyField(
+        "models.RouteMeta", related_name="route_meta"
+    )
 
     def __str__(self):
         return f"<{self.__class__.__name__},id:{self.id}>"
@@ -33,9 +36,10 @@ class RouteMeta(AbstractBaseModel):
     icon = fields.CharField(max_length=255)
     no_cache = fields.BooleanField()
     link = fields.CharField(max_length=255, null=True)
-    route: fields.ForeignKeyRelation["Routes"] = fields.ForeignKeyField(
-        "models.Routes", related_name="route_meta"
-    )
+    # route: fields.ForeignKeyRelation["Routes"] = fields.ForeignKeyField(
+    #     "models.Routes", related_name="route_meta"
+    # )
+    route: fields.ReverseRelation["Routes"]
 
     class Meta:
         table = "route_meta"

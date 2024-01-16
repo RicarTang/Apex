@@ -58,24 +58,7 @@ class InitDbData:
                     test_suite_route,
                     test_env_route,
                 ) = await self.init_menu_route()
-                # 插入菜单路由
-                await system_route.save()
-                await test_route.save()
-                # 添加外键
-                system_user_route.parent_id = system_route.id
-                test_case_route.parent_id = test_route.id
-                # system_dict_route.parent_id = system_route.id
-                system_role_route.parent_id = system_route.id
-                system_menu_route.parent_id = system_route.id
-                test_suite_route.parent_id = test_route.id
-                test_env_route.parent_id = test_route.id
-                await system_user_route.save()
-                await test_case_route.save()
-                # await system_dict_route.save()
-                await system_role_route.save()
-                await system_menu_route.save()
-                await test_suite_route.save()
-                await test_env_route.save()
+                
                 # 初始化菜单路由meta
                 (
                     system_meta,
@@ -89,15 +72,16 @@ class InitDbData:
                     test_env_meta,
                 ) = await self.init_menu_meta()
                 # 插入菜单路由meita
-                system_meta.route = system_route
-                test_meta.route = test_route
-                system_user_meta.route = system_user_route
-                test_case_meta.route = test_case_route
-                # system_dict_meta.route = system_dict_route
-                system_role_meta.route = system_role_route
-                system_menu_meta.route = system_menu_route
-                test_suite_meta.route = test_suite_route
-                test_env_meta.route = test_env_route
+                # system_meta.route = system_route
+                # test_meta.route = test_route
+                # system_user_meta.route = system_user_route
+                # test_case_meta.route = test_case_route
+                # # system_dict_meta.route = system_dict_route
+                # system_role_meta.route = system_role_route
+                # system_menu_meta.route = system_menu_route
+                # test_suite_meta.route = test_suite_route
+                # test_env_meta.route = test_env_route
+                
                 await system_meta.save()
                 await test_meta.save()
                 await system_user_meta.save()
@@ -107,6 +91,35 @@ class InitDbData:
                 await system_menu_meta.save()
                 await test_suite_meta.save()
                 await test_env_meta.save()
+                # 添加外键
+                # 插入菜单路由
+                system_route.route_meta = system_meta
+                test_route.route_meta = test_meta
+                await system_route.save()
+                await test_route.save()
+                
+                system_user_route.parent_id = system_route.id
+                test_case_route.parent_id = test_route.id
+                # system_dict_route.parent_id = system_route.id
+                system_role_route.parent_id = system_route.id
+                system_menu_route.parent_id = system_route.id
+                test_suite_route.parent_id = test_route.id
+                test_env_route.parent_id = test_route.id
+                # 添加meta
+                system_user_route.route_meta = system_user_meta
+                test_case_route.route_meta = test_case_meta
+                system_role_route.route_meta = system_role_meta
+                system_menu_route.route_meta = system_menu_meta
+                test_suite_route.route_meta = test_suite_meta
+                test_env_route.route_meta = test_env_meta
+                await system_user_route.save()
+                await test_case_route.save()
+                # await system_dict_route.save()
+                await system_role_route.save()
+                await system_menu_route.save()
+                await test_suite_route.save()
+                await test_env_route.save()
+                
                 # 菜单角色关联
                 await member_role.menus.add(test_route,test_case_route,test_suite_route,test_env_route)
                 # 初始化数据字典
@@ -296,17 +309,17 @@ class InitDbData:
             title="接口测试",
         )
         test_case_meta = RouteMeta(
-            icon="build",
+            icon="excel",
             no_cache=False,
             title="用例管理",
         )
         test_suite_meta = RouteMeta(
-            icon="build",
+            icon="tab",
             no_cache=False,
             title="套件管理",
         )
         test_env_meta = RouteMeta(
-            icon="build",
+            icon="time-range",
             no_cache=False,
             title="测试环境管理",
         )

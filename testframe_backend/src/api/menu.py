@@ -78,18 +78,64 @@ async def get_treeselect():
 async def add_menu(body: menu.AddMenuIn):
     """添加前端路由菜单"""
     async with in_transaction():
+        # 添加路由meta
+        route_meta = await RouteMeta.create(**body.meta.model_dump(exclude_unset=True))
         # 路由
         route = await Routes.create(
-            **body.model_dump(exclude_unset=True, exclude=["meta"])
+            **body.model_dump(exclude_unset=True, exclude=["meta"]),
+            route_meta=route_meta,
         )
-        # 添加路由meta
-        await RouteMeta.create(**body.meta.model_dump(exclude_unset=True), route=route)
-        result = (
-            await Routes.filter(id=route.id)
-            .prefetch_related("children__route_meta", "route_meta")
-            .first()
-        )
-        return ResultResponse[menu.MenuTo](result=result)
+
+        return ResultResponse[menu.MenuTo](result=route)
+
+
+@router.get(
+    "/{menu_id}",
+    summary="查询菜单",
+    response_model=ResultResponse[menu.MenuTo],
+)
+async def get_menu(menu_id: int):
+    """查询菜单"""
+    query = (
+        await Routes.filter(id=menu_id)
+        .prefetch_related("children__route_meta", "route_meta")
+        .first()
+    )
+    if not query:
+        raise MenuNotExistException
+    return ResultResponse[menu.MenuTo](result=query)
+
+
+@router.put(
+    "/{menu_id}",
+    summary="更新菜单",
+    response_model=ResultResponse[None],
+)
+async def update_menu(menu_id: int, body: menu.MenuUpdateIn):
+    """更新菜单"""
+    query = (
+        await Routes.filter(id=menu_id)
+        .prefetch_related("children__route_meta", "route_meta")
+        .first()
+    )
+    if not query:
+        raise MenuNotExistException
+    # 更新关联模型字段
+    if body.meta.title:
+        query.route_meta.title = body.meta.title
+    if body.meta.icon:
+        query.route_meta.icon = body.meta.icon
+    if body.meta.no_cache:
+        query.route_meta.no_cache = body.meta.no_cache
+    if body.meta.link:
+        query.route_meta.link = body.meta.link
+    async with in_transaction():
+        # 更新多个字段
+        query.update_from_dict(body.model_dump(exclude_unset=True))
+        # 修改关联模型数据需要save
+        await query.route_meta.save()
+        await query.save()
+    return ResultResponse[None](message="successful updated menu!")
 
 
 @router.delete(
