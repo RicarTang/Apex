@@ -79,16 +79,22 @@ async def logout(request: Request):
 @router.get(
     "/getRouters",
     summary="获取前端菜单路由",
-    # response_model=ResultResponse[List[default.RoutesTo]],
     response_model=ResultResponse[List[menu.MenuTo]],
     dependencies=[Depends(check_jwt_auth)],
 )
 async def get_routers(current_user=Depends(current_user)):
-    # 判断是否是admin角色用户, admin获取所有一级路由
+    # 判断是否是admin角色用户, admin获取所有一级路由, 筛选status
     is_super = any(role.is_super for role in current_user.roles)
     if is_super:
-        route_list = await Routes.filter(parent_id__isnull=True).prefetch_related(
-            "children__route_meta", "route_meta"
+        route_list = await Routes.filter(
+            parent_id__isnull=True, status=1
+        ).prefetch_related(
+            Prefetch(
+                "children",
+                queryset=Routes.filter(status=1).prefetch_related(),
+            ),
+            "children__route_meta",
+            "route_meta",
         )
     # 根据menus权限获取
     else:
@@ -113,10 +119,13 @@ async def get_routers(current_user=Depends(current_user)):
         parent_menus = [menu.id for menu in all_menus if not menu.parent_id]
         log.debug(f"子路由：{sub_menus},父路由：{parent_menus}")
         # 使用Prefetch对预取进行复杂的查询，查询当前角色的子菜单
-        route_list = await Routes.filter(id__in=parent_menus).prefetch_related(
+        route_list = await Routes.filter(
+            id__in=parent_menus, status=1
+        ).prefetch_related(
             # 使用Prefetch时，正常的prefetch_related操作也要查询
             Prefetch(
-                "children", queryset=Routes.filter(id__in=sub_menus).prefetch_related()
+                "children",
+                queryset=Routes.filter(id__in=sub_menus, status=1).prefetch_related(),
             ),
             "children__route_meta",
             "route_meta",

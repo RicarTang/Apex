@@ -42,23 +42,16 @@ async def add_testcase(body: testcase.TestCaseIn):
     summary="导入excel测试用例",
     response_model=ResultResponse[None],
 )
-async def add_testcases(excel: UploadFile):
-    """导入测试用例
-
-    Args:
-        excel (UploadFile): excel测试用例
-
-    Returns:
-        _type_: _description_
-    """
-    if excel.filename.endswith(("xlsx", "csv", "xls")):
+async def add_testcases(file: UploadFile):
+    """导入测试用例"""
+    if file.filename.endswith(("xlsx", "csv", "xls")):
         # 保存文件名
-        save_name = str(datetime.now().strftime("%Y-%m-%d-%H-%M-%S")) + excel.filename
+        save_name = str(datetime.now().strftime("%Y-%m-%d-%H-%M-%S")) + file.filename
         # 保存路径
         save_path = config.STATIC_PATH / "testcase" / "upload" / save_name
         # 保存上传的文件
         await save_file(
-            file=excel,
+            file=file,
             save_path=save_path,
         )
         # 读取表格数据
@@ -71,7 +64,7 @@ async def add_testcases(excel: UploadFile):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="template suffix is error!"
         )
-    return ResultResponse[None](message=f"Successful import {excel.filename}!")
+    return ResultResponse[None](message=f"Successful import {file.filename}!")
 
 
 @router.get(

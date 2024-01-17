@@ -2,6 +2,7 @@ from typing import List, Optional
 from datetime import datetime
 from fastapi import APIRouter, Query
 from tortoise.transactions import in_transaction
+from tortoise.query_utils import Prefetch
 from ..db.models import Routes, RouteMeta
 from ..schemas import ResultResponse, menu
 from ..utils.exceptions.menu import MenuNotExistException
@@ -44,9 +45,19 @@ async def menu_list(
             begin_time,
             end_time,
         )
-    query = Routes.filter(**filters, parent_id__isnull=True)
+    if filters:
+        query = Routes.filter(parent_id__isnull=True)
+    else:
+        query = Routes.filter(**filters,parent_id__isnull=True)
     menu_list = (
-        await query.prefetch_related("children__route_meta", "route_meta")
+        await query.prefetch_related(
+            Prefetch(
+                "children",
+                queryset=Routes.filter(**filters).prefetch_related(),
+            ),
+            "children__route_meta",
+            "route_meta",
+        )
         .offset(limit * (page - 1))
         .limit(limit)
         .all()

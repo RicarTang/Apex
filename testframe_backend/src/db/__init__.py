@@ -52,59 +52,49 @@ class InitDbData:
                     test_route,
                     system_user_route,
                     test_case_route,
-                    # system_dict_route,
                     system_role_route,
                     system_menu_route,
                     test_suite_route,
                     test_env_route,
+                    system_permission_route,
                 ) = await self.init_menu_route()
-                
+
                 # 初始化菜单路由meta
                 (
                     system_meta,
                     test_meta,
                     system_user_meta,
                     test_case_meta,
-                    # system_dict_meta,
                     system_role_meta,
                     system_menu_meta,
                     test_suite_meta,
                     test_env_meta,
+                    system_permission_meta,
                 ) = await self.init_menu_meta()
-                # 插入菜单路由meita
-                # system_meta.route = system_route
-                # test_meta.route = test_route
-                # system_user_meta.route = system_user_route
-                # test_case_meta.route = test_case_route
-                # # system_dict_meta.route = system_dict_route
-                # system_role_meta.route = system_role_route
-                # system_menu_meta.route = system_menu_route
-                # test_suite_meta.route = test_suite_route
-                # test_env_meta.route = test_env_route
-                
+
                 await system_meta.save()
                 await test_meta.save()
                 await system_user_meta.save()
                 await test_case_meta.save()
-                # await system_dict_meta.save()
                 await system_role_meta.save()
                 await system_menu_meta.save()
                 await test_suite_meta.save()
                 await test_env_meta.save()
+                await system_permission_meta.save()
                 # 添加外键
                 # 插入菜单路由
                 system_route.route_meta = system_meta
                 test_route.route_meta = test_meta
                 await system_route.save()
                 await test_route.save()
-                
+
                 system_user_route.parent_id = system_route.id
                 test_case_route.parent_id = test_route.id
-                # system_dict_route.parent_id = system_route.id
                 system_role_route.parent_id = system_route.id
                 system_menu_route.parent_id = system_route.id
                 test_suite_route.parent_id = test_route.id
                 test_env_route.parent_id = test_route.id
+                system_permission_route.parent_id = system_route.id
                 # 添加meta
                 system_user_route.route_meta = system_user_meta
                 test_case_route.route_meta = test_case_meta
@@ -112,18 +102,19 @@ class InitDbData:
                 system_menu_route.route_meta = system_menu_meta
                 test_suite_route.route_meta = test_suite_meta
                 test_env_route.route_meta = test_env_meta
+                system_permission_route.route_meta = system_permission_meta
                 await system_user_route.save()
                 await test_case_route.save()
-                # await system_dict_route.save()
                 await system_role_route.save()
                 await system_menu_route.save()
                 await test_suite_route.save()
                 await test_env_route.save()
-                
+                await system_permission_route.save()
+
                 # 菜单角色关联
-                await member_role.menus.add(test_route,test_case_route,test_suite_route,test_env_route)
-                # 初始化数据字典
-                # await self.init_data_dict()
+                await member_role.menus.add(
+                    test_route, test_case_route, test_suite_route, test_env_route
+                )
                 log.info("初始化完成!".center(100, "-"))
 
     async def db_has_data(self) -> bool:
@@ -157,7 +148,6 @@ class InitDbData:
             role_name="普通用户", role_key="member", remark="普通用户角色", is_super=False
         )
         return admin_role, member_role
-
 
     async def init_permission(self) -> Tuple[Permission]:
         """初始化权限"""
@@ -209,13 +199,6 @@ class InitDbData:
             hidden=False,
             component="system/user/index",
         )
-        # 系统管理菜单子菜单字典管理
-        system_dict_route = Routes(
-            name="Dict",
-            path="dict",
-            hidden=False,
-            component="system/dict/index",
-        )
         # 系统管理菜单子菜单角色管理
         system_role_route = Routes(
             name="Role",
@@ -229,6 +212,13 @@ class InitDbData:
             path="menu",
             hidden=False,
             component="system/menu/index",
+        )
+        # 系统管理菜单子菜单权限管理
+        system_permission_route = Routes(
+            name="Permission",
+            path="permission",
+            hidden=False,
+            component="system/permission/index",
         )
         # 创建apiTest菜单路由
         # 测试菜单
@@ -266,11 +256,11 @@ class InitDbData:
             test_route,
             system_user_route,
             test_case_route,
-            # system_dict_route,
             system_role_route,
             system_menu_route,
             test_suite_route,
             test_env_route,
+            system_permission_route,
         )
 
     async def init_menu_meta(self) -> Tuple[RouteMeta]:
@@ -287,11 +277,6 @@ class InitDbData:
             no_cache=False,
             title="用户管理",
         )
-        system_dict_meta = RouteMeta(
-            icon="dict",
-            no_cache=False,
-            title="字典管理",
-        )
         system_role_meta = RouteMeta(
             icon="peoples",
             no_cache=False,
@@ -301,6 +286,11 @@ class InitDbData:
             icon="tree-table",
             no_cache=False,
             title="菜单管理",
+        )
+        system_permission_meta = RouteMeta(
+            icon="lock",
+            no_cache=False,
+            title="权限管理",
         )
         # 接口测试meta
         test_meta = RouteMeta(
@@ -328,30 +318,9 @@ class InitDbData:
             test_meta,
             system_user_meta,
             test_case_meta,
-            # system_dict_meta,
             system_role_meta,
             system_menu_meta,
             test_suite_meta,
             test_env_meta,
-        )
-
-    async def init_data_dict(self) -> None:
-        """初始化字典数据"""
-        await DataDict.bulk_create(
-            [
-                DataDict(
-                    dict_type="sys_normal_disable",
-                    dict_label="正常",
-                    dict_value="1",
-                    is_default=BoolEnum.TRUE,
-                    remark="正常状态",
-                ),
-                DataDict(
-                    dict_type="sys_normal_disable",
-                    dict_label="停用",
-                    dict_value="0",
-                    is_default=BoolEnum.FALSE,
-                    remark="停用状态",
-                ),
-            ]
+            system_permission_meta,
         )

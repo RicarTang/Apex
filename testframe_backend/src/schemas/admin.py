@@ -9,36 +9,39 @@ from .common import PageParam, DefaultModel
 
 class PermissionIn(BaseModel):
     name: str = Field(description="权限名称", alias="permissionName")
+    model: AccessModelEnum = Field(description="权限能访问的模块", alias="permissionModule")
+    action: AccessActionEnum = Field(description="权限能操作的动作", alias="permissionAction")
 
 
-class PermissionAccessIn(BaseModel):
-    permission_id: int = Field(description="权限id", alias="permissionId")
-    access_id: int = Field(description="访问控制id", alias="accessId")
-
-
-class RolePermissionIn(BaseModel):
-    permission_id: int = Field(description="权限id", alias="permissionId")
-    role_id: int = Field(description="角色id", alias="roleId")
+# class RolePermissionIn(BaseModel):
+#     permission_id: int = Field(description="权限id", alias="permissionId")
+#     role_id: int = Field(description="角色id", alias="roleId")
 
 
 class PermissionTo(DefaultModel):
     """权限 res schema"""
 
-    model_config = ConfigDict(from_attributes=True)
+    # model_config = ConfigDict(from_attributes=True)
 
-    name: Optional[str] = Field(default=None)
-    model: Optional[str] = Field(default=None)
-    action: Optional[str] = Field(default=None)
+    name: Optional[str] = Field(default=None, serialization_alias="permissionName")
+    model: Optional[str] = Field(default=None, serialization_alias="permissionModule")
+    action: Optional[str] = Field(default=None, serialization_alias="permissionAction")
 
 
 class PermissionsTo(PageParam):
     data: List[PermissionTo]
 
 
-class AccessIn(BaseModel):
-    name: str = Field(description="访问控制summary", alias="accessName")
-    model: AccessModelEnum = Field(description="权限能访问的模块")
-    action: AccessActionEnum = Field(description="权限能操作的动作")
+class PutPermissionIn(BaseModel):
+    name: Optional[str] = Field(
+        default=None, description="权限名称", alias="permissionName"
+    )
+    model: Optional[AccessModelEnum] = Field(
+        default=None, description="权限能访问的模块", alias="permissionModule"
+    )
+    action: Optional[AccessActionEnum] = Field(
+        default=None, description="权限能操作的动作", alias="permissionAction"
+    )
 
 
 class RoleIn(BaseModel):
@@ -120,3 +123,7 @@ class RolePermIn(BaseModel):
 
 class DeleteRoleIn(BaseModel):
     role_ids: List[int] = Field(alias="roleIds")
+
+
+class DeletePermissionIn(BaseModel):
+    permission_ids: List[int] = Field(alias="permissionIds")

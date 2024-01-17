@@ -8,7 +8,10 @@ from ..db.models import Role, Permission, Routes
 from ..utils.log_util import log
 from ..core.authentication import Authority
 from ..utils.exceptions.user import RoleNotExistException
-from ..utils.exceptions.admin import PermissionExistException
+from ..utils.exceptions.admin import (
+    PermissionExistException,
+    PermissionNotExistException,
+)
 
 
 router = APIRouter()
@@ -75,8 +78,8 @@ async def query_permissions(
     permission_name: Optional[str] = Query(
         default=None, description="权限名称", alias="permissionName"
     ),
-    permission_model: Optional[str] = Query(
-        default=None, description="权限模块", alias="permissionModel"
+    permission_module: Optional[str] = Query(
+        default=None, description="权限模块", alias="permissionModule"
     ),
     permission_action: Optional[str] = Query(
         default=None, description="权限动作", alias="permissionAction"
@@ -92,8 +95,8 @@ async def query_permissions(
     filters = {}
     if permission_name:
         filters["name__icontains"] = permission_name
-    if permission_model:
-        filters["model__icontains"] = permission_model
+    if permission_module:
+        filters["model__icontains"] = permission_module
     if permission_action:
         filters["action__icontains"] = permission_action
     if begin_time:
@@ -164,7 +167,7 @@ async def add_role(body: admin.RoleIn):
 
 
 @router.post(
-    "/permission",
+    "/permission/add",
     summary="新增权限",
     response_model=ResultResponse[admin.PermissionTo],
     # dependencies=[Depends(Authority("admin,add"))],
@@ -178,18 +181,6 @@ async def add_permission(body: admin.PermissionIn):
     return ResultResponse[admin.PermissionTo](result=permission)
 
 
-@router.put("/permission/{permission_id}", summary="修改权限")
-async def update_role_permission(permission_id: int):
-    """修改权限"""
-    pass
-
-
-@router.delete("/permission/{permission_id}", summary="删除权限")
-async def delete_role_permission(permission_id: int):
-    """删除权限"""
-    pass
-
-
 @router.delete(
     "/role/delete",
     summary="删除角色",
@@ -201,7 +192,20 @@ async def delete_role(body: admin.DeleteRoleIn):
     deleted_count = await Role.filter(id__in=body.role_ids).delete()
     if not deleted_count:
         raise RoleNotExistException
-    return ResultResponse[None](message=f"successful deleted role!")
+    return ResultResponse[None](message="successful deleted role!")
+
+
+@router.delete(
+    "/permission/delete",
+    summary="删除权限",
+    response_model=ResultResponse[None],
+)
+async def del_permission(body: admin.DeletePermissionIn):
+    """删除权限"""
+    permission = await Permission.filter(id__in=body.permission_ids).delete()
+    if not permission:
+        raise PermissionNotExistException
+    return ResultResponse[None](message="successful deleted permission!")
 
 
 @router.get(
@@ -275,3 +279,33 @@ async def update_role(role_id: int, body: admin.RoleIn):
         # 刷新
         # await role.refresh_from_db()
         return ResultResponse[None](message="successful updated role!")
+
+
+@router.get(
+    "/permission/{permission_id}",
+    summary="获取权限",
+    response_model=ResultResponse[admin.PermissionTo],
+)
+async def get_permission(
+    permission_id: int,
+):
+    """获取权限"""
+    permission = await Permission.filter(id=permission_id).first()
+    if not permission:
+        raise PermissionNotExistException
+    return ResultResponse[admin.PermissionTo](result=permission)
+
+
+@router.put(
+    "/permission/{permission_id}",
+    summary="修改权限",
+    response_model=ResultResponse[None],
+)
+async def update_permission(permission_id: int, body: admin.PutPermissionIn):
+    """修改权限"""
+    permission = await Permission.filter(id=permission_id).update(
+        **body.model_dump(exclude_unset=True)
+    )
+    if not permission:
+        raise PermissionNotExistException
+    return ResultResponse[None](message="successful updated permission!")
