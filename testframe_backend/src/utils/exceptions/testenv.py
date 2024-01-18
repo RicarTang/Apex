@@ -10,7 +10,7 @@ class TestEnvNotExistException(HTTPException):
             detail="Environment does not exist!",
         )
 class CurrentTestEnvNotSetException(HTTPException):
-    """测试环境不存在"""
+    """未设置当前环境"""
 
     def __init__(self):
         super().__init__(

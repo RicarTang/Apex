@@ -1,8 +1,8 @@
-# import time
+import json
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
-from httpx import AsyncClient
+
 from fastapi import (
     APIRouter,
     HTTPException,
@@ -13,7 +13,6 @@ from fastapi import (
 )
 from fastapi.responses import FileResponse
 from tortoise.exceptions import DoesNotExist
-from redis.asyncio import Redis
 from ...config import config
 from ..core.cache import RedisService
 from ..services import TestCaseService
@@ -22,6 +21,7 @@ from ..schemas import ResultResponse, testcase
 from ..utils.log_util import log
 from ..utils.excel_util import save_file, read_all_testcase
 from ..utils.exceptions.testcase import TestcaseNotExistException
+from ..utils.exceptions.testenv import CurrentTestEnvNotSetException
 
 router = APIRouter()
 
@@ -138,41 +138,24 @@ async def get_all_testcase(
 @router.post(
     "/executeOne",
     summary="执行单条测试用例",
+    response_model=ResultResponse[None],
 )
 async def execute_testcase(
     body: testcase.ExecuteTestcaseIn,
 ):
-    """执行测试用例
-
-    Args:
-        body (testcase.ExecuteTestcaseIn): 前端给case_id
-    Returns:
-        _type_: _description_
-    """
+    """执行测试用例"""
     testcase = await TestCase.filter(id=body.case_id).first()
-    current_env = await RedisService().get("currentEnv")
+    current_env = await RedisService().aio_get("currentEnv")
+    if not current_env:
+        raise CurrentTestEnvNotSetException
     if not testcase:
         raise TestcaseNotExistException
-    async with AsyncClient(base_url=current_env) as client:
-        try:
-            res = await client.request(
-                method=testcase.api_method,
-                url=testcase.api_path,
-            )
-            assert res.status_code == testcase.expect_code
-        except AssertionError:
-            pass
-        else:
-            return res
-
-
-@router.post(
-    "/executeAll",
-    summary="执行所有测试用例",
-)
-async def execute_all_testcase():
-    """待完善"""
-    return
+    # 执行用例逻辑
+    result = await TestCaseService.execute_testcase(
+        testcase=testcase, current_env=current_env
+    )
+    log.debug(result)
+    return ResultResponse[None]
 
 
 @router.delete(
@@ -206,16 +189,13 @@ async def get_testcase(case_id: int):
 @router.put(
     "/{case_id}",
     summary="更新测试用例",
-    response_model=ResultResponse[testcase.TestCaseTo],
+    response_model=ResultResponse[None],
 )
-async def update_testcase(case_id: int, body: dict):
-    """更新测试用例数据
-
-    Args:
-        body (dict): _description_
-    """
-    if not await TestCase.filter(id=case_id).exists():
+async def update_testcase(case_id: int, body: testcase.UpdateCaseIn):
+    """更新测试用例数据"""
+    update_count = await TestCase.filter(id=case_id).update(
+        **body.model_dump(exclude_unset=True)
+    )
+    if not update_count:
         raise TestcaseNotExistException
-    result = await TestCase.filter(id=case_id).update(**body.dict(exclude_unset=True))
-    log.debug(f"update更新{result}条数据")
-    return ResultResponse[testcase.TestCaseTo](result=await TestCase.get(id=case_id))
+    return ResultResponse[None](message="successful updated testcase!")

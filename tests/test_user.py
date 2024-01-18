@@ -2,7 +2,7 @@ import pytest
 from httpx import AsyncClient
 
 
-@pytest.mark.endpoint
+# @pytest.mark.endpoint
 @pytest.mark.asyncio
 async def test_login_success():
     """登录成功测试"""
@@ -15,7 +15,7 @@ async def test_login_success():
     assert res.json()["message"] == "success"
 
 
-@pytest.mark.endpoint
+# @pytest.mark.endpoint
 @pytest.mark.asyncio
 async def test_login_password_error():
     """密码错误登录"""

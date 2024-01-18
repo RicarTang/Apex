@@ -14,9 +14,12 @@ async def custom_http_exception_handler(request: Request, exc: HTTPException):
     Returns:
         _type_: _description_
     """
+    custom_content = dict(success=False, message=str(exc.detail), result=None)
+    if result := getattr(exc, "result", None):
+        custom_content["result"] = result
     return JSONResponse(
         status_code=exc.status_code,
-        content={"success": False, "message": f"{exc.detail}"},
+        content=custom_content,
     )
 
 

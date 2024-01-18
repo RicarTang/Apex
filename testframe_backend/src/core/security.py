@@ -38,7 +38,6 @@ def create_access_token(data: dict, expires_delta: Union[timedelta, None] = None
         )
     to_encode.update({"exp": expire})
     jwt_token = jwt.encode(to_encode, config.SECRET_KEY, algorithm=config.ALGORITHM)
-    log.debug(f"encoded_jwt:{jwt_token}")
     return jwt_token
 
 
@@ -97,4 +96,5 @@ async def get_current_user(
         raise TokenInvalidException
     # 查询用户
     user = await UserService.query_user_by_username(username=username)
+    request.state.user = user
     return user

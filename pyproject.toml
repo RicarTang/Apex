@@ -21,7 +21,7 @@ aerich_init = "aerich init -t testframe_backend.src.db.settings.TORTOISE_ORM"
 init_db = "aerich init-db"
 migrate_db = "aerich migrate"
 upgrade_db = "aerich upgrade"
-test = "pytest -m endpoint"
+test = "pytest tests"
 
 [project]
 name = ""
