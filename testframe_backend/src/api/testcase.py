@@ -1,12 +1,9 @@
-import json
 from datetime import datetime
 from pathlib import Path
-from typing import Optional
-
+from typing import Optional, Any
 from fastapi import (
     APIRouter,
     HTTPException,
-    Depends,
     UploadFile,
     Query,
     status,
@@ -138,7 +135,7 @@ async def get_all_testcase(
 @router.post(
     "/executeOne",
     summary="执行单条测试用例",
-    response_model=ResultResponse[None],
+    response_model=ResultResponse[Any],
 )
 async def execute_testcase(
     body: testcase.ExecuteTestcaseIn,
@@ -154,8 +151,15 @@ async def execute_testcase(
     result = await TestCaseService.execute_testcase(
         testcase=testcase, current_env=current_env
     )
-    log.debug(result)
-    return ResultResponse[None]
+    res_time = result.elapsed.total_seconds() * 1000
+    log.debug(res_time)
+    res = dict(
+        code=result.status_code,
+        time=res_time,
+        headers=dict(result.headers),
+        body=result.json(),
+    )
+    return ResultResponse[Any](result=res)
 
 
 @router.delete(

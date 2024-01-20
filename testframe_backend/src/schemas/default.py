@@ -1,4 +1,4 @@
-from pydantic import Field, BaseModel
+from pydantic import Field, BaseModel, ConfigDict
 from ..schemas.user import UserTo
 
 
@@ -13,9 +13,9 @@ class Login(BaseModel):
 class LoginIn(BaseModel):
     """登录req schema"""
 
+    model_config = ConfigDict(
+        json_schema_extra={"example": {"username": "admin", "password": "123456"}}
+    )
+
     username: str = Field(min_length=2, max_length=20)
     password: str = Field(min_length=6, max_length=20)
-    # docs scheam添加example
-    model_config = {
-        "json_schema_extra": {"example": {"username": "admin", "password": "123456"}}
-    }

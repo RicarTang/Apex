@@ -138,7 +138,7 @@ class TestCasesTo(PageParam):
 class ExecuteTestcaseIn(BaseModel):
     """执行单条测试用例request schema"""
 
-    case_id: int
+    case_id: int = Field(alias="caseId")
 
 
 class DeleteCaseIn(BaseModel):

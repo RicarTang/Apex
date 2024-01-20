@@ -68,7 +68,7 @@ class TestCaseService:
                         detail="Request body type error!",
                     )
                 log.debug(json.loads(testcase.request_param))
-                
+
             try:
                 # 请求
                 res = await client.request(
@@ -90,5 +90,7 @@ class TestCaseService:
                 ), f"Assert error: response code {res.status_code} != expect code {testcase.expect_code}"
             except AssertionError as e:
                 log.error(f"断言错误:{e}")
-                raise AssertErrorException(e, res.json())
+                raise AssertErrorException(
+                    e, dict(code=res.status_code, headers=dict(res.headers), body=res.json())
+                )
             return res

@@ -8,14 +8,14 @@ from .common import PageParam, DefaultModel
 
 
 class PermissionIn(BaseModel):
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {"name": "admin", "model": "user", "action": "add"}
+        }
+    )
     name: str = Field(description="权限名称", alias="permissionName")
     model: AccessModelEnum = Field(description="权限能访问的模块", alias="permissionModule")
     action: AccessActionEnum = Field(description="权限能操作的动作", alias="permissionAction")
-
-
-# class RolePermissionIn(BaseModel):
-#     permission_id: int = Field(description="权限id", alias="permissionId")
-#     role_id: int = Field(description="角色id", alias="roleId")
 
 
 class PermissionTo(DefaultModel):
@@ -101,24 +101,6 @@ class UserAddRoleIn(BaseModel):
 
     user_id: int = Field(description="用户id", alias="userId")
     role_id: int = Field(description="角色id", alias="roleId")
-
-
-# class UserAddRoleTo(BaseModel):
-#     """用户添加角色res schema"""
-
-#     pass
-
-
-class RolePermIn(BaseModel):
-    role: str = Field(..., description="角色")
-    model: str = Field(..., description="模块")
-    act: str = Field(..., description="权限行为")
-    # docs scheam添加example
-    model_config = {
-        "json_schema_extra": {
-            "example": {"role": "admin", "model": "admin", "act": "add"}
-        }
-    }
 
 
 class DeleteRoleIn(BaseModel):

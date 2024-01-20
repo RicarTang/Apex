@@ -1,4 +1,5 @@
 import sys, os
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.exceptions import RequestValidationError
@@ -20,7 +21,7 @@ from .src.core.middleware import middleware
 from .src.core.exception import (
     custom_http_exception_handler,
     custom_validation_exception_handler,
-    custom_integrity_exception_handler
+    custom_integrity_exception_handler,
 )
 from .config import config
 
@@ -38,7 +39,6 @@ app = FastAPI(
     middleware=middleware,  # 注册middleware
 )
 
-
 # 注册tortoise orm 需要在initial_data前面
 register_tortoise(
     app,
@@ -49,7 +49,7 @@ register_tortoise(
 
 
 @app.on_event("startup")
-async def app_startup():
+async def lifespan():
     """fastapi初始化"""
     # 初始化缓存池
     # await init_cache()
@@ -169,9 +169,9 @@ app.add_exception_handler(IntegrityError, custom_integrity_exception_handler)
 #     return JSONResponse(status_code=422, content={"code": 400, "message": exc.errors()})
 
 
-try:
-    scheduler.start()
-except:
-    log.info("后台任务启动失败！")
-else:
-    log.info("暂无后台任务！")
+# try:
+#     scheduler.start()
+# except:
+#     log.info("后台任务启动失败！")
+# else:
+#     log.info("暂无后台任务！")
