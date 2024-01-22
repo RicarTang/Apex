@@ -1,7 +1,4 @@
-from pydantic import ConfigDict
-from pydantic.alias_generators import to_camel
 from tortoise import fields
-from tortoise.contrib.pydantic import pydantic_model_creator
 from ..base_models import AbstractBaseModel
 from ..enum import DisabledEnum, BoolEnum, AccessActionEnum, AccessModelEnum
 
@@ -21,7 +18,6 @@ class Users(AbstractBaseModel):
     roles: fields.ManyToManyRelation["Role"] = fields.ManyToManyField(
         model_name="models.Role", related_name="roles", through="user_role"
     )
-    tokens: fields.ReverseRelation["UserToken"]
 
     class Meta:
         table = "user"
@@ -72,21 +68,3 @@ class Permission(AbstractBaseModel):
         ordering = ["-created_at"]
         # 复合唯一索引
         unique_together = ("model", "action")
-
-
-class UserToken(AbstractBaseModel):
-    """用户token模型"""
-
-    token = fields.CharField(max_length=255, index=True, description="用户token令牌")
-    is_active = fields.IntEnumField(
-        enum_type=DisabledEnum,
-        default=DisabledEnum.ENABLE,
-        description="令牌状态,0:disable,1:enabled",
-    )
-    client_ip = fields.CharField(max_length=45, index=True, description="登录客户端IP")
-    user: fields.ForeignKeyRelation[Users] = fields.ForeignKeyField(
-        model_name="models.Users", related_name="tokens"
-    )
-
-    class Meta:
-        table = "user_token"

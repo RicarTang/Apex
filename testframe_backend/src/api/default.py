@@ -3,13 +3,14 @@ from fastapi import APIRouter, Depends, Request, HTTPException, status
 from ..core.security import (
     create_access_token,
     check_jwt_auth,
+    get_current_user as current_user,
 )
 from passlib.hash import md5_crypt
 from tortoise.exceptions import DoesNotExist
-from tortoise.expressions import Q
 from tortoise.query_utils import Prefetch
-from ..db.models import Users, Routes, Role, RouteMeta
-from ..schemas import ResultResponse, user, default, menu
+from ..core.cache import RedisService
+from ..db.models import Users, Routes
+from ..schemas import ResultResponse, default, menu
 from ..utils.exceptions.user import (
     UserUnavailableException,
     PasswordValidateErrorException,
@@ -17,11 +18,7 @@ from ..utils.exceptions.user import (
     TokenInvalidException,
 )
 from ..utils.log_util import log
-from ..services import UserTokenService, UserService
-from ..core.security import (
-    check_jwt_auth,
-    get_current_user as current_user,
-)
+from ..services import UserService
 
 router = APIRouter()
 
@@ -49,10 +46,6 @@ async def login(
         raise PasswordValidateErrorException
     # 创建jwt
     access_token = create_access_token(data={"sub": query_user.user_name})
-    # 更新用户jwt
-    await UserTokenService.add_jwt(
-        current_user_id=query_user.id, token=access_token, client_ip=request.client.host
-    )
     return ResultResponse[default.Login](
         result=default.Login(
             data=query_user,
@@ -66,13 +59,14 @@ async def login(
     "/logout",
     summary="退出登录",
     response_model=ResultResponse[None],
-    dependencies=[Depends(check_jwt_auth)],
+    # dependencies=[Depends(check_jwt_auth)],
 )
-async def logout(request: Request):
-    # 修改当前用户数据库token状态为0
+async def logout(request: Request, current_user=Depends(current_user)):
     access_type, access_token = request.headers["authorization"].split(" ")
-    if not await UserTokenService.update_token_state(token=access_token):
-        raise TokenInvalidException
+    # token加入黑名单列表
+    await RedisService().aio_lpush(
+        current_user.user_name + "-token-blacklist", access_token
+    )
     return ResultResponse[None](message="Successfully logged out!")
 
 

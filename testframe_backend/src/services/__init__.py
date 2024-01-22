@@ -1,3 +1,3 @@
-from .user import UserService, UserTokenService
+from .user import UserService
 from .role import RolePermissionService
 from .testcase import TestCaseService

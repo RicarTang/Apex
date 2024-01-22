@@ -12,7 +12,8 @@ from ..utils.exceptions.user import (
     TokenInvalidException,
     UserLoggedOutException,
 )
-from ..services import UserTokenService, UserService
+from ..services import UserService
+from ..core.cache import RedisService
 
 
 oauth2_bearer = HTTPBearer(auto_error=False)
@@ -62,14 +63,23 @@ async def check_jwt_auth(
     try:
         # jwt decode,验证jwt
         payload = jwt.decode(
-            bearer.credentials, config.SECRET_KEY, algorithms=[config.ALGORITHM]
+            # bearer.credentials 当前token，
+            # config.SECRET_KEY 私钥，
+            # algorithms hash算法
+            bearer.credentials,
+            config.SECRET_KEY,
+            algorithms=[config.ALGORITHM],
         )
     except AttributeError:
         raise TokenUnauthorizedException
     except JWTError:
         raise TokenExpiredException
-    # 检查token状态
-    if not await UserTokenService.query_jwt_state(bearer.credentials):
+    # 查询token黑名单列表
+    token_black_list = await RedisService().aio_lrange(
+        payload.get("sub") + "-token-blacklist", 0, -1
+    )
+    # 判断token是否在黑名单中
+    if bearer.credentials in token_black_list:
         raise UserLoggedOutException
     return payload
 
@@ -96,5 +106,4 @@ async def get_current_user(
         raise TokenInvalidException
     # 查询用户
     user = await UserService.query_user_by_username(username=username)
-    request.state.user = user
     return user

@@ -155,3 +155,50 @@ class RedisService:
             return self.redis_pool().getdel(key)
         except Exception as e:
             raise e
+
+    async def aio_lpush(
+        self,
+        key: Union[str, bytes, memoryview],
+        *values: Union[str, bytes, memoryview, int, float],
+    ) -> int:
+        """异步lpush,
+        将值推入列表名称的头部
+
+        Args:
+            key (Union[str, bytes, memoryview]): _description_
+            values (Union[str, bytes, memoryview, int, float]): _description_
+
+        Returns:
+            int: _description_
+        """
+        async with self.aioredis_pool() as redis:
+            try:
+                return await redis.lpush(key, *values)
+            except Exception as e:
+                raise e
+
+    async def aio_lrange(
+        self,
+        key: str,
+        start: int,
+        end: int,
+    ) -> list:
+        """异步lrange,
+        返回开始和结束位置之间列表名称的片段
+
+        Args:
+            key (str): _description_
+            start (int): _description_
+            end (int): _description_
+
+        Raises:
+            e: _description_
+
+        Returns:
+            list: _description_
+        """
+        async with self.aioredis_pool() as redis:
+            try:
+                return await redis.lrange(name=key, start=start, end=end)
+            except Exception as e:
+                raise e
