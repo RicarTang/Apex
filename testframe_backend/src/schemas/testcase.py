@@ -141,6 +141,15 @@ class ExecuteTestcaseIn(BaseModel):
     case_id: int = Field(alias="caseId")
 
 
+class ExecuteTestcaseTo(BaseModel):
+    """执行单条测试用例response schema"""
+
+    code: int = Field(description="测试结果响应状态码")
+    time: float = Field(description="测试结果响应时间")
+    headers: dict = Field(description="测试结果响应头")
+    body: dict = Field(description="测试结果响应体")
+
+
 class DeleteCaseIn(BaseModel):
     """删除用例schema"""
 

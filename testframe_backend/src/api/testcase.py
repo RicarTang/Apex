@@ -135,7 +135,7 @@ async def get_all_testcase(
 @router.post(
     "/executeOne",
     summary="执行单条测试用例",
-    response_model=ResultResponse[Any],
+    response_model=ResultResponse[testcase.ExecuteTestcaseTo],
 )
 async def execute_testcase(
     body: testcase.ExecuteTestcaseIn,
@@ -159,7 +159,7 @@ async def execute_testcase(
         headers=dict(result.headers),
         body=result.json(),
     )
-    return ResultResponse[Any](result=res)
+    return ResultResponse[testcase.ExecuteTestcaseTo](result=res)
 
 
 @router.delete(

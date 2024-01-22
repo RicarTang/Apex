@@ -90,17 +90,21 @@ async def get_current_env():
 @router.post(
     "/setCurrentEnv",
     summary="设置当前环境变量",
+    response_model=ResultResponse[str],
 )
 async def set_current_env(
     body: testenv.CurrentEnvIn,
 ):
-    """设置当前环境变量
+    """设置当前环境变量"""
+    env = await TestEnv.filter(id=body.env_id).first()
+    if not env:
+        raise TestEnvNotExistException
 
-    Args:
-        env_id (int, optional): _description_. Defaults to Body().
-    """
-    await TestEnvService().aio_set_current_env("http://127.0.0.1:4000")
-    return 1
+    await TestEnvService().aio_set_current_env(env.env_url)
+    return ResultResponse[str](
+        message=f"Successfully set the current environment variable to {env.env_url}",
+        result=env.env_url,
+    )
 
 
 @router.delete(

@@ -91,6 +91,12 @@ class TestCaseService:
             except AssertionError as e:
                 log.error(f"断言错误:{e}")
                 raise AssertErrorException(
-                    e, dict(code=res.status_code, headers=dict(res.headers), body=res.json())
+                    e,
+                    dict(
+                        code=res.status_code,
+                        time=res.elapsed.total_seconds() * 1000,
+                        headers=dict(res.headers),
+                        body=res.json(),
+                    ),
                 )
             return res

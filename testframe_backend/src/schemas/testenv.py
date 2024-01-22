@@ -1,5 +1,5 @@
 from typing import Optional, List
-from pydantic import BaseModel, HttpUrl, Field, ConfigDict
+from pydantic import BaseModel, HttpUrl, Field, ConfigDict, field_validator
 from .common import PageParam, DefaultModel
 
 
@@ -9,6 +9,12 @@ class TestEnvIn(BaseModel):
     env_name: str = Field(max_length=30, description="测试环境远端地址", alias="envName")
     env_url: HttpUrl = Field(description="测试环境远端地址", alias="envUrl")
     remark: Optional[str] = Field(default=None, max_length=100, description="备注")
+
+    @field_validator("env_url", mode="after")
+    @classmethod
+    def modify_env_url_after_validation(cls, value):
+        """去除HttpUrl类型的多余的/"""
+        return str(value).rstrip("/")
 
 
 class DeleteEnvIn(BaseModel):
@@ -36,4 +42,4 @@ class TestEnvsTo(PageParam):
 class CurrentEnvIn(BaseModel):
     """设置current env"""
 
-    env_id: int
+    env_id: int = Field(alias="envId")
