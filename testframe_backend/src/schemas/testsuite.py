@@ -64,4 +64,4 @@ class TestSuitesTo(PageParam):
 class TestSuiteId(BaseModel):
     """suite id"""
 
-    suite_id: int = Field(description="测试套件id")
+    suite_id: int = Field(description="测试套件id",alias="suiteId")

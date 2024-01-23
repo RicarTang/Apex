@@ -141,15 +141,15 @@ async def execute_testcase(
     body: testcase.ExecuteTestcaseIn,
 ):
     """执行测试用例"""
-    testcase = await TestCase.filter(id=body.case_id).first()
+    case = await TestCase.filter(id=body.case_id).first()
     current_env = await RedisService().aio_get("currentEnv")
     if not current_env:
         raise CurrentTestEnvNotSetException
-    if not testcase:
+    if not case:
         raise TestcaseNotExistException
     # 执行用例逻辑
     result = await TestCaseService.execute_testcase(
-        testcase=testcase, current_env=current_env
+        testcase=case, current_env=current_env
     )
     res_time = result.elapsed.total_seconds() * 1000
     log.debug(res_time)
