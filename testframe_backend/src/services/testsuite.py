@@ -1,6 +1,5 @@
-from typing import Union, List, NamedTuple
 from tortoise.exceptions import DoesNotExist
-from ..db.models import TestSuite
+from ..db.models import TestSuite, TestSuiteTaskId
 from ..utils.log_util import log
 from ..utils.exceptions.testsuite import TestsuiteNotExistException
 
@@ -25,3 +24,16 @@ class TestSuiteService:
             raise TestsuiteNotExistException
         except Exception as e:
             raise e
+
+    @staticmethod
+    async def change_status(suite_id: int, status: int) -> int:
+        """修改suite status
+
+        Args:
+            suite_id (str): 套件id
+            status (int): 更新状态码
+        Returns:
+            int: 更新数量
+        """
+        suite = await TestSuite.filter(id=suite_id).update(status=status)
+        return suite

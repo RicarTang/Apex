@@ -60,7 +60,6 @@ class TestCaseIn(BaseModel):
 class TestCaseTo(DefaultModel):
     """测试用例 response schema"""
 
-    model_config = ConfigDict(from_attributes=True)
     case_no: Optional[str] = Field(
         default=None, description="用例编号", serialization_alias="caseNo"
     )

@@ -2,8 +2,7 @@ from tortoise import fields
 from tortoise.contrib.pydantic import pydantic_model_creator
 from ..base_models import AbstractBaseModel
 from ..enum import (
-    DisabledEnum,
-    BoolEnum,
+    SuiteStatusEnum,
     BoolEnum,
     ApiMethodEnum,
     RequestParamTypeEnum,
@@ -67,6 +66,11 @@ class TestSuite(AbstractBaseModel):
     suite_no = fields.CharField(max_length=10, unique=True, description="套件编号")
     suite_title = fields.CharField(max_length=50, index=True, description="套件名称/标题")
     remark = fields.CharField(max_length=100, null=True, description="备注")
+    status = fields.IntEnumField(
+        enum_type=SuiteStatusEnum,
+        default=SuiteStatusEnum.NOT_EXECUTED,
+        description="测试用例执行状态;0:未执行,1:执行成功,2:执行失败",
+    )
     testcases: fields.ManyToManyRelation["TestCase"] = fields.ManyToManyField(
         model_name="models.TestCase", related_name="testsuites"
     )

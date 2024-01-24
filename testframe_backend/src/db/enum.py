@@ -36,13 +36,24 @@ class RequestParamTypeEnum(str, Enum):
 
 class AccessActionEnum(str, Enum):
     """访问控制action"""
+
     ADD = "add"
     DEL = "delete"
     PUT = "update"
     GET = "query"
 
+
 class AccessModelEnum(str, Enum):
     """访问控制model"""
+
     USER = "user"
     ADMIN = "admin"
     APITEST = "apitest"
+
+
+class SuiteStatusEnum(IntEnum):
+    """套件状态"""
+
+    NOT_EXECUTED = 0
+    EXECUTED_OK = 1
+    EXECUTED_FAILED = 2

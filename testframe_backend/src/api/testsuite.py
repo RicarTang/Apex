@@ -1,9 +1,6 @@
 from typing import Optional
 from datetime import datetime
-from fastapi import (
-    APIRouter,
-    Query,
-)
+from fastapi import APIRouter, Query, HTTPException, status
 from fastapi.encoders import jsonable_encoder
 from tortoise.exceptions import DoesNotExist
 from tortoise.transactions import in_transaction
@@ -13,7 +10,7 @@ from ..schemas import ResultResponse, testsuite
 from ..utils.log_util import log
 from ..utils.exceptions.testsuite import TestsuiteNotExistException
 from ..utils.exceptions.testenv import CurrentTestEnvNotSetException
-from ..autotest.utils.celery.task.testcase_task import task_test
+from ..autotest.utils.celery.task.testcase_task import task_test, test_callback
 from ..services.testenv import TestEnvService
 
 
@@ -111,19 +108,27 @@ async def test_run_result(task_id: str):
     summary="运行测试套件",
     response_model=ResultResponse[dict],
 )
-async def run_testsuite(body: testsuite.TestSuiteId):
+async def run_testsuite(body: testsuite.RunSuiteIn):
     try:
         result = await TestSuite.get(id=body.suite_id).prefetch_related("testcases")
     except DoesNotExist:
         raise TestsuiteNotExistException
     if not await TestEnvService().aio_get_current_env():
         raise CurrentTestEnvNotSetException
-    task: AsyncResult = task_test.delay(
-        testsuite_data=jsonable_encoder(
-            ResultResponse[testsuite.TestSuiteTo](result=result).result.testcases
-        )
+    # try:
+    #     task: AsyncResult = task_test.delay(
+    #         testsuite_data=jsonable_encoder(
+    #             ResultResponse[testsuite.TestSuiteTo](result=result).result.testcases
+    #         )
+    #     )  # 将Celery任务发送到消息队列,并传递测试数据
+    # except Exception:
+    #     raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,detail="pytest error")
+    log.debug("开始调用task")
+    task: AsyncResult = task_test.apply_async(
+        [jsonable_encoder(testsuite.TestSuiteTo.model_validate(result).testcases)],
+        link=test_callback.s(body.suite_id)
     )  # 将Celery任务发送到消息队列,并传递测试数据
-    # 对应保存suite与task id
+    # 保存对应的suite与task id
     suite_task_id = await TestSuiteTaskId.get_or_none(testsuite_id=body.suite_id)
     if suite_task_id:
         suite_task_id.task_id = task.id

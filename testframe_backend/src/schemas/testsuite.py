@@ -1,6 +1,7 @@
 from typing import Optional, List, Union
 from pydantic import BaseModel, Field, field_validator, ConfigDict
 from ..db.models import TestSuiteTaskId
+from ..db.enum import SuiteStatusEnum
 from .common import PageParam, DefaultModel
 from .testcase import TestCaseTo
 
@@ -25,13 +26,12 @@ class DeleteSuiteIn(BaseModel):
 class TestSuiteTo(DefaultModel):
     """测试套件response schema"""
 
-    model_config = ConfigDict(from_attributes=True)
-
-    suite_no: Optional[str] = Field(default=None, serialization_alias="suiteNo")
-    suite_title: Optional[str] = Field(default=None, serialization_alias="suiteTitle")
+    suite_no: str = Field(serialization_alias="suiteNo")
+    suite_title: str = Field(serialization_alias="suiteTitle")
     remark: Optional[str] = Field(default=None)
+    status: SuiteStatusEnum = Field()
     testcases: List[TestCaseTo] = Field(description="套件包含的用例")
-    task_id: Optional[str] = Field(
+    task_id: Union[str, None] = Field(
         description="运行测试的task id", serialization_alias="taskId"
     )
 
@@ -61,7 +61,7 @@ class TestSuitesTo(PageParam):
     data: List[TestSuiteTo]
 
 
-class TestSuiteId(BaseModel):
+class RunSuiteIn(BaseModel):
     """suite id"""
 
-    suite_id: int = Field(description="测试套件id",alias="suiteId")
+    suite_id: int = Field(description="测试套件id", alias="suiteId")
