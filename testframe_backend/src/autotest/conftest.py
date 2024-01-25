@@ -2,6 +2,7 @@ import allure, pytest, pickle
 from ..core.cache import RedisService
 from ..utils.log_util import log
 from ..services.testenv import TestEnvService
+from .plugin.sse_plugin import SSEPlugin
 
 
 def pytest_addoption(parser):
@@ -10,6 +11,11 @@ def pytest_addoption(parser):
         "--task_id",
         help="pytest test task id",
     )
+
+
+def pytest_configure(config):
+    """Pytest 插件的配置"""
+    config.pluginmanager.register(SSEPlugin())
 
 
 def pytest_generate_tests(metafunc):

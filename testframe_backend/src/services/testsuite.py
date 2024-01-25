@@ -1,5 +1,7 @@
+import asyncio, json
+from fastapi import Request
 from tortoise.exceptions import DoesNotExist
-from ..db.models import TestSuite, TestSuiteTaskId
+from ..db.models import TestSuite
 from ..utils.log_util import log
 from ..utils.exceptions.testsuite import TestsuiteNotExistException
 
@@ -37,3 +39,23 @@ class TestSuiteService:
         """
         suite = await TestSuite.filter(id=suite_id).update(status=status)
         return suite
+
+    @staticmethod
+    async def generate_run_data(request: Request) -> None:
+        """生成推送数据"""
+        counter = 0
+        while True:
+            if await request.is_disconnected():
+                log.debug("Request disconnected")
+                break
+            if counter == 3:
+                break
+            await asyncio.sleep(5)  # 模拟耗时操作 @TODO 获取测试进度？
+            event_data = {
+                "id": counter,
+                "event": "message",
+                "retry": 1000,
+                "data": json.dumps(dict(title="测试开始", description="擦擦擦擦拭")),
+            }
+            yield event_data
+            counter += 1

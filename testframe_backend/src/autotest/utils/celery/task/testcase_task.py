@@ -57,5 +57,5 @@ def task_test(self, testsuite_data: list) -> str:
 @celery.task()
 def test_callback(result, suite_id):
     """测试任务执行完成后的回调函数"""
-    log.debug(f"执行了回调函数,{result, suite_id}")
+    log.debug(f"测试退出码:{result},修改suite_id:{suite_id}的状态")
     ResultProcessor(exit_code=result, suite_id=suite_id).process_result()

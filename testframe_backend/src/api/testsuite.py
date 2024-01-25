@@ -1,7 +1,8 @@
 from typing import Optional
 from datetime import datetime
-from fastapi import APIRouter, Query, HTTPException, status
+from fastapi import APIRouter, Query, HTTPException, status, Request
 from fastapi.encoders import jsonable_encoder
+from sse_starlette.sse import EventSourceResponse
 from tortoise.exceptions import DoesNotExist
 from tortoise.transactions import in_transaction
 from celery.result import AsyncResult
@@ -12,6 +13,7 @@ from ..utils.exceptions.testsuite import TestsuiteNotExistException
 from ..utils.exceptions.testenv import CurrentTestEnvNotSetException
 from ..autotest.utils.celery.task.testcase_task import task_test, test_callback
 from ..services.testenv import TestEnvService
+from ..services.testsuite import TestSuiteService
 
 
 router = APIRouter()
@@ -126,7 +128,7 @@ async def run_testsuite(body: testsuite.RunSuiteIn):
     log.debug("开始调用task")
     task: AsyncResult = task_test.apply_async(
         [jsonable_encoder(testsuite.TestSuiteTo.model_validate(result).testcases)],
-        link=test_callback.s(body.suite_id)
+        link=test_callback.s(body.suite_id),
     )  # 将Celery任务发送到消息队列,并传递测试数据
     # 保存对应的suite与task id
     suite_task_id = await TestSuiteTaskId.get_or_none(testsuite_id=body.suite_id)
@@ -138,6 +140,15 @@ async def run_testsuite(body: testsuite.RunSuiteIn):
     return ResultResponse[dict](
         result={"message": "Tests are running in the background.", "task_id": task.id}
     )
+
+
+@router.get(
+    "/runState",
+    summary="推送套件运行状态",
+)
+async def sse_run_state(request: Request):
+    """使用sse推送运行状态"""
+    return EventSourceResponse(TestSuiteService.generate_run_data(request))
 
 
 @router.delete(

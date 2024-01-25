@@ -12,7 +12,6 @@ from .src.api import (
     testsuite_api,
     testenv_api,
     config_api,
-    sse_api,
     default_api,
     menu_api,
 )
@@ -145,12 +144,6 @@ app.include_router(
     menu_api,
     tags=["Menu"],
     prefix="/menu",
-    # dependencies=[Depends(check_jwt_auth)],
-)
-app.include_router(
-    sse_api,
-    tags=["SSE Demo"],
-    prefix="/sse",
     # dependencies=[Depends(check_jwt_auth)],
 )
 

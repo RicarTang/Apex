@@ -15,20 +15,23 @@ class ResultProcessor:
         method = getattr(self, method_name)
         method()
 
-    def process_result_0(self) -> None:
+    def process_result_0(self) -> int:
         """Tests passed"""
         log.debug("更新状态为1")
         sql = text("UPDATE test_suite SET status = :status WHERE id = :suite_id")
         with engine.connect() as con:
             res = con.execute(sql, dict(status=1, suite_id=self.suite_id))
             con.commit()
-            log.debug(res.rowcount)
+            return res.rowcount
 
-    def process_result_1(self):
+    def process_result_1(self) -> int:
         """Tests failed"""
+        log.debug("更新状态为2")
         sql = text("UPDATE test_suite SET status = :status WHERE id = :suite_id")
         with engine.connect() as con:
-            con.execute(sql, dict(status=2, suite_id=self.suite_id))
+            res = con.execute(sql, dict(status=2, suite_id=self.suite_id))
+            con.commit()
+            return res.rowcount
 
     def process_result_2(self):
         """pytest was interrupted"""
