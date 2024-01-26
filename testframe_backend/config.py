@@ -43,6 +43,8 @@ class BaseConfig(BaseSettings):
     # 数据库
     # 业务数据DB_URL, "mysql://root:123456@127.0.0.1:3306/tortoise"
     DB_URL: str
+    # sqlalchemy engine
+    SQL_ENGINE: str = "mysql+pymysql://root:123456@139.9.75.78:3579/tortoise"
     # redis, example：redis://:123456@127.0.0.1:6379/0
     REDIS_URL: str
     # celery backend url, example: "db+mysql+pymysql://root:123456@127.0.0.1:3306/tortoise"(数据库作为backend)

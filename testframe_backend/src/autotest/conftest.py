@@ -1,4 +1,4 @@
-import allure, pytest, pickle
+import allure, pytest, json
 from ..core.cache import RedisService
 from ..utils.log_util import log
 from ..services.testenv import TestEnvService
@@ -31,8 +31,7 @@ def pytest_generate_tests(metafunc):
         # redis获取当前task_id的测试用例
         suite_data = RedisService().getdel(pytest_task_id)
         # 解析待参数化的用例数据
-        parametrize_data = pickle.loads(suite_data)
-        log.debug(f"pickli后:{parametrize_data}")
+        parametrize_data = json.loads(suite_data)
         # 用例参数化
         metafunc.parametrize("case", parametrize_data)
 

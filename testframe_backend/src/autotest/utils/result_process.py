@@ -17,7 +17,7 @@ class ResultProcessor:
 
     def process_result_0(self) -> int:
         """Tests passed"""
-        log.debug("更新状态为1")
+        log.info(f"更新suite_id:{self.suite_id}状态为1")
         sql = text("UPDATE test_suite SET status = :status WHERE id = :suite_id")
         with engine.connect() as con:
             res = con.execute(sql, dict(status=1, suite_id=self.suite_id))
@@ -26,7 +26,7 @@ class ResultProcessor:
 
     def process_result_1(self) -> int:
         """Tests failed"""
-        log.debug("更新状态为2")
+        log.info(f"更新suite_id:{self.suite_id}状态为2")
         sql = text("UPDATE test_suite SET status = :status WHERE id = :suite_id")
         with engine.connect() as con:
             res = con.execute(sql, dict(status=2, suite_id=self.suite_id))

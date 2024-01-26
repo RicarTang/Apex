@@ -1,4 +1,4 @@
-from typing import Union, Any, Awaitable
+from typing import Union, Any, Awaitable, Optional, List
 from pathlib import Path
 from contextlib import asynccontextmanager
 from redis import asyncio as aioredis
@@ -160,20 +160,102 @@ class RedisService:
         self,
         key: Union[str, bytes, memoryview],
         *values: Union[str, bytes, memoryview, int, float],
-    ) -> int:
+    ) -> Union[Awaitable[int], int]:
         """异步lpush,
         将值推入列表名称的头部
 
         Args:
-            key (Union[str, bytes, memoryview]): _description_
-            values (Union[str, bytes, memoryview, int, float]): _description_
+            key (Union[str, bytes, memoryview]): 键
+            values (Union[str, bytes, memoryview, int, float]): 多个值
 
         Returns:
-            int: _description_
+            Union[Awaitable[int], int]: _description_
         """
         async with self.aioredis_pool() as redis:
             try:
                 return await redis.lpush(key, *values)
+            except Exception as e:
+                raise e
+
+    async def aio_rpush(
+        self,
+        key: Union[str, bytes, memoryview],
+        *values: Union[str, bytes, memoryview, int, float],
+    ) -> Union[Awaitable[int], int]:
+        """异步rpush,
+        将值推入列表名称的尾部
+
+        Args:
+            key (Union[str, bytes, memoryview]): 键
+            values (Union[str, bytes, memoryview, int, float]): 值
+
+        Returns:
+            Union[Awaitable[int], int]: _description_
+        """
+        async with self.aioredis_pool() as redis:
+            try:
+                return await redis.rpush(key, *values)
+            except Exception as e:
+                raise e
+
+    def rpush(
+        self,
+        key: Union[str, bytes, memoryview],
+        *values: Union[str, bytes, memoryview, int, float],
+    ) -> Union[Awaitable[int], int]:
+        """同步rpush,
+        将值推入列表名称的尾部
+
+        Args:
+            key (Union[str, bytes, memoryview]): 键
+            values (Union[str, bytes, memoryview, int, float]): 值
+
+        Returns:
+            Union[Awaitable[int], int]: _description_
+        """
+        try:
+            return self.redis_pool().rpush(key, *values)
+        except Exception as e:
+            raise e
+
+    def lpop(
+        self,
+        key: str,
+        count: Optional[int] = None,
+    ) -> Union[Awaitable[Union[str, List, None]], str, List, None]:
+        """同步lpop,
+        删除并返回列表名称的第一个元素。
+
+        Args:
+            key str: 键
+            count  Optional[int]: 取出的数量
+
+        Returns:
+            Union[Awaitable[Union[str, List, None]], str, List, None]: _description_
+        """
+        try:
+            return self.redis_pool().lpop(key, count)
+        except Exception as e:
+            raise e
+
+    async def aio_lpop(
+        self,
+        key: str,
+        count: Optional[int] = None,
+    ) -> Union[Awaitable[Union[str, List, None]], str, List, None]:
+        """异步lpop,
+        删除并返回列表名称的第一个元素。
+
+        Args:
+            key str: 键
+            count  Optional[int]: 取出的数量
+
+        Returns:
+            Union[Awaitable[Union[str, List, None]], str, List, None]: _description_
+        """
+        async with self.aioredis_pool() as redis:
+            try:
+                return redis.lpop(key, count)
             except Exception as e:
                 raise e
 

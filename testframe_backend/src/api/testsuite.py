@@ -11,9 +11,9 @@ from ..schemas import ResultResponse, testsuite
 from ..utils.log_util import log
 from ..utils.exceptions.testsuite import TestsuiteNotExistException
 from ..utils.exceptions.testenv import CurrentTestEnvNotSetException
-from ..autotest.utils.celery.task.testcase_task import task_test, test_callback
+from ..autotest.utils.celery.task.testcase_task import task_test
 from ..services.testenv import TestEnvService
-from ..services.testsuite import TestSuiteService
+from ..services.testsuite import TestSuiteSSEService
 
 
 router = APIRouter()
@@ -117,18 +117,14 @@ async def run_testsuite(body: testsuite.RunSuiteIn):
         raise TestsuiteNotExistException
     if not await TestEnvService().aio_get_current_env():
         raise CurrentTestEnvNotSetException
-    # try:
-    #     task: AsyncResult = task_test.delay(
-    #         testsuite_data=jsonable_encoder(
-    #             ResultResponse[testsuite.TestSuiteTo](result=result).result.testcases
-    #         )
-    #     )  # 将Celery任务发送到消息队列,并传递测试数据
-    # except Exception:
-    #     raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,detail="pytest error")
-    log.debug("开始调用task")
+    import os
+
+    log.debug(f"进程id:{os.getpid()},父进程id:{os.getppid()}")
     task: AsyncResult = task_test.apply_async(
-        [jsonable_encoder(testsuite.TestSuiteTo.model_validate(result).testcases)],
-        link=test_callback.s(body.suite_id),
+        [
+            jsonable_encoder(testsuite.TestSuiteTo.model_validate(result).testcases),
+            body.suite_id,
+        ],
     )  # 将Celery任务发送到消息队列,并传递测试数据
     # 保存对应的suite与task id
     suite_task_id = await TestSuiteTaskId.get_or_none(testsuite_id=body.suite_id)
@@ -146,9 +142,9 @@ async def run_testsuite(body: testsuite.RunSuiteIn):
     "/runState",
     summary="推送套件运行状态",
 )
-async def sse_run_state(request: Request):
+async def sse_run_state(request: Request, task_id: str):
     """使用sse推送运行状态"""
-    return EventSourceResponse(TestSuiteService.generate_run_data(request))
+    return EventSourceResponse(TestSuiteSSEService.generate_sse_data(request, task_id))
 
 
 @router.delete(
