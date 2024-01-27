@@ -22,7 +22,6 @@ def task_test(self, testsuite_data: list, suite_id: int) -> str:
     # 报告数据存储目录
     allure_report_dir = config.ALLURE_REPORT / self.request.id
     pytest_data_dir = config.PYTEST_DATA / self.request.id
-    log.debug(f"进程id:{os.getpid()},父进程id:{os.getppid()}")
     # 使用task_id为key保存json格式测试数据至redis
     RedisService().set(self.request.id, json.dumps(testsuite_data))
     exit_code = pytest.main(

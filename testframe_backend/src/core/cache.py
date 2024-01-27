@@ -255,7 +255,7 @@ class RedisService:
         """
         async with self.aioredis_pool() as redis:
             try:
-                return redis.lpop(key, count)
+                return await redis.lpop(key, count)
             except Exception as e:
                 raise e
 

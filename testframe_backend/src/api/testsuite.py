@@ -14,6 +14,7 @@ from ..utils.exceptions.testenv import CurrentTestEnvNotSetException
 from ..autotest.utils.celery.task.testcase_task import task_test
 from ..services.testenv import TestEnvService
 from ..services.testsuite import TestSuiteSSEService
+from ..core.cache import RedisService
 
 
 router = APIRouter()
@@ -119,7 +120,6 @@ async def run_testsuite(body: testsuite.RunSuiteIn):
         raise CurrentTestEnvNotSetException
     import os
 
-    log.debug(f"进程id:{os.getpid()},父进程id:{os.getppid()}")
     task: AsyncResult = task_test.apply_async(
         [
             jsonable_encoder(testsuite.TestSuiteTo.model_validate(result).testcases),

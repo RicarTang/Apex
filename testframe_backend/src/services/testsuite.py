@@ -1,4 +1,4 @@
-import asyncio, json, queue
+import asyncio, json
 from fastapi import Request
 from tortoise.exceptions import DoesNotExist
 from ..db.models import TestSuite
@@ -33,15 +33,30 @@ class TestSuiteSSEService:
     """测试套件sse推送服务"""
 
     @classmethod
-    async def get_redis_sse_data(cls, task_id: str):
-        """从redis拿取测试状态"""
-        key = task_id + "sse_data"
-        data = await RedisService.aio_lpop(key)
+    async def get_redis_sse_data(cls, task_id: str) -> str:
+        """从redis拿取测试状态
+
+        Args:
+            task_id (str): celery task id
+
+        Returns:
+            str: json 字符串
+        """
+        key = task_id + "-sse_data"
+        data = await RedisService().aio_lpop(key)
         return data
 
     @classmethod
     async def generate_sse_data(cls, request: Request, task_id: str) -> None:
-        """生成推送数据"""
+        """生成推送数据
+
+        Args:
+            request (Request): _description_
+            task_id (str): celery task id
+
+        Yields:
+            _type_: _description_
+        """
         counter = 0
 
         while True:
@@ -50,7 +65,7 @@ class TestSuiteSSEService:
                 log.debug("Request disconnected")
                 break
             # 从对应的task_id拿取需要推送的状态
-            send_data = cls.get_redis_sse_data(task_id)
+            send_data = await cls.get_redis_sse_data(task_id)
             if send_data:
                 # 有数据推送数据
                 event_data = {
@@ -60,5 +75,8 @@ class TestSuiteSSEService:
                     "data": json.dumps(dict(task_id=task_id, message=send_data)),
                 }
                 yield event_data
-            await asyncio.sleep(2)  # 模拟耗时操作,给其他代码得到cpu的时间 @TODO 获取测试进度？
+                if json.loads(send_data)["status"] == 1:
+                    break
+            await asyncio.sleep(0.5)  # 给其他代码得到cpu的时间
+
             counter += 1
