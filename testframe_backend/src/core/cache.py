@@ -284,3 +284,59 @@ class RedisService:
                 return await redis.lrange(name=key, start=start, end=end)
             except Exception as e:
                 raise e
+
+    async def aio_pubsub(self):
+        """Return a async Publish/Subscribe object"""
+        async with self.aioredis_pool() as redis:
+            try:
+                return redis.pubsub()
+            except Exception as e:
+                raise e
+
+    def pubsub(self):
+        """Return a Publish/Subscribe object"""
+        try:
+            return self.redis_pool().pubsub()
+        except Exception as e:
+            raise e
+
+    async def aio_publish(
+        self,
+        channel: Union[bytes, str, memoryview],
+        message: Union[bytes, memoryview, str, int, float],
+        **kwargs,
+    ) -> Union[Awaitable, Any]:
+        """异步发布message到频道
+
+        Args:
+            channel (Union[bytes, str, memoryview]): 频道
+            message (Union[bytes, memoryview, str, int, float]): 消息
+
+        Returns:
+            Union[Awaitable, Any]: _description_
+        """
+        async with self.aioredis_pool() as redis:
+            try:
+                return await redis.publish(channel, message, **kwargs)
+            except Exception as e:
+                raise e
+
+    def publish(
+        self,
+        channel: Union[bytes, str, memoryview],
+        message: Union[bytes, memoryview, str, int, float],
+        **kwargs,
+    ) -> Union[Awaitable, Any]:
+        """同步发布message到频道
+
+        Args:
+            channel (Union[bytes, str, memoryview]): 频道
+            message (Union[bytes, memoryview, str, int, float]): 消息
+
+        Returns:
+            Union[Awaitable, Any]: _description_
+        """
+        try:
+            return self.redis_pool().publish(channel, message, **kwargs)
+        except Exception as e:
+            raise e

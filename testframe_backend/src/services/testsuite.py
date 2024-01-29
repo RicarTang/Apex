@@ -33,18 +33,25 @@ class TestSuiteSSEService:
     """测试套件sse推送服务"""
 
     @classmethod
-    async def get_redis_sse_data(cls, task_id: str) -> str:
-        """从redis拿取测试状态
+    async def get_redis_sse_subscribe(cls, task_id: str) -> dict:
+        """从redis拿取sse推送订阅数据
 
         Args:
             task_id (str): celery task id
 
         Returns:
-            str: json 字符串
+            dict: redis 订阅消息字典
         """
         key = task_id + "-sse_data"
-        data = await RedisService().aio_lpop(key)
-        return data
+        # 创建订阅者对象
+        pubsub = await RedisService().aio_pubsub()
+        # 订阅频道
+        await pubsub.subscribe(key)
+        # 处理异步生成器
+        async for message in pubsub.listen():
+            if message["type"] == "message":
+                log.debug(message)
+                return message
 
     @classmethod
     async def generate_sse_data(cls, request: Request, task_id: str) -> None:
@@ -65,17 +72,22 @@ class TestSuiteSSEService:
                 log.debug("Request disconnected")
                 break
             # 从对应的task_id拿取需要推送的状态
-            send_data = await cls.get_redis_sse_data(task_id)
+            send_data = await cls.get_redis_sse_subscribe(task_id)
             if send_data:
                 # 有数据推送数据
                 event_data = {
                     "id": counter,
                     "event": "message",
                     "retry": 1000,
-                    "data": json.dumps(dict(task_id=task_id, message=send_data)),
+                    "data": json.dumps(
+                        dict(
+                            task_id=task_id,
+                            message=json.loads(send_data["data"]),
+                        )
+                    ),
                 }
                 yield event_data
-                if json.loads(send_data)["status"] == 1:
+                if json.loads(send_data["data"])["status"] == 1:
                     break
             await asyncio.sleep(0.5)  # 给其他代码得到cpu的时间
 
