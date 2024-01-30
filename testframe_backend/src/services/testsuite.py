@@ -2,7 +2,7 @@ import asyncio, json
 from fastapi import Request
 from tortoise.exceptions import DoesNotExist
 from ..db.models import TestSuite
-from ..core.cache import RedisService
+from ..core.cache import redis
 from ..utils.log_util import log
 from ..utils.exceptions.testsuite import TestsuiteNotExistException
 
@@ -44,7 +44,7 @@ class TestSuiteSSEService:
         """
         key = task_id + "-sse_data"
         # 创建订阅者对象
-        pubsub = await RedisService().aio_pubsub()
+        pubsub = await redis.aio_pubsub()
         # 订阅频道
         await pubsub.subscribe(key)
         # 处理异步生成器
@@ -89,6 +89,5 @@ class TestSuiteSSEService:
                 yield event_data
                 if json.loads(send_data["data"])["status"] == 1:
                     break
-            await asyncio.sleep(0.5)  # 给其他代码得到cpu的时间
 
             counter += 1

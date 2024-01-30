@@ -1,5 +1,5 @@
 import httpx
-from ..core.cache import RedisService
+from ..core.cache import redis
 
 
 class TestEnvService:
@@ -10,12 +10,12 @@ class TestEnvService:
 
     async def aio_get_current_env(self):
         """redis异步读取平台当前环境变量"""
-        current_env = await RedisService().aio_get(self.current_env_name)
+        current_env = await redis.aio_get(self.current_env_name)
         return current_env
 
     def get_current_env(self):
         """redis同步读取平台当前环境变量"""
-        current_env = RedisService().get(self.current_env_name)
+        current_env = redis.get(self.current_env_name)
         return current_env
 
     async def aio_set_current_env(self, value: str) -> bool:
@@ -24,7 +24,7 @@ class TestEnvService:
         Args:
             value (str): 环境变量值
         """
-        return await RedisService().aio_set(self.current_env_name, value)
+        return await redis.aio_set(self.current_env_name, value)
 
     @staticmethod
     async def execute_one(method: str, url: str, expect_code: int):

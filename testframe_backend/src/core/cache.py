@@ -1,9 +1,9 @@
 from typing import Union, Any, Awaitable, Optional, List
 from pathlib import Path
-from contextlib import asynccontextmanager
-from redis import asyncio as aioredis
+# from contextlib import asynccontextmanager
+from redis import ConnectionPool
 from redis.client import Redis
-from redis.asyncio import Redis as AioRedis
+from redis.asyncio import Redis as AioRedis, ConnectionPool as AioConnectionPool
 
 # from fastapi_cache import FastAPICache
 # from fastapi_cache.backends.redis import RedisBackend
@@ -16,32 +16,27 @@ class RedisService:
     def __init__(self, url: Union[str, Path] = config.REDIS_URL) -> None:
         self.url = url
 
-    @asynccontextmanager
-    async def aioredis_pool(self, **kwargs) -> AioRedis:
-        """异步redis上下文管理器服务"""
-        redis = aioredis.from_url(
+    def aioredis_pool(self, **kwargs) -> AioRedis:
+        """异步redis poll"""
+        pool: AioConnectionPool = AioConnectionPool.from_url(
             self.url,
             encoding="utf-8",
             decode_responses=True,  # 自动解码response
             **kwargs,
         )
-        try:
-            yield redis
-        finally:
-            await redis.aclose()
+        redis = AioRedis.from_pool(pool)
+        return redis
 
     def redis_pool(self, **kwargs) -> Redis:
         """同步redis pool"""
-        redis: Redis = Redis.from_url(
+        pool: ConnectionPool = ConnectionPool.from_url(
             self.url,
             # encoding="utf-8",
             # decode_responses=True,  # 自动解码response
             **kwargs,
         )
-        try:
-            return redis
-        finally:
-            redis.close()
+        redis = Redis.from_pool(pool)
+        return redis
 
     async def aio_set(
         self,
@@ -70,11 +65,10 @@ class RedisService:
         Returns:
             bool: _description_
         """
-        async with self.aioredis_pool() as redis:
-            try:
-                return await redis.set(name=key, value=value, **kwargs)
-            except Exception as e:
-                raise e
+        try:
+            return await self.aioredis_pool().set(name=key, value=value, **kwargs)
+        except Exception as e:
+            raise e
 
     async def aio_get(
         self, key: Union[str, bytes, memoryview]
@@ -90,11 +84,10 @@ class RedisService:
         Returns:
             Union[Any, Awaitable]: _description_
         """
-        async with self.aioredis_pool() as redis:
-            try:
-                return await redis.get(name=key)
-            except Exception as e:
-                raise e
+        try:
+            return await self.aioredis_pool().get(name=key)
+        except Exception as e:
+            raise e
 
     def get(self, key: Union[str, bytes, memoryview]) -> Any:
         """同步get
@@ -171,11 +164,10 @@ class RedisService:
         Returns:
             Union[Awaitable[int], int]: _description_
         """
-        async with self.aioredis_pool() as redis:
-            try:
-                return await redis.lpush(key, *values)
-            except Exception as e:
-                raise e
+        try:
+            return await self.aioredis_pool().lpush(key, *values)
+        except Exception as e:
+            raise e
 
     async def aio_rpush(
         self,
@@ -192,11 +184,10 @@ class RedisService:
         Returns:
             Union[Awaitable[int], int]: _description_
         """
-        async with self.aioredis_pool() as redis:
-            try:
-                return await redis.rpush(key, *values)
-            except Exception as e:
-                raise e
+        try:
+            return await self.aioredis_pool().rpush(key, *values)
+        except Exception as e:
+            raise e
 
     def rpush(
         self,
@@ -253,11 +244,10 @@ class RedisService:
         Returns:
             Union[Awaitable[Union[str, List, None]], str, List, None]: _description_
         """
-        async with self.aioredis_pool() as redis:
-            try:
-                return await redis.lpop(key, count)
-            except Exception as e:
-                raise e
+        try:
+            return await self.aioredis_pool().lpop(key, count)
+        except Exception as e:
+            raise e
 
     async def aio_lrange(
         self,
@@ -279,19 +269,17 @@ class RedisService:
         Returns:
             list: _description_
         """
-        async with self.aioredis_pool() as redis:
-            try:
-                return await redis.lrange(name=key, start=start, end=end)
-            except Exception as e:
-                raise e
+        try:
+            return await self.aioredis_pool().lrange(name=key, start=start, end=end)
+        except Exception as e:
+            raise e
 
     async def aio_pubsub(self):
         """Return a async Publish/Subscribe object"""
-        async with self.aioredis_pool() as redis:
-            try:
-                return redis.pubsub()
-            except Exception as e:
-                raise e
+        try:
+            return self.aioredis_pool().pubsub()
+        except Exception as e:
+            raise e
 
     def pubsub(self):
         """Return a Publish/Subscribe object"""
@@ -315,11 +303,10 @@ class RedisService:
         Returns:
             Union[Awaitable, Any]: _description_
         """
-        async with self.aioredis_pool() as redis:
-            try:
-                return await redis.publish(channel, message, **kwargs)
-            except Exception as e:
-                raise e
+        try:
+            return await self.aioredis_pool().publish(channel, message, **kwargs)
+        except Exception as e:
+            raise e
 
     def publish(
         self,
@@ -340,3 +327,6 @@ class RedisService:
             return self.redis_pool().publish(channel, message, **kwargs)
         except Exception as e:
             raise e
+
+
+redis = RedisService()

@@ -8,7 +8,7 @@ from ..core.security import (
 from passlib.hash import md5_crypt
 from tortoise.exceptions import DoesNotExist
 from tortoise.query_utils import Prefetch
-from ..core.cache import RedisService
+from ..core.cache import redis
 from ..db.models import Users, Routes
 from ..schemas import ResultResponse, default, menu
 from ..utils.exceptions.user import (
@@ -64,7 +64,7 @@ async def login(
 async def logout(request: Request, current_user=Depends(current_user)):
     access_type, access_token = request.headers["authorization"].split(" ")
     # token加入黑名单列表
-    await RedisService().aio_lpush(
+    await redis.aio_lpush(
         current_user.user_name + "-token-blacklist", access_token
     )
     return ResultResponse[None](message="Successfully logged out!")
