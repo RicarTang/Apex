@@ -1,5 +1,5 @@
 import sys, os
-from contextlib import asynccontextmanager
+# from contextlib import asynccontextmanager
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.exceptions import RequestValidationError
@@ -25,7 +25,7 @@ from .src.core.exception import (
 from .config import config
 
 # from .src.core.cache import init_cache
-from .src.utils.background_task_util import scheduler
+# from .src.utils.background_task_util import scheduler
 from .src.utils.log_util import log
 from .src.db.settings import TORTOISE_ORM
 from .src.db import InitDbData

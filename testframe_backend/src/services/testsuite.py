@@ -1,4 +1,4 @@
-import asyncio, json
+import json
 from fastapi import Request
 from tortoise.exceptions import DoesNotExist
 from ..db.models import TestSuite
@@ -50,7 +50,7 @@ class TestSuiteSSEService:
         # 处理异步生成器
         async for message in pubsub.listen():
             if message["type"] == "message":
-                log.debug(message)
+                # log.debug(message)
                 return message
 
     @classmethod
@@ -89,5 +89,4 @@ class TestSuiteSSEService:
                 yield event_data
                 if json.loads(send_data["data"])["status"] == 1:
                     break
-
             counter += 1
