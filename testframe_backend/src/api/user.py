@@ -126,8 +126,17 @@ async def reset_user_pwd(body: user.UserResetPwdIn):
 )
 async def delete_user(body: user.DeleteUserIn):
     """删除用户."""
-
-    delete_count = await Users.filter(id__in=body.user_ids).delete()
+    # 检查是否存在admin用户
+    admin_user_ids = await Users.filter(id__in=body.user_ids, user_name="admin").exists()
+    # 禁止删除admin用户
+    if admin_user_ids:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="admin is prohibited from being deleted",
+        )
+    delete_count = await Users.filter(
+        id__in=body.user_ids, user_name__not="admin"
+    ).delete()
     if not delete_count:
         raise UserNotExistException
     return ResultResponse[None](message="successful deleted user!")

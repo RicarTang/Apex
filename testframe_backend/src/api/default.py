@@ -126,3 +126,13 @@ async def get_routers(current_user=Depends(current_user)):
         )
 
     return ResultResponse[List[menu.MenuTo]](result=route_list)
+
+
+@router.get(
+    "/statistics",
+    summary="统计数据",
+    response_model=ResultResponse[str],
+)
+async def statistics_data():
+    """统计测试数据"""
+    pass
