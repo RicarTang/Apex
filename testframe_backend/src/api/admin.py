@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import Optional
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, HTTPException, status
 from tortoise.transactions import in_transaction
 from tortoise.query_utils import Prefetch
 from ..schemas import ResultResponse, admin
@@ -189,6 +189,14 @@ async def add_permission(body: admin.PermissionIn):
 )
 async def delete_role(body: admin.DeleteRoleIn):
     """删除角色"""
+    # 检查是否存在admin角色
+    admin_role_ids = await Role.filter(id__in=body.role_ids, role_key="admin").exists()
+    # 禁止删除admin角色
+    if admin_role_ids:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Cannot delete administrator role",
+        )
     deleted_count = await Role.filter(id__in=body.role_ids).delete()
     if not deleted_count:
         raise RoleNotExistException

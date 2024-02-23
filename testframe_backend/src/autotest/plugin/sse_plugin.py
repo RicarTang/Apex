@@ -1,3 +1,4 @@
+import os
 from ...utils.log_util import log
 from ...core.cache import redis
 from ..utils.formatter import publish_format
@@ -5,7 +6,6 @@ from ..utils.formatter import publish_format
 
 class SSEPlugin:
     """Pytest 插件类"""
-
     test_results = {"passed": 0, "failed": 0, "skipped": 0}
 
     def pytest_sessionstart(self, session):
@@ -16,6 +16,8 @@ class SSEPlugin:
                 f"开始启动pytest会话,task id为{session.config.getoption('task_id')}", 0
             ),
         )
+        self.test_results = {"passed": 0, "failed": 0, "skipped": 0}
+        log.debug(f"测试环境pid：{os.getpid()}")
 
     def pytest_runtest_protocol(self, item, nextitem):
         # 在每个测试用例执行前更新测试结果统计
