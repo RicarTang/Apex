@@ -163,14 +163,14 @@ async def execute_testcase(
 
 
 @router.delete(
-    "/delete",
+    "/{case_ids}",
     summary="删除测试用例",
     response_model=ResultResponse[None],
 )
-async def delete_testcase(body: testcase.DeleteCaseIn):
+async def delete_testcase(case_ids: str):
     """删除测试用例"""
-
-    delete_count = await TestCase.filter(id__in=body.case_ids).delete()
+    source_ids_list = case_ids.split(",")
+    delete_count = await TestCase.filter(id__in=source_ids_list).delete()
     if not delete_count:
         raise TestcaseNotExistException
     return ResultResponse[None](message="successful deleted testcase!")

@@ -63,9 +63,3 @@ class UsersTo(PageParam):
     """用户列表res schema"""
 
     data: List[UserTo]
-
-
-class DeleteUserIn(BaseModel):
-    """批量删除用户 req schema"""
-
-    user_ids: List[int] = Field(alias="userIds")

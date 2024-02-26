@@ -103,9 +103,3 @@ class UserAddRoleIn(BaseModel):
     role_id: int = Field(description="角色id", alias="roleId")
 
 
-class DeleteRoleIn(BaseModel):
-    role_ids: List[int] = Field(alias="roleIds")
-
-
-class DeletePermissionIn(BaseModel):
-    permission_ids: List[int] = Field(alias="permissionIds")

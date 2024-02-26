@@ -148,14 +148,14 @@ async def sse_run_state(request: Request, task_id: str):
 
 
 @router.delete(
-    "/delete",
+    "/{suite_ids}",
     summary="删除测试套件",
     response_model=ResultResponse[None],
 )
-async def delete_testsuite(body: testsuite.DeleteSuiteIn):
+async def delete_testsuite(suite_ids: str):
     """删除测试套件"""
-
-    delete_count = await TestSuite.filter(id__in=body.suite_ids).delete()
+    source_ids_list = suite_ids.split(",")
+    delete_count = await TestSuite.filter(id__in=source_ids_list).delete()
     if not delete_count:
         raise TestsuiteNotExistException
     return ResultResponse[None](message="successful deleted testsuite!")

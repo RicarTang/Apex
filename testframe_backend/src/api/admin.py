@@ -182,35 +182,38 @@ async def add_permission(body: admin.PermissionIn):
 
 
 @router.delete(
-    "/role/delete",
+    "/role/{role_ids}",
     summary="删除角色",
     response_model=ResultResponse[None],
     dependencies=[Depends(Authority("admin", "delete"))],
 )
-async def delete_role(body: admin.DeleteRoleIn):
+async def delete_role(role_ids: str):
     """删除角色"""
+    # 解析role ids为列表
+    resource_ids_list = role_ids.split(",")
     # 检查是否存在admin角色
-    admin_role_ids = await Role.filter(id__in=body.role_ids, role_key="admin").exists()
+    admin_role_ids = await Role.filter(id__in=resource_ids_list, role_key="admin").exists()
     # 禁止删除admin角色
     if admin_role_ids:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Cannot delete administrator role",
         )
-    deleted_count = await Role.filter(id__in=body.role_ids).delete()
+    deleted_count = await Role.filter(id__in=resource_ids_list).delete()
     if not deleted_count:
         raise RoleNotExistException
     return ResultResponse[None](message="successful deleted role!")
 
 
 @router.delete(
-    "/permission/delete",
+    "/permission/{permission_ids}",
     summary="删除权限",
     response_model=ResultResponse[None],
 )
-async def del_permission(body: admin.DeletePermissionIn):
+async def del_permission(permission_ids: str):
     """删除权限"""
-    permission = await Permission.filter(id__in=body.permission_ids).delete()
+    resource_ids_list = permission_ids.split(",")
+    permission = await Permission.filter(id__in=resource_ids_list).delete()
     if not permission:
         raise PermissionNotExistException
     return ResultResponse[None](message="successful deleted permission!")

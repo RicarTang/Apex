@@ -119,15 +119,17 @@ async def reset_user_pwd(body: user.UserResetPwdIn):
 
 
 @router.delete(
-    "/delete",
+    "/{user_ids}",
     response_model=ResultResponse[None],
     summary="删除用户",
     dependencies=[Depends(Authority("user", "delete"))],
 )
-async def delete_user(body: user.DeleteUserIn):
+async def delete_user(user_ids: str):
     """删除用户."""
+    # 解析User ids 为列表
+    source_ids_list = user_ids.split(",")
     # 检查是否存在admin用户
-    admin_user_ids = await Users.filter(id__in=body.user_ids, user_name="admin").exists()
+    admin_user_ids = await Users.filter(id__in=source_ids_list, user_name="admin").exists()
     # 禁止删除admin用户
     if admin_user_ids:
         raise HTTPException(
@@ -135,7 +137,7 @@ async def delete_user(body: user.DeleteUserIn):
             detail="admin is prohibited from being deleted",
         )
     delete_count = await Users.filter(
-        id__in=body.user_ids, user_name__not="admin"
+        id__in=source_ids_list, user_name__not="admin"
     ).delete()
     if not delete_count:
         raise UserNotExistException
