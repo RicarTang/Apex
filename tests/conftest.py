@@ -31,6 +31,13 @@ async def client():
             yield c
 
 
+@pytest.fixture(scope="session", autouse=True)
+def faker_locale():
+    """配置faker local"""
+    locale = "zh_CN"
+    return locale
+
+
 @pytest.fixture(scope="session")
 async def login(client: AsyncClient):
     """admin用户登录前置"""

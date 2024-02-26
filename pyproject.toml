@@ -5,10 +5,7 @@ src_folder = "./."
 
 [tool.pdm]
 [tool.pdm.dev-dependencies]
-dev = [
-    "black>=23.12.1",
-    "faker>=22.5.0",
-]
+dev = ["black>=23.12.1", "faker>=22.5.0"]
 
 [tool.pdm.build]
 includes = []
@@ -23,14 +20,19 @@ init_db = "aerich init-db"
 migrate_db = "aerich migrate"
 upgrade_db = "aerich upgrade"
 test = "pytest tests -sv"
+test_add_user = "pytest tests -sv -m add_user"
+
+[tool.pytest.ini_options]
+# pytest配置
+addopts = "-p no:warnings"
+markers = ["add_user: add fake user"]
+
 
 [project]
 name = ""
 version = ""
 description = ""
-authors = [
-    {name = "RicarTang", email = "357965604@qq.com"},
-]
+authors = [{ name = "RicarTang", email = "357965604@qq.com" }]
 dependencies = [
     "pydantic<3.0.0,>=2.5.2",
     "tortoise-orm[asyncmy]<1.0.0,>=0.20.0",
@@ -64,6 +66,4 @@ dependencies = [
 ]
 requires-python = ">=3.9"
 readme = "README.md"
-license = {text = "MIT"}
-
-
+license = { text = "MIT" }

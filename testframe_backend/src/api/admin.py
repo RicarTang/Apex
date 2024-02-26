@@ -1,6 +1,8 @@
 from datetime import datetime
 from typing import Optional
 from fastapi import APIRouter, Depends, Query, HTTPException, status
+from typing_extensions import Annotated
+from pydantic import StringConstraints
 from tortoise.transactions import in_transaction
 from tortoise.query_utils import Prefetch
 from ..schemas import ResultResponse, admin
@@ -187,7 +189,7 @@ async def add_permission(body: admin.PermissionIn):
     response_model=ResultResponse[None],
     dependencies=[Depends(Authority("admin", "delete"))],
 )
-async def delete_role(role_ids: str):
+async def delete_role(role_ids: Annotated[str, StringConstraints(strip_whitespace=True, pattern=r'^\d+(,\d+)*$')]):
     """删除角色"""
     # 解析role ids为列表
     resource_ids_list = role_ids.split(",")
@@ -210,7 +212,7 @@ async def delete_role(role_ids: str):
     summary="删除权限",
     response_model=ResultResponse[None],
 )
-async def del_permission(permission_ids: str):
+async def del_permission(permission_ids: Annotated[str, StringConstraints(strip_whitespace=True, pattern=r'^\d+(,\d+)*$')]):
     """删除权限"""
     resource_ids_list = permission_ids.split(",")
     permission = await Permission.filter(id__in=resource_ids_list).delete()

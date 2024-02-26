@@ -8,6 +8,8 @@ from fastapi import (
     Query,
     status,
 )
+from typing_extensions import Annotated
+from pydantic import StringConstraints
 from fastapi.responses import FileResponse
 from tortoise.exceptions import DoesNotExist
 from ...config import config
@@ -167,7 +169,7 @@ async def execute_testcase(
     summary="删除测试用例",
     response_model=ResultResponse[None],
 )
-async def delete_testcase(case_ids: str):
+async def delete_testcase(case_ids: Annotated[str, StringConstraints(strip_whitespace=True, pattern=r'^\d+(,\d+)*$')]):
     """删除测试用例"""
     source_ids_list = case_ids.split(",")
     delete_count = await TestCase.filter(id__in=source_ids_list).delete()

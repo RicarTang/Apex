@@ -1,5 +1,5 @@
 import pytest
-from faker import Faker
+import faker
 from httpx import AsyncClient
 
 
@@ -22,6 +22,7 @@ async def test_user_me(client: AsyncClient, login):
 
 
 @pytest.mark.anyio
+@pytest.mark.add_user
 async def test_user_add_success(client: AsyncClient, login, faker, get_role_list, log):
     """成功添加用户"""
     global new_user_id
@@ -47,6 +48,18 @@ async def test_user_add_success(client: AsyncClient, login, faker, get_role_list
 
 
 @pytest.mark.anyio
+async def test_user_query(client: AsyncClient, login, log):
+    """查询某个用户信息"""
+    res = await client.get(
+        f"/user/{new_user_id}", headers={"Authorization": f"Bearer {login}"}
+    )
+    assert res.status_code == 200
+    assert res.json()["success"] == True
+    assert res.json()["message"] == "success"
+    log.info(f"查询用户id{new_user_id}成功,响应体为:{res.json()}")
+
+
+@pytest.mark.anyio
 async def test_user_resetPwd_success(client: AsyncClient, login, log):
     """成功修改用户密码"""
     new_psw = "12345678"
@@ -59,6 +72,20 @@ async def test_user_resetPwd_success(client: AsyncClient, login, log):
     assert res.json()["success"] == True
     assert res.json()["message"] == "successful reset user password!"
     log.info(f"使用admin用户成功修改用户{new_user_id}的密码为{new_psw}")
+
+
+@pytest.mark.anyio
+async def test_user_update_success(client: AsyncClient, login, get_role_list, log):
+    """成功更新用户信息"""
+    res = await client.put(
+        f"/user/{new_user_id}",
+        headers={"Authorization": f"Bearer {login}"},
+        json=dict(roleIds=[get_role_list[1]["id"]], status=0, remark="update用户数据"),
+    )
+    assert res.status_code == 200
+    assert res.json()["success"] == True
+    assert res.json()["message"] == "Update user information successfully!"
+    log.info(f"使用admin用户成功更新用户{new_user_id}信息")
 
 
 @pytest.mark.anyio

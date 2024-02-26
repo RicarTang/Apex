@@ -1,6 +1,8 @@
 from typing import Optional, Union
 from datetime import datetime
 from fastapi import APIRouter, Query, Request, Body, Depends
+from typing_extensions import Annotated
+from pydantic import StringConstraints
 from tortoise.exceptions import DoesNotExist
 from ..db.models import TestEnv
 from ..services.testenv import TestEnvService
@@ -112,7 +114,7 @@ async def set_current_env(
     summary="删除环境变量",
     response_model=ResultResponse[None],
 )
-async def delete_env(env_ids: str):
+async def delete_env(env_ids: Annotated[str, StringConstraints(strip_whitespace=True, pattern=r'^\d+(,\d+)*$')]):
     """删除指定环境"""
     source_ids_list = env_ids.split(",")
     delete_count = await TestEnv.filter(id__in=source_ids_list).delete()

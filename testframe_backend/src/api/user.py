@@ -1,6 +1,8 @@
 from datetime import datetime
 from typing import Optional, List
 from fastapi import APIRouter, Depends, Query, Response, HTTPException, status
+from typing_extensions import Annotated
+from pydantic import StringConstraints
 from passlib.hash import md5_crypt
 from tortoise.transactions import in_transaction
 from tortoise.contrib.fastapi import HTTPNotFoundError
@@ -124,8 +126,9 @@ async def reset_user_pwd(body: user.UserResetPwdIn):
     summary="删除用户",
     dependencies=[Depends(Authority("user", "delete"))],
 )
-async def delete_user(user_ids: str):
+async def delete_user(user_ids: Annotated[str, StringConstraints(strip_whitespace=True, pattern=r'^\d+(,\d+)*$')]):
     """删除用户."""
+    log.debug(user_ids)
     # 解析User ids 为列表
     source_ids_list = user_ids.split(",")
     # 检查是否存在admin用户
