@@ -120,8 +120,6 @@ async def run_testsuite(body: testsuite.RunSuiteIn):
         raise TestsuiteNotExistException
     if not await TestEnvService().aio_get_current_env():
         raise CurrentTestEnvNotSetException
-    import os
-
     task: AsyncResult = task_test.apply_async(
         [
             jsonable_encoder(testsuite.TestSuiteTo.model_validate(result).testcases),
@@ -154,7 +152,11 @@ async def sse_run_state(request: Request, task_id: str):
     summary="删除测试套件",
     response_model=ResultResponse[None],
 )
-async def delete_testsuite(suite_ids: Annotated[str, StringConstraints(strip_whitespace=True, pattern=r'^\d+(,\d+)*$')]):
+async def delete_testsuite(
+    suite_ids: Annotated[
+        str, StringConstraints(strip_whitespace=True, pattern=r"^\d+(,\d+)*$")
+    ]
+):
     """删除测试套件"""
     source_ids_list = suite_ids.split(",")
     delete_count = await TestSuite.filter(id__in=source_ids_list).delete()
