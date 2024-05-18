@@ -8,7 +8,7 @@ from tortoise.transactions import in_transaction
 from tortoise.contrib.fastapi import HTTPNotFoundError
 from tortoise.exceptions import DoesNotExist
 from ..core.security import (
-    check_jwt_auth,
+    # check_jwt_auth,
     get_current_user as current_user,
 )
 from ..core.authentication import Authority
