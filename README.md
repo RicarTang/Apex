@@ -13,6 +13,10 @@
 - 使用分布式队列celery运行pytest测试
 - fastapi挂载使用allure-pytest对测试结果进行报告展示
     - config.py可配置ON_STATICFILES=False,可选nginx等web服务器代理转发(可选)
+## TODO
+- [] 性能测试；
+- [] 使用httpx代替pytest进行接口套件测试；
+- [] 改善用例与套件数据库表结构；
 ## 使用
 默认超级管理员账号：superadmin,123456;
 > Tips💡：需要在项目根目录新建一个.env文件,添加字段如下:<br>
