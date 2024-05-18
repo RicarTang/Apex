@@ -7,7 +7,7 @@ class TestEnvNotExistException(HTTPException):
     def __init__(self):
         super().__init__(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Environment does not exist!",
+            detail="测试环境不存在!",
         )
 class CurrentTestEnvNotSetException(HTTPException):
     """未设置当前环境"""
@@ -15,5 +15,5 @@ class CurrentTestEnvNotSetException(HTTPException):
     def __init__(self):
         super().__init__(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Current environment is not set!",
+            detail="未设置当前测试环境!",
         )

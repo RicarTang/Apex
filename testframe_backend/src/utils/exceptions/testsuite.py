@@ -7,5 +7,5 @@ class TestsuiteNotExistException(HTTPException):
     def __init__(self):
         super().__init__(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Testsuite does not exist!",
+            detail="测试套件不存在!",
         )

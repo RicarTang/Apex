@@ -8,7 +8,7 @@ class TestcaseNotExistException(HTTPException):
     def __init__(self):
         super().__init__(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Testcase does not exist!",
+            detail="测试用例不存在!",
         )
 
 
@@ -18,7 +18,7 @@ class RequestTimeOutException(HTTPException):
     def __init__(self):
         super().__init__(
             status_code=status.HTTP_504_GATEWAY_TIMEOUT,
-            detail="Request time out!",
+            detail="用例执行请求超时!",
         )
 
 

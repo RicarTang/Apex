@@ -7,7 +7,7 @@ class TokenExpiredException(HTTPException):
     def __init__(self):
         super().__init__(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Token has expired",
+            detail="token已过期!",
             headers={"WWW-Authenticate": "Bearer"},
         )
 
@@ -18,7 +18,7 @@ class TokenUnauthorizedException(HTTPException):
     def __init__(self):
         super().__init__(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Not authenticated",
+            detail="未经过身份验证!",
             headers={"WWW-Authenticate": "Bearer"},
         )
 
@@ -29,7 +29,7 @@ class TokenInvalidException(HTTPException):
     def __init__(self):
         super().__init__(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Token is invalid!",
+            detail="token无效!",
             headers={"WWW-Authenticate": "Bearer"},
         )
 
@@ -40,7 +40,7 @@ class UserLoggedOutException(HTTPException):
     def __init__(self):
         super().__init__(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="User logged out, please log in again!",
+            detail="用户已注销，请重新登录!",
             headers={"WWW-Authenticate": "Bearer"},
         )
 
@@ -51,7 +51,7 @@ class UserNotExistException(HTTPException):
     def __init__(self):
         super().__init__(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="User does not exist!",
+            detail="用户不存在!",
         )
 
 
@@ -61,7 +61,7 @@ class PasswordValidateErrorException(HTTPException):
     def __init__(self):
         super().__init__(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Password validate error!",
+            detail="密码验证错误!",
         )
 
 
@@ -71,7 +71,7 @@ class UserUnavailableException(HTTPException):
     def __init__(self):
         super().__init__(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="The user status is unavailable!",
+            detail="用户状态为不可用!",
         )
 
 
@@ -81,5 +81,5 @@ class RoleNotExistException(HTTPException):
     def __init__(self):
         super().__init__(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Role does not exist!",
+            detail="角色不存在!",
         )
