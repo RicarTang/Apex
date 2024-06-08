@@ -1,0 +1,26 @@
+# 使用 Python 3.9.12 作为基础镜像
+FROM python:3.9.12
+# 设置工作目录
+WORKDIR /app
+# 将项目代码复制到容器中
+COPY . .
+
+RUN apt-get update \
+    && apt-get instll -y supervisor \
+    && mkdir -p /var/log/fastapi_server \
+    # 安装pdm管理工具
+    && pip install pdm \
+    # 修改下载源
+    && pdm config pypi.url https://pypi.tuna.tsinghua.edu.cn/simple \
+    # 初始化项目
+    && pdm init \
+    # 同步项目依赖
+    && pdm sync \
+    # 执行pdm初始化数据库迁移工具命令
+    && pdm run aerich_init \
+    # 执行pdm初始化数据库命令
+    && pdm run init_db
+
+# 复制supervisor管理配置文件
+COPY conf/fastapi_server.conf /etc/supervisor/conf.d/
+CMD ["pdm", "run", "pro"]

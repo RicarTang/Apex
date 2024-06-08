@@ -31,7 +31,7 @@
 >   REDIS_URL: str  # redis地址，example："redis://[[name]:[pwd]]127.0.0.1:6379/0"<br>
 >   SECRET_KEY: str  # jwt私钥，使用openssl rand -hex 32快捷生成<br>
 >   CELERY_BROKER: str  # celery消息代理, 用来发送任务.example: "redis://[[name]:[pwd]]127.0.0.1:6379/0"<br>
->   CELERY_BACKEND: str  # celery消息后端,用来保存celery任务结果.example: "db+mysql+pymysql://root:123456@127.0.0.1:3306/tortoise"
+>   CELERY_BACKEND: str  # celery消息后端,用来保存celery任务结果.example: "db+mysql+pymysql://root:123456@127.0.0.1:3306/tortoise"<br>
 >   SQL_ENGINE: str  # sqlalchemy.example: "mysql+pymysql://root:123456@127.0.0.1:3306/tortoise"
 ### dev
 1. 安装pdm包管理工具

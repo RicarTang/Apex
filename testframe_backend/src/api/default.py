@@ -130,9 +130,11 @@ async def get_routers(current_user=Depends(current_user)):
 
 @router.get(
     "/statistics",
-    summary="统计数据",
-    response_model=ResultResponse[str],
+    summary="首页统计数据",
+    response_model=ResultResponse[dict],
+    dependencies=[Depends(check_jwt_auth)],
 )
 async def statistics_data():
     """统计测试数据"""
-    pass
+    # 从redis获取统计数据
+    return ResultResponse(result=dict(caseNum=5,scheduledTask=8,project=15))

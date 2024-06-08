@@ -29,5 +29,8 @@ pidfile = "./gunicorn.pid"
 accesslog = "./testframe_backend/src/log/gunicorn_access.log"
 errorlog = "./testframe_backend/src/log/gunicorn_error.log"
 
+# 设置这个值为true 才会把打印信息记录到错误日志里
+capture_output = True
+
 # 设置日志记录水平
 loglevel = "info"
