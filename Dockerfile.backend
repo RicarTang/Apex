@@ -1,11 +1,13 @@
-# 使用 Python 3.9.12 作为基础镜像
-FROM python:3.9.12
+# 使用 Python 3.9 作为基础镜像
+FROM python:3.9
 # 设置工作目录
 WORKDIR /app
 # 将项目代码复制到容器中
 COPY . .
 
-RUN apt-get update \
+RUN sed -i 's/deb.debian.org/mirrors.ustc.edu.cn/g' /etc/apt/sources.list.d/debian.sources \
+    && sed -i 's|security.debian.org/debian-security|mirrors.ustc.edu.cn/debian-security|g' /etc/apt/sources.list.d/debian.sources \
+    && pt-get update \
     && apt-get instll -y supervisor \
     && mkdir -p /var/log/fastapi_server \
     # 安装pdm管理工具
