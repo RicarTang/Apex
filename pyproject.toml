@@ -14,7 +14,7 @@ includes = []
 #celery_server = "celery -A testframe_backend.src.utils.celery.celery_config.celery worker -P gevent -c 1000 --loglevel=INFO"
 celery_server = "celery -A testframe_backend.src.autotest.utils.celery.celery_config.celery worker --loglevel=INFO"
 dev = "uvicorn testframe_backend.main:app --host 0.0.0.0 --port 4000 --reload"
-pro = "gunicorn -c conf.gunicorn_conf.py testframe_backend.main:app"
+pro = "gunicorn -c gunicorn_conf.py testframe_backend.main:app"
 aerich_init = "aerich init -t testframe_backend.src.db.settings.TORTOISE_ORM"
 init_db = "aerich init-db"
 migrate_db = "aerich migrate"
