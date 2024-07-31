@@ -4,6 +4,7 @@
 
 from pathlib import Path
 from typing import Union
+from functools import lru_cache
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -61,7 +62,12 @@ class BaseConfig(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7
 
 
-config = BaseConfig()
+@lru_cache()
+def get_config():
+    """添加缓存避免多次实例化"""
+    return BaseConfig()
+
+config = get_config()
 
 if __name__ == "__main__":
     print(config.model_dump())

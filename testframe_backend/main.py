@@ -1,8 +1,13 @@
 import sys, os
+
 # from contextlib import asynccontextmanager
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.exceptions import RequestValidationError
+from fastapi.openapi.docs import (
+    get_swagger_ui_html,
+    get_swagger_ui_oauth2_redirect_html,
+)
 from tortoise.exceptions import IntegrityError
 from tortoise.contrib.fastapi import register_tortoise
 from .src.api import (
@@ -36,7 +41,9 @@ app = FastAPI(
     version="1.0",
     description="fastapi+tortoise-orm async web framework",
     middleware=middleware,  # 注册middleware
+    docs_url=None,  # docs url设置为none，使用自定义的docs路由
 )
+
 
 # 注册tortoise orm 需要在initial_data前面
 register_tortoise(
@@ -56,9 +63,10 @@ async def lifespan():
     # swagger 静态文件
     app.mount(
         "/static",
-        StaticFiles(packages=[("testframe_backend", "static")]),
+        StaticFiles(directory=config.STATIC_PATH),
         name="static",
     )
+
     # allure报告
     if config.ON_STATICFILES:
         try:
@@ -72,25 +80,20 @@ async def lifespan():
 
     # 初始化数据库,需要在注册tortoise后面初始化
     await InitDbData().execute_init()
-    # 修改默认swagger参数，使用static文件
-    sys.modules["fastapi.applications"].get_swagger_ui_html.__kwdefaults__[
-        "swagger_js_url"
-    ] = "/static/swagger-ui/swagger-ui-bundle.js"
-    sys.modules["fastapi.applications"].get_swagger_ui_html.__kwdefaults__[
-        "swagger_css_url"
-    ] = "/static/swagger-ui/swagger-ui.css"
 
 
-# 注册CORS中间件(迁移至core.middleware模块)
-# app.add_middleware(
-#     CORSMiddleware,
-#     allow_origins=["*"],
-#     allow_credentials=True,
-#     allow_methods=["*"],
-#     allow_headers=["*"],
-#     expose_headers=["X-Process-Time"],  # 浏览器显示自定义请求头
-# )
-# app.add_middleware(TimeMiddleware)
+@app.get("/docs", include_in_schema=False)
+async def custom_swagger_ui_html():
+    """自定义swagger"""
+    return get_swagger_ui_html(
+        openapi_url=app.openapi_url,
+        title=app.title + "- Swagger UI",
+        oauth2_redirect_url=app.swagger_ui_oauth2_redirect_url,
+        swagger_js_url="/static/swagger-ui/swagger-ui-bundle.js",
+        swagger_css_url="/static/swagger-ui/swagger-ui.css",
+        swagger_favicon_url="https://fastapi.tiangolo.com/img/favicon.png",
+    )
+
 
 # 自定义中间件(函数方式)
 # @app.middleware("http")
@@ -160,11 +163,3 @@ app.add_exception_handler(IntegrityError, custom_integrity_exception_handler)
 # ):
 #     """修改默认的请求验证错误模型"""
 #     return JSONResponse(status_code=422, content={"code": 400, "message": exc.errors()})
-
-
-# try:
-#     scheduler.start()
-# except:
-#     log.info("后台任务启动失败！")
-# else:
-#     log.info("暂无后台任务！")
