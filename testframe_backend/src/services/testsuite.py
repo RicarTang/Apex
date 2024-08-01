@@ -2,7 +2,7 @@ import json
 from fastapi import Request
 from tortoise.exceptions import DoesNotExist
 from ..db.models import TestSuite
-from ..core.cache import redis
+from ..core.redis import RedisService
 from ..utils.log_util import log
 from ..utils.exceptions.testsuite import TestsuiteNotExistException
 
@@ -44,7 +44,7 @@ class TestSuiteSSEService:
         """
         key = task_id + "-sse_data"
         # 创建订阅者对象
-        pubsub = await redis.aio_pubsub()
+        pubsub = await RedisService().aioredis_pool().pubsub()
         # 订阅频道
         await pubsub.subscribe(key)
         # 处理异步生成器

@@ -16,7 +16,7 @@ from ..utils.exceptions.testenv import CurrentTestEnvNotSetException
 from ..autotest.utils.celery.task.testcase_task import task_test
 from ..services.testenv import TestEnvService
 from ..services.testsuite import TestSuiteSSEService
-from ..core.cache import RedisService
+from ..core.redis import RedisService
 
 
 router = APIRouter()

@@ -13,7 +13,7 @@ from pydantic import StringConstraints
 from fastapi.responses import FileResponse
 from tortoise.exceptions import DoesNotExist
 from ...config import config
-from ..core.cache import redis
+from ..core.redis import RedisService
 from ..services import TestCaseService
 from ..db.models import TestCase
 from ..schemas import ResultResponse, testcase
@@ -144,7 +144,7 @@ async def execute_testcase(
 ):
     """执行测试用例"""
     case = await TestCase.filter(id=body.case_id).first()
-    current_env = await redis.aio_get("currentEnv")
+    current_env = await RedisService().aioredis_pool().get("currentEnv")
     if not current_env:
         raise CurrentTestEnvNotSetException
     if not case:
