@@ -12,7 +12,7 @@ from .util import Singleton
 from ...config import config
 
 
-class RedisService(Singleton):
+class RedisService(metaclass=Singleton):
     """redis服务"""
 
     def __init__(self, url: Union[str, Path] = config.REDIS_URL) -> None:

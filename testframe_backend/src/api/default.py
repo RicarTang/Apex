@@ -64,7 +64,7 @@ async def login(
 async def logout(request: Request, current_user=Depends(current_user)):
     access_type, access_token = request.headers["authorization"].split(" ")
     # token加入黑名单列表
-    await redis.aioredis_pool().lpush(
+    await RedisService.aioredis_pool().lpush(
         current_user.user_name + "-token-blacklist", access_token
     )
     return ResultResponse[None](message="Successfully logged out!")
