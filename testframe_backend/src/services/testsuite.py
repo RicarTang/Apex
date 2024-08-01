@@ -1,4 +1,5 @@
 import json
+from typing import AsyncGenerator, Dict, Any
 from fastapi import Request
 from tortoise.exceptions import DoesNotExist
 from ..db.models import TestSuite
@@ -54,7 +55,9 @@ class TestSuiteSSEService:
                 return message
 
     @classmethod
-    async def generate_sse_data(cls, request: Request, task_id: str) -> None:
+    async def generate_sse_data(
+        cls, request: Request, task_id: str
+    ) -> AsyncGenerator[Dict,Any]:
         """生成推送数据
 
         Args:
@@ -62,7 +65,7 @@ class TestSuiteSSEService:
             task_id (str): celery task id
 
         Yields:
-            _type_: _description_
+            _type_: 返回字典数据
         """
         counter = 0
 
