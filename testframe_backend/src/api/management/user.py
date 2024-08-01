@@ -7,19 +7,21 @@ from passlib.hash import md5_crypt
 from tortoise.transactions import in_transaction
 from tortoise.contrib.fastapi import HTTPNotFoundError
 from tortoise.exceptions import DoesNotExist
-from ..core.security import (
+
+from ...schemas.management import admin, user
+from ...core.security import (
     # check_jwt_auth,
     get_current_user as current_user,
 )
-from ..core.authentication import Authority
-from ..db.models import Users, Role
-from ..schemas import ResultResponse, user, admin
-from ..utils.log_util import log
-from ..utils.exceptions.user import (
+from ...core.authentication import Authority
+from ...db.models import Users, Role
+from ...schemas import ResultResponse
+from ...utils.log_util import log
+from ...utils.exceptions.user import (
     UserNotExistException,
     RoleNotExistException,
 )
-from ..services import UserService
+from ...services import UserService
 
 
 router = APIRouter()

@@ -12,15 +12,17 @@ from typing_extensions import Annotated
 from pydantic import StringConstraints
 from fastapi.responses import FileResponse
 from tortoise.exceptions import DoesNotExist
-from ...config import config
-from ..core.redis import RedisService
-from ..services import TestCaseService
-from ..db.models import TestCase
-from ..schemas import ResultResponse, testcase
-from ..utils.log_util import log
-from ..utils.excel_util import save_file, read_all_testcase
-from ..utils.exceptions.testcase import TestcaseNotExistException
-from ..utils.exceptions.testenv import CurrentTestEnvNotSetException
+
+from ...schemas.autotest import testcase
+from ....config import config
+from ...core.redis import RedisService
+from ...services import TestCaseService
+from ...db.models import TestCase
+from ...schemas import ResultResponse
+from ...utils.log_util import log
+from ...utils.excel_util import save_file, read_all_testcase
+from ...utils.exceptions.testcase import TestcaseNotExistException
+from ...utils.exceptions.testenv import CurrentTestEnvNotSetException
 
 router = APIRouter()
 

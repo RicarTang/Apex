@@ -1,7 +1,7 @@
 import allure, pytest, json
 from ..core.redis import RedisService
 from ..utils.log_util import log
-from ..services.testenv import TestEnvService
+from ..services.autotest.testenv import TestEnvService
 from .plugin.sse_plugin import SSEPlugin
 
 

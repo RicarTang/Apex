@@ -1,6 +1,6 @@
 from typing import Optional, List
 from pydantic import BaseModel, HttpUrl, Field, ConfigDict, field_validator
-from .common import PageParam, DefaultModel
+from ..common import PageParam, DefaultModel
 
 
 class TestEnvIn(BaseModel):

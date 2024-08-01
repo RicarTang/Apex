@@ -5,12 +5,14 @@ from typing_extensions import Annotated
 from pydantic import StringConstraints
 from tortoise.transactions import in_transaction
 from tortoise.query_utils import Prefetch
-from ..schemas import ResultResponse, admin
-from ..db.models import Role, Permission, Routes
-from ..utils.log_util import log
-from ..core.authentication import Authority
-from ..utils.exceptions.user import RoleNotExistException
-from ..utils.exceptions.admin import (
+
+from ...schemas.management import admin
+from ...schemas import ResultResponse
+from ...db.models import Role, Permission, Routes
+from ...utils.log_util import log
+from ...core.authentication import Authority
+from ...utils.exceptions.user import RoleNotExistException
+from ...utils.exceptions.admin import (
     PermissionExistException,
     PermissionNotExistException,
 )

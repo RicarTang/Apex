@@ -1,10 +1,10 @@
 from typing import List, Optional
 from pydantic import BaseModel, Field, field_validator, ConfigDict
-from ..db.models import (
+from ...db.models import (
     AccessActionEnum,
     AccessModelEnum,
 )
-from .common import PageParam, DefaultModel
+from ..common import PageParam, DefaultModel
 
 
 class PermissionIn(BaseModel):

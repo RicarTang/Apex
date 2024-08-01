@@ -1,5 +1,5 @@
 import httpx
-from ..core.redis import RedisService
+from ...core.redis import RedisService
 
 
 class TestEnvService:

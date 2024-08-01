@@ -2,10 +2,10 @@ import json
 from typing import AsyncGenerator, Dict, Any
 from fastapi import Request
 from tortoise.exceptions import DoesNotExist
-from ..db.models import TestSuite
-from ..core.redis import RedisService
-from ..utils.log_util import log
-from ..utils.exceptions.testsuite import TestsuiteNotExistException
+from ...db.models import TestSuite
+from ...core.redis import RedisService
+from ...utils.log_util import log
+from ...utils.exceptions.testsuite import TestsuiteNotExistException
 
 
 class TestSuiteService:

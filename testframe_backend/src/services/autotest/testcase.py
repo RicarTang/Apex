@@ -4,12 +4,12 @@ from fastapi import HTTPException, status
 from tortoise.exceptions import DoesNotExist
 from tortoise.queryset import QuerySet
 from httpx import AsyncClient, TimeoutException, Response
-from ..utils.exceptions.testcase import (
+from ...utils.exceptions.testcase import (
     RequestTimeOutException,
     AssertErrorException,
 )
-from ..db.models import TestCase
-from ..utils.log_util import log
+from ...db.models import TestCase
+from ...utils.log_util import log
 
 
 class TestCaseService:

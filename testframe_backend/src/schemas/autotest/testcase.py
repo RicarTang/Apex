@@ -1,7 +1,7 @@
 from typing import Optional, List
 from pydantic import BaseModel, Field, ConfigDict
-from ..db.enum import BoolEnum, ApiMethodEnum, RequestParamTypeEnum
-from .common import PageParam, DefaultModel
+from ...db.enum import BoolEnum, ApiMethodEnum, RequestParamTypeEnum
+from ..common import PageParam, DefaultModel
 
 
 class TestCaseIn(BaseModel):

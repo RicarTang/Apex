@@ -1,3 +1,3 @@
-from .user import UserService
-from .role import RolePermissionService
-from .testcase import TestCaseService
+from .management.user import UserService
+from .management.role import RolePermissionService
+from .autotest.testcase import TestCaseService

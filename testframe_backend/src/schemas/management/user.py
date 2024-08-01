@@ -1,7 +1,7 @@
 from typing import List, Optional
 from pydantic import BaseModel, Field, ConfigDict
-from ..db.models import DisabledEnum
-from .common import PageParam, DefaultModel
+from ...db.models import DisabledEnum
+from ..common import PageParam, DefaultModel
 
 
 class User(BaseModel):

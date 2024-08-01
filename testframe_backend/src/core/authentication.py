@@ -3,7 +3,7 @@ from fastapi.exceptions import HTTPException
 from .security import get_current_user
 from .premission import PermissionAccess
 from ..db.models import Users
-from ..services.user import UserService
+from ..services.management.user import UserService
 
 
 

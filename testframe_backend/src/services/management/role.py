@@ -1,8 +1,8 @@
 from typing import Union, List, NamedTuple
 from tortoise.exceptions import DoesNotExist
 from tortoise.queryset import QuerySet
-from ..db.models import Users, Role
-from ..utils.log_util import log
+from ...db.models import Users, Role
+from ...utils.log_util import log
 
 
 class RolePermissionService:

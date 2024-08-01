@@ -1,5 +1,5 @@
 from pydantic import Field, BaseModel, ConfigDict
-from ..schemas.user import UserTo
+from .management.user import UserTo
 
 
 class Login(BaseModel):

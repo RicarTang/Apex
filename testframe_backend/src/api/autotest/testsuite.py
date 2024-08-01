@@ -8,15 +8,17 @@ from sse_starlette.sse import EventSourceResponse
 from tortoise.exceptions import DoesNotExist
 from tortoise.transactions import in_transaction
 from celery.result import AsyncResult
-from ..db.models import TestSuite, TestCase, TestSuiteTaskId
-from ..schemas import ResultResponse, testsuite
-from ..utils.log_util import log
-from ..utils.exceptions.testsuite import TestsuiteNotExistException
-from ..utils.exceptions.testenv import CurrentTestEnvNotSetException
-from ..autotest.utils.celery.task.testcase_task import task_test
-from ..services.testenv import TestEnvService
-from ..services.testsuite import TestSuiteSSEService
-from ..core.redis import RedisService
+
+from ...schemas.autotest import testsuite
+from ...db.models import TestSuite, TestCase, TestSuiteTaskId
+from ...schemas import ResultResponse
+from ...utils.log_util import log
+from ...utils.exceptions.testsuite import TestsuiteNotExistException
+from ...utils.exceptions.testenv import CurrentTestEnvNotSetException
+from ...autotest.utils.celery.task.testcase_task import task_test
+from ...services.autotest.testenv import TestEnvService
+from ...services.autotest.testsuite import TestSuiteSSEService
+from ...core.redis import RedisService
 
 
 router = APIRouter()

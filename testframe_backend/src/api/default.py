@@ -1,5 +1,7 @@
 from typing import List
 from fastapi import APIRouter, Depends, Request, HTTPException, status
+
+from ..schemas.management import menu
 from ..core.security import (
     create_access_token,
     check_jwt_auth,
@@ -10,7 +12,7 @@ from tortoise.exceptions import DoesNotExist
 from tortoise.query_utils import Prefetch
 from ..core.redis import RedisService
 from ..db.models import Users, Routes
-from ..schemas import ResultResponse, default, menu
+from ..schemas import ResultResponse, default
 from ..utils.exceptions.user import (
     UserUnavailableException,
     PasswordValidateErrorException,

@@ -4,11 +4,13 @@ from fastapi import APIRouter, Query, Request, Body, Depends
 from typing_extensions import Annotated
 from pydantic import StringConstraints
 from tortoise.exceptions import DoesNotExist
-from ..db.models import TestEnv
-from ..services.testenv import TestEnvService
-from ..schemas import ResultResponse, testenv
-from ..utils.exceptions.testenv import TestEnvNotExistException
-from ..utils.log_util import log
+
+from ...schemas.autotest import testenv
+from ...db.models import TestEnv
+from ...services.autotest.testenv import TestEnvService
+from ...schemas import ResultResponse
+from ...utils.exceptions.testenv import TestEnvNotExistException
+from ...utils.log_util import log
 
 
 router = APIRouter()

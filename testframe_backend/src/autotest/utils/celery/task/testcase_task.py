@@ -6,7 +6,7 @@ from ..celery_config import celery
 from ....utils.formatter import publish_format
 from .....core.redis import RedisService
 from .....utils.log_util import log
-from .....services.testsuite import TestSuiteSSEService
+from .....services.autotest.testsuite import TestSuiteSSEService
 from ......config import config
 
 
