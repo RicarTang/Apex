@@ -45,7 +45,7 @@ class TestSuiteSSEService:
         """
         key = task_id + "-sse_data"
         # 创建订阅者对象
-        pubsub = await RedisService().aioredis_pool().pubsub()
+        pubsub = await RedisService().aioredis_pool.pubsub()
         # 订阅频道
         await pubsub.subscribe(key)
         # 处理异步生成器

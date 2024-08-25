@@ -146,7 +146,7 @@ async def execute_testcase(
 ):
     """执行测试用例"""
     case = await TestCase.filter(id=body.case_id).first()
-    current_env = await RedisService().aioredis_pool().get("currentEnv")
+    current_env = await RedisService().aioredis_pool.get("currentEnv")
     if not current_env:
         raise CurrentTestEnvNotSetException
     if not case:

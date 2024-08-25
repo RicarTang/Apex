@@ -29,7 +29,7 @@ def pytest_generate_tests(metafunc):
         # 获取传递过来的当前进程的task_id
         pytest_task_id = metafunc.config.getoption("task_id")
         # redis获取当前task_id的测试用例
-        suite_data = RedisService().redis_pool().getdel(pytest_task_id)
+        suite_data = RedisService().redis_pool.getdel(pytest_task_id)
         # 解析待参数化的用例数据
         parametrize_data = json.loads(suite_data)
         # 用例参数化

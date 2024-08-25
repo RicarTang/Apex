@@ -30,7 +30,7 @@ async def set_config():
 )
 async def get_config():
     """获取test配置信息"""
-    config_redis = await RedisService().aioredis_pool().get("config")
+    config_redis = await RedisService().aioredis_pool.get("config")
     try:
         config_redis = json.loads(config_redis)
     except TypeError:

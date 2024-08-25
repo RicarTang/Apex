@@ -75,7 +75,7 @@ async def check_jwt_auth(
     except JWTError:
         raise TokenExpiredException
     # 查询token黑名单列表
-    token_black_list = await RedisService().aioredis_pool().lrange(
+    token_black_list = await RedisService().aioredis_pool.lrange(
         payload.get("sub") + "-token-blacklist", 0, -1
     )
     # 判断token是否在黑名单中
