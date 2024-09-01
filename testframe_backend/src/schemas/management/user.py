@@ -6,6 +6,7 @@ from ..common import PageParam, DefaultModel
 
 class User(BaseModel):
     """用户"""
+    model_config = ConfigDict(use_enum_values=True)
 
     user_name: str = Field(max_length=20, description="用户名", alias="userName")
     remark: Optional[str] = Field(default=None, max_length=50, description="用户描述")

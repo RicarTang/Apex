@@ -35,12 +35,10 @@ description = ""
 authors = [{ name = "RicarTang", email = "357965604@qq.com" }]
 dependencies = [
     "pydantic<3.0.0,>=2.5.2",
-    "tortoise-orm[asyncmy]<1.0.0,>=0.20.0",
     "gunicorn<22.0.0,>=21.2.0",
     "passlib<2.0.0,>=1.7.4",
     "python-jose<4.0.0,>=3.3.0",
     "apscheduler<4.0.0,>=3.10.4",
-    "aerich<1.0.0,>=0.7.2",
     "openpyxl<4.0.0,>=3.1.2",
     "aiofiles<24.0.0,>=23.2.1",
     "pyyaml<7.0.0,>=6.0.1",
@@ -57,12 +55,13 @@ dependencies = [
     "pytest-asyncio>=0.23.2",
     "allure-pytest>=2.13.2",
     "redis[hiredis]>=5.0.1",
-    "fastapi-cache2>=0.2.1",
     "pendulum>=2.1.2",
     "httpx>=0.25.2",
     "pytest-assume>=2.4.3",
     "asgi-lifespan>=2.1.0",
-    "sqlalchemy>=2.0.25",
+    "sqlalchemy[asyncio]>=2.0.32",
+    "asyncmy>=0.2.9",
+    "alembic>=1.13.2",
 ]
 requires-python = ">=3.9"
 readme = "README.md"

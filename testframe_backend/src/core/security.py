@@ -4,7 +4,7 @@ from jose import JWTError, jwt
 from fastapi.security import HTTPBearer
 from fastapi import Depends, Request
 from ...config import config
-from ..db.models import Users
+from ..db.models import User
 from ..utils.log_util import log
 from ..utils.exceptions.user import (
     TokenUnauthorizedException,
@@ -86,7 +86,7 @@ async def check_jwt_auth(
 
 async def get_current_user(
     request: Request, payload: dict = Depends(check_jwt_auth)
-) -> Users:
+) -> User:
     """获取当前登录用户
 
     Args:
