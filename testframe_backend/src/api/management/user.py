@@ -1,22 +1,16 @@
-from datetime import datetime
 from typing import Optional, List
-from fastapi import APIRouter, Depends, Query, Response, HTTPException, status
+from fastapi import APIRouter, Depends, Query, Path
 from typing_extensions import Annotated
 from pydantic import StringConstraints
-from passlib.hash import md5_crypt
-
+from ...db.models import User
 from ...schemas.management import user
 from ...core.security import (
     # check_jwt_auth,
     get_current_user as current_user,
 )
+
 # from ...core.authentication import Authority
 from ...schemas import ResultResponse
-from ...utils.log_util import log
-from ...utils.exceptions.user import (
-    UserNotExistException,
-    RoleNotExistException,
-)
 from ...services import UserService
 
 
@@ -26,133 +20,93 @@ router = APIRouter()
 @router.get(
     "/list",
     summary="用户列表",
-    # response_model=ResultResponse[user.UsersTo],
+    response_model=ResultResponse[user.UsersTo],
 )
 async def get_users(
-    username: Optional[str] = Query(default=None, description="用户名", alias="userName"),
+    username: Optional[str] = Query(
+        default=None, description="用户名", alias="userName"
+    ),
     status: Optional[str] = Query(default=None, description="用户状态"),
     begin_time: Optional[str] = Query(
         default=None, description="开始时间", alias="beginTime"
     ),
-    end_time: Optional[str] = Query(default=None, description="结束时间", alias="endTime"),
+    end_time: Optional[str] = Query(
+        default=None, description="结束时间", alias="endTime"
+    ),
     limit: Optional[int] = Query(default=20, ge=10),
     page: Optional[int] = Query(default=1, gt=0),
 ):
     """获取用户列表"""
-    # 筛选列表
-    # filters = {}
-    # if username:
-    #     filters["user_name__icontains"] = username
-    # if status is not None:
-    #     filters["status"] = status
-    # if begin_time:
-    #     begin_time = datetime.strptime(begin_time, "%Y-%m-%d")
-    #     filters["created_at__gte"] = begin_time
-    # if end_time:
-    #     end_time = datetime.strptime(end_time, "%Y-%m-%d")
-    #     filters["created_at__lte"] = end_time
-    # if begin_time and end_time:
-    #     filters["created_at__range"] = (
-    #         begin_time,
-    #         end_time,
-    #     )
-    # 执行查询
-    # query = Users.filter(**filters)
-    # result = (
-    #     await query.prefetch_related("roles")
-    #     .offset(limit * (page - 1))
-    #     .limit(limit)
-    #     .all()
-    # )
-    # total
-    # total = await query.count()
-    # return ResultResponse[user.UsersTo](
-    #     result=user.UsersTo(data=result, page=page, limit=limit, total=total)
-    # )
-    user_list = await UserService.query_user_list()
-    return user_list
+
+    result, total = await UserService.query_user_list(
+        username, status, begin_time, end_time, limit, page
+    )
+    return ResultResponse[user.UsersTo](
+        result=user.UsersTo(data=result, page=page, limit=limit, total=total)
+    )
 
 
-# @router.get(
-#     "/me",
-#     summary="获取当前用户信息",
-#     response_model=ResultResponse[user.UserTo],
-# )
-# async def get_current_user(current_user: Users = Depends(current_user)):
-#     """获取当前用户"""
-#     return ResultResponse[user.UserTo](result=current_user)
+@router.get(
+    "/me",
+    summary="获取当前用户信息",
+    response_model=ResultResponse[user.UserTo],
+)
+async def get_current_user(current_user: User = Depends(current_user)):
+    """获取当前用户"""
+    return ResultResponse[user.UserTo](result=current_user)
 
 
 @router.post(
     "/add",
     summary="创建用户",
-    response_model=ResultResponse[user.UserTo],
+    response_model=ResultResponse[None],
     # dependencies=[Depends(Authority("user", "add"))],
 )
 async def create_user(body: user.UserIn):
     """创建用户."""
-    user = await UserService.create_user(body)
-    
-    # return ResultResponse[user.UserTo](
-    #     result=await UserService.query_user_by_id(user_obj.id)
-    # )
-
-    return user
+    result = await UserService.create_user(body)
+    return ResultResponse[None](message="创建用户成功！")
 
 
-# @router.put(
-#     "/resetPwd",
-#     summary="重置用户密码",
-#     dependencies=[Depends(Authority("user", "update"))],
-# )
-# async def reset_user_pwd(body: user.UserResetPwdIn):
-#     """更新用户密码"""
-#     if not await Users.filter(id=body.user_id).exists():
-#         raise UserNotExistException
-#     await Users.filter(id=body.user_id).update(password=md5_crypt.hash(body.password))
-#     return ResultResponse[None](message="successful reset user password!")
+@router.put(
+    "/resetPwd",
+    summary="重置用户密码",
+    # dependencies=[Depends(Authority("user", "update"))],
+)
+async def reset_user_pwd(body: user.UserResetPwdIn):
+    """更新用户密码"""
+    await UserService.update_user_pwd(body.user_id, body.password)
+    return ResultResponse[None](message="修改密码成功!")
 
 
-# @router.delete(
-#     "/{user_ids}",
-#     response_model=ResultResponse[None],
-#     summary="删除用户",
-#     dependencies=[Depends(Authority("user", "delete"))],
-# )
-# async def delete_user(user_ids: Annotated[str, StringConstraints(strip_whitespace=True, pattern=r'^\d+(,\d+)*$')]):
-#     """删除用户."""
-#     log.debug(user_ids)
-#     # 解析User ids 为列表
-#     source_ids_list = user_ids.split(",")
-#     # 检查是否存在admin用户
-#     admin_user_ids = await Users.filter(id__in=source_ids_list, user_name="admin").exists()
-#     # 禁止删除admin用户
-#     if admin_user_ids:
-#         raise HTTPException(
-#             status_code=status.HTTP_403_FORBIDDEN,
-#             detail="admin is prohibited from being deleted",
-#         )
-#     delete_count = await Users.filter(
-#         id__in=source_ids_list, user_name__not="admin"
-#     ).delete()
-#     if not delete_count:
-#         raise UserNotExistException
-#     return ResultResponse[None](message="successful deleted user!")
+@router.delete(
+    "/{user_ids}",
+    response_model=ResultResponse[None],
+    summary="删除用户",
+    # dependencies=[Depends(Authority("user", "delete"))],
+)
+async def delete_user(
+    user_ids: Annotated[
+        str,
+        StringConstraints(strip_whitespace=True, pattern=r"^\d+(,\d+)*$"),
+        Path(description="用户id字符串"),
+    ]
+):
+    """删除用户."""
+    await UserService.delete_user(user_ids)
+    return ResultResponse[None](message="删除用户成功!")
 
 
-# @router.get(
-#     "/{user_id}",
-#     response_model=ResultResponse[user.UserTo],
-#     summary="根据id查询用户",
-#     dependencies=[Depends(Authority("user", "query"))],
-# )
-# async def get_user(user_id: int):
-#     """根据id查询用户."""
-#     try:
-#         q_user = await UserService.query_user_by_id(user_id)
-#     except DoesNotExist:
-#         raise UserNotExistException
-#     return ResultResponse[user.UserTo](result=q_user)
+@router.get(
+    "/{user_id}",
+    response_model=ResultResponse[user.UserTo],
+    summary="根据id查询用户",
+    # dependencies=[Depends(Authority("user", "query"))],
+)
+async def get_user(user_id: int):
+    """根据id查询用户."""
+    result = await UserService.query_user_by_id(user_id)
+    return ResultResponse[user.UserTo](result=result)
 
 
 # @router.put(

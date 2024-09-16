@@ -8,12 +8,12 @@ from fastapi.openapi.docs import (
 )
 from .src.api import (
     user_api,
-    # admin_api,
+    admin_api,
     # testcase_api,
     # testsuite_api,
     # testenv_api,
     # config_api,
-    # default_api,
+    default_api,
     # menu_api,
 )
 from .src.core.security import check_jwt_auth
@@ -81,19 +81,19 @@ async def custom_swagger_ui_html():
 
 
 # include router
-# app.include_router(default_api)  # default
+app.include_router(default_api)  # default
 app.include_router(
     user_api,
     tags=["User"], 
     prefix="/user",
     # dependencies=[Depends(check_jwt_auth)],
 )
-# app.include_router(
-#     admin_api,
-#     tags=["Admin"],
-#     prefix="/admin",
-#     dependencies=[Depends(check_jwt_auth)],
-# )
+app.include_router(
+    admin_api,
+    tags=["Admin"],
+    prefix="/admin",
+    # dependencies=[Depends(check_jwt_auth)],
+)
 # app.include_router(
 #     testcase_api,
 #     tags=["Testcase"],

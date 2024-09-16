@@ -73,13 +73,3 @@ class UserUnavailableException(HTTPException):
             status_code=status.HTTP_403_FORBIDDEN,
             detail="用户状态为不可用!",
         )
-
-
-class RoleNotExistException(HTTPException):
-    """角色不存在"""
-
-    def __init__(self):
-        super().__init__(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="角色不存在!",
-        )

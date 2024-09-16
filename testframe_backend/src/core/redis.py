@@ -18,21 +18,21 @@ class RedisService(metaclass=Singleton):
     def __init__(self, url: Union[str, Path] = config.REDIS_URL) -> None:
         self.url = url
         # 实例两种类型redis连接池避免多次调用导致的多次实例化
-        self.aioredis_pool = self._aioredis_pool()
-        self.redis_pool = self._redis_pool()
+        self.aioredis_pool = self.__aioredis_pool()
+        self.redis_pool = self.__redis_pool()
 
 
-    def _aioredis_pool(self) -> AioRedis:
+    def __aioredis_pool(self) -> AioRedis:
         """初始化异步redis poll"""
         pool: AioConnectionPool = AioConnectionPool.from_url(
             self.url,
-            encoding="utf-8",
-            decode_responses=True,  # 自动解码response
+            # encoding="utf-8",
+            # decode_responses=True,  # 自动解码response
         )
         redis = AioRedis.from_pool(pool)
         return redis
 
-    def _redis_pool(self) -> Redis:
+    def __redis_pool(self) -> Redis:
         """初始化同步redis pool"""
         pool: ConnectionPool = ConnectionPool.from_url(
             self.url,

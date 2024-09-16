@@ -1,50 +1,77 @@
-from .base_models import Base
+from typing import Optional, List
+from .base_models import Base, CommonMixin
 from ..enum import DisabledEnum, BoolEnum, AccessActionEnum, AccessModelEnum
-from sqlalchemy import String, Integer
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy import (
+    String,
+    Integer,
+    SmallInteger,
+    UniqueConstraint,
+    ForeignKey,
+    Table,
+)
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 
-class User(Base):
+class User(Base, CommonMixin):
     """用户表映射模型"""
 
     __tablename__ = "ap_user"
+    __table_args__ = (UniqueConstraint("user_name", "is_unique"),)
 
-    user_name: Mapped[str] = mapped_column(String(20), unique=True, comment="用户名称")
+    user_name: Mapped[str] = mapped_column(String(20), index=True, comment="用户名称")
     password: Mapped[str] = mapped_column(String(128), comment="密码")
     status: Mapped[int] = mapped_column(
-        default=DisabledEnum.ENABLE.value, comment="用户状态,0:禁用,1:启用"
+        SmallInteger,
+        default=DisabledEnum.ENABLE.value,
+        index=True,
+        comment="用户状态,0:禁用,1:启用",
     )
-    remark: Mapped[str] = mapped_column(String(50), comment="用户名称")
-
+    remark: Mapped[Optional[str]] = mapped_column(String(50), comment="备注")
     # 关联关系
-    # roles: fields.ManyToManyRelation["Role"] = fields.ManyToManyField(
-    #     model_name="models.Role", related_name="roles", through="user_role"
-    # )
+    roles: Mapped[List["Role"]] = relationship(
+        secondary="ap_user_role", back_populates="users"
+    )
 
     def __str__(self):
         return f"<{self.__class__.__name__},id:{self.id}>"
 
 
-# class Role(Base):
-#     """角色表"""
+class Role(Base, CommonMixin):
+    """角色表映射模型"""
 
-#     role_name = fields.CharField(max_length=20, unique=True, description="角色名称")
-#     role_key = fields.CharField(max_length=20, unique=True, description="角色字符")
-#     remark = fields.CharField(max_length=50, null=True, description="角色详情")
-#     is_super = fields.IntEnumField(
-#         enum_type=BoolEnum,
-#         default=BoolEnum.FALSE,
-#         description="是否超级管理员角色,1: True,0: False",
-#     )
-#     permissions: fields.ManyToManyRelation["Permission"] = fields.ManyToManyField(
-#         model_name="models.Permission", related_name="permissions"
-#     )
-#     menus = fields.ManyToManyField(
-#         model_name="models.Routes", related_name="menus", through="role_menu"
-#     )
+    __tablename__ = "ap_role"
+    __table_args__ = (
+        UniqueConstraint("role_name", "is_unique"),
+        UniqueConstraint("role_key", "is_unique"),
+    )
 
-#     class Meta:
-#         ordering = ["-created_at"]
+    role_name: Mapped[str] = mapped_column(String(20), comment="角色名称")
+    role_key: Mapped[str] = mapped_column(String(20), comment="角色字符")
+    remark: Mapped[Optional[str]] = mapped_column(String(50), comment="角色详情")
+    is_super: Mapped[int] = mapped_column(
+        SmallInteger,
+        default=BoolEnum.FALSE.value,
+        comment="是否超级管理员角色,1: True,0: False",
+    )
+
+    users: Mapped[List[User]] = relationship(
+        secondary="ap_user_role", back_populates="roles"
+    )
+
+    # permissions: fields.ManyToManyRelation["Permission"] = fields.ManyToManyField(
+    #     model_name="models.Permission", related_name="permissions"
+    # )
+    # menus = fields.ManyToManyField(
+    #     model_name="models.Routes", related_name="menus", through="role_menu"
+    # )
+
+
+class UserRole(Base):
+    """用户角色关联模型"""
+
+    __tablename__ = "ap_user_role"
+    user_id: Mapped[int] = mapped_column(ForeignKey("ap_user.id"), primary_key=True)
+    role_id: Mapped[int] = mapped_column(ForeignKey("ap_role.id"), primary_key=True)
 
 
 # class Permission(Base):

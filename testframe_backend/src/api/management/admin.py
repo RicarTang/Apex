@@ -1,76 +1,46 @@
-# from datetime import datetime
-# from typing import Optional
-# from fastapi import APIRouter, Depends, Query, HTTPException, status
-# from typing_extensions import Annotated
-# from pydantic import StringConstraints
-# from tortoise.transactions import in_transaction
-# from tortoise.query_utils import Prefetch
+from typing import Optional
+from fastapi import APIRouter, Depends, Query
+from typing_extensions import Annotated
+from pydantic import StringConstraints
 
-# from ...schemas.management import admin
-# from ...schemas import ResultResponse
-# from ...db.models import Role, Permission, Routes
-# from ...utils.log_util import log
+from ...schemas.management import admin
+from ...schemas import ResultResponse
+from ...utils.log_util import log
+from ...services.management.admin import RoleService
 # from ...core.authentication import Authority
-# from ...utils.exceptions.user import RoleNotExistException
-# from ...utils.exceptions.admin import (
-#     PermissionExistException,
-#     PermissionNotExistException,
-# )
 
 
-# router = APIRouter()
+router = APIRouter()
 
 
-# @router.get(
-#     "/role/list",
-#     summary="角色列表",
-#     response_model=ResultResponse[admin.RolesTo],
-# )
-# async def query_roles(
-#     role_name: Optional[str] = Query(
-#         default=None, description="角色名称", alias="roleName"
-#     ),
-#     role_key: Optional[str] = Query(default=None, description="角色详情", alias="roleKey"),
-#     begin_time: Optional[str] = Query(
-#         default=None, description="开始时间", alias="beginTime"
-#     ),
-#     end_time: Optional[str] = Query(default=None, description="结束时间", alias="endTime"),
-#     limit: Optional[int] = Query(default=20, ge=10),
-#     page: Optional[int] = Query(default=1, gt=0),
-# ):
-#     """获取角色列表"""
-#     # 筛选列表
-#     filters = {}
-#     if role_name:
-#         filters["role_name__icontains"] = role_name
-#     if role_key:
-#         filters["role_key__icontains"] = role_key
-#     if begin_time:
-#         begin_time = datetime.strptime(begin_time, "%Y-%m-%d")
-#         filters["created_at__gte"] = begin_time
-#     if end_time:
-#         end_time = datetime.strptime(end_time, "%Y-%m-%d")
-#         filters["created_at__lte"] = end_time
-#     if begin_time and end_time:
-#         filters["created_at__range"] = (
-#             begin_time,
-#             end_time,
-#         )
-#     # 执行查询
-#     query = Role.filter(**filters)
-#     result = (
-#         await query.prefetch_related(
-#             "permissions", "menus__children__route_meta", "menus__route_meta"
-#         )
-#         .offset(limit * (page - 1))
-#         .limit(limit)
-#         .all()
-#     )
-#     # total
-#     total = await query.count()
-#     return ResultResponse[admin.RolesTo](
-#         result=admin.RolesTo(data=result, page=page, limit=limit, total=total)
-#     )
+@router.get(
+    "/role/list",
+    summary="角色列表",
+    response_model=ResultResponse[admin.RolesTo],
+)
+async def query_roles(
+    role_name: Optional[str] = Query(
+        default=None, description="角色名称", alias="roleName"
+    ),
+    role_key: Optional[str] = Query(
+        default=None, description="角色详情", alias="roleKey"
+    ),
+    begin_time: Optional[str] = Query(
+        default=None, description="开始时间", alias="beginTime"
+    ),
+    end_time: Optional[str] = Query(
+        default=None, description="结束时间", alias="endTime"
+    ),
+    limit: Optional[int] = Query(default=20, ge=10),
+    page: Optional[int] = Query(default=1, gt=0),
+):
+    """获取角色列表"""
+    result, total = await RoleService.query_role_list(
+        role_name, role_key, begin_time, end_time, limit, page
+    )
+    return ResultResponse[admin.RolesTo](
+        result=admin.RolesTo(data=result, page=page, limit=limit, total=total)
+    )
 
 
 # @router.get(

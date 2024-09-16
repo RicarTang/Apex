@@ -6,6 +6,7 @@ from ..common import PageParam, DefaultModel
 
 class User(BaseModel):
     """用户"""
+
     model_config = ConfigDict(use_enum_values=True)
 
     user_name: str = Field(max_length=20, description="用户名", alias="userName")
@@ -45,7 +46,6 @@ class UserTo(DefaultModel):
     """用户res schema"""
 
     user_name: Optional[str] = Field(default=None, serialization_alias="userName")
-    # password: Optional[str] = Field(default=None)
     status: Optional[int] = Field(default=None)
     remark: Optional[str] = Field(default=None)
     roles: List["RoleTo"] = Field(description="用户角色")

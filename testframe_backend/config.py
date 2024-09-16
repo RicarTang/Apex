@@ -73,7 +73,7 @@ class BaseConfig(BaseSettings):
     SECRET_KEY: str
     # jwt算法
     ALGORITHM: str = "HS256"
-    # jwt过期时间,单位s
+    # jwt过期时间,单位m
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7
 
 
