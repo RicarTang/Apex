@@ -5,7 +5,7 @@ FROM python:3.9 as requirements-stage
 WORKDIR /app
 
 # 安装 pdm
-RUN pip install pdm
+RUN pip install pdm -i https://pypi.tuna.tsinghua.edu.cn/simple
 
 # 复制项目配置文件
 COPY pyproject.toml pdm.lock /app/
