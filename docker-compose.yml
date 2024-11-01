@@ -1,5 +1,3 @@
-version: '3.8'  # 指定docker-compose版本语法
-
 services:
   # fastapi backend
   apex_server:
