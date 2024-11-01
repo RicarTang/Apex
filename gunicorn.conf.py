@@ -26,8 +26,10 @@ worker_connections = 500
 pidfile = "./gunicorn.pid"
 
 # 日志标准输出
-accesslog = "./testframe_backend/src/log/gunicorn_access.log"
-errorlog = "./testframe_backend/src/log/gunicorn_error.log"
+# accesslog = "./testframe_backend/src/log/gunicorn_access.log"
+# errorlog = "./testframe_backend/src/log/gunicorn_error.log"
+accesslog = "/var/log/gunicorn/gunicorn_access.log"
+errorlog = "/var/log/gunicorn/gunicorn_error.log"
 
 # 设置这个值为true 才会把打印信息记录到错误日志里
 capture_output = True
