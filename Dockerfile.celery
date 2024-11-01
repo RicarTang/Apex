@@ -5,4 +5,5 @@ WORKDIR /app
 
 RUN pip install celery[redis] supervisor
 
+COPY ./conf/* /etc/supervisor/conf.d
 COPY . .
