@@ -18,14 +18,8 @@ services:
       - apex_celery
     networks:
       - apex_network
-    command:
-      - bash
-      - -c
-      - |
-        wait-for-it -s apex_mysql:3306 -s apex_redis:6379 -t 300
-        mkdir -p /var/log/supervisor/
-        supervisord -c /app/testframe_backend/conf/supervisor.conf
-        supervisorctl restart fastapi_server
+    command: ["gunicorn","-c","gunicorn.conf.py","testframe_backend.main:app"]
+
   # celery服务
   apex_celery:
     build:
@@ -34,15 +28,14 @@ services:
     container_name: apex_celery
     restart: always
     depends_on:
-      - redis
-      - mysql
+      - apex_redis
+      - apex_mysql
     networks:
       - apex_network
     command:
       - bash
       - -c
       - |
-        wait-for-it -s apex_redis:6379 -t 300
         mkdir -p /var/log/supervisor/
         supervisord -c /app/testframe_backend/conf/supervisor.conf
         supervisorctl restart celery_worker
@@ -76,10 +69,10 @@ services:
     networks:
       - apex_network
     command:
-      --default-authentication-plugin=mysql_native_password
-      --character-set-server=utf8mb4
-      --collation-server=utf8mb4_general_ci
-      --lower_case_table_names=1
+      - --default-authentication-plugin=mysql_native_password
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_general_ci
+      - --lower_case_table_names=1
 
 networks:
   apex_network:

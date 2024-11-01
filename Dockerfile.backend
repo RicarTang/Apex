@@ -1,28 +1,30 @@
-# 使用 Python 3.9 作为基础镜像
-FROM python:3.9
+# 构建阶段：安装依赖并导出 requirements.txt
+FROM python:3.9 as requirements-stage
+
 # 设置工作目录
 WORKDIR /app
-# 将项目代码复制到容器中
+
+# # 设置国内镜像源，安装 pdm
+# RUN sed -i 's/deb.debian.org/mirrors.ustc.edu.cn/g' /etc/apt/sources.list.d/debian.sources \
+#     && sed -i 's|security.debian.org/debian-security|mirrors.ustc.edu.cn/debian-security|g' /etc/apt/sources.list.d/debian.sources \
+#     && apt-get update \
+#     && pip install pdm \
+
+# 复制项目配置文件
+COPY pyproject.toml pdm.lock /app/
+
+# 安装依赖并导出 requirements.txt 文件
+RUN pdm export -o requirements.txt --no-hashes
+
+# 生产阶段：仅包含运行依赖和应用代码
+FROM python:3.9-slim
+
+# 设置工作目录
+WORKDIR /app
+
+# 复制构建阶段生成的 requirements.txt 文件并安装依赖
+COPY --from=requirements-stage /app/requirements.txt /app/requirements.txt
+RUN pip install --no-cache-dir -r /app/requirements.txt
+
+# 复制应用代码到容器
 COPY . .
-
-RUN sed -i 's/deb.debian.org/mirrors.ustc.edu.cn/g' /etc/apt/sources.list.d/debian.sources \
-    && sed -i 's|security.debian.org/debian-security|mirrors.ustc.edu.cn/debian-security|g' /etc/apt/sources.list.d/debian.sources \
-    && pt-get update \
-    && apt-get instll -y supervisor \
-    && mkdir -p /var/log/fastapi_server \
-    # 安装pdm管理工具
-    && pip install pdm \
-    # 修改下载源
-    && pdm config pypi.url https://pypi.tuna.tsinghua.edu.cn/simple \
-    # 初始化项目
-    && pdm init \
-    # 同步项目依赖
-    && pdm sync \
-    # 执行pdm初始化数据库迁移工具命令
-    && pdm run aerich_init \
-    # 执行pdm初始化数据库命令
-    && pdm run init_db
-
-# 复制supervisor管理配置文件
-COPY conf/fastapi_server.conf /etc/supervisor/conf.d/
-CMD ["pdm", "run", "pro"]

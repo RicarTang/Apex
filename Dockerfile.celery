@@ -3,6 +3,6 @@ FROM python:3.9.12
 
 WORKDIR /app
 
-RUN pip install celery redis
+RUN pip install celery[redis] supervisor
 
 COPY . .
