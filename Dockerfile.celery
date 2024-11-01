@@ -3,7 +3,7 @@ FROM python:3.9.12
 
 WORKDIR /app
 
-RUN pip install celery[redis] supervisor \
+RUN pip install celery[redis] supervisor -i https://pypi.tuna.tsinghua.edu.cn/simple\
     && mkdir -p /etc/supervisor/conf.d
 
 COPY ./conf/* /etc/supervisor/conf.d
