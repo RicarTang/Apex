@@ -37,7 +37,7 @@ services:
       - -c
       - |
         mkdir -p /var/log/supervisor/
-        supervisord -c /app/testframe_backend/conf/supervisor.conf
+        supervisord -c /app/conf/supervisor.conf
         supervisorctl restart celery_worker
         supervisorctl restart celery_beat
   # redis服务
