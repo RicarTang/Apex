@@ -3,7 +3,7 @@ preload_app = True
 
 # 并行工作进程数
 
-workers = 1
+workers = 2
 
 # 指定每个工作者的线程数
 threads = 5
@@ -28,8 +28,8 @@ pidfile = "./gunicorn.pid"
 # 日志标准输出
 # accesslog = "./testframe_backend/src/log/gunicorn_access.log"
 # errorlog = "./testframe_backend/src/log/gunicorn_error.log"
-accesslog = "/var/log/gunicorn/gunicorn_access.log"
-errorlog = "/var/log/gunicorn/gunicorn_error.log"
+# accesslog = "/var/log/gunicorn/gunicorn_access.log"
+# errorlog = "/var/log/gunicorn/gunicorn_error.log"
 
 # 设置这个值为true 才会把打印信息记录到错误日志里
 capture_output = True
