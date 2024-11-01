@@ -60,6 +60,7 @@ services:
       - apex_redis:/data
     networks:
       - apex_network
+    command: redis-server --requirepass "$REDIS_PASSWORD"
   # mysql服务
   apex_mysql:
     image: mysql:8.1.0
