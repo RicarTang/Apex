@@ -15,7 +15,7 @@ worker_class = "uvicorn.workers.UvicornWorker"
 bind = "0.0.0.0:4000"
 
 # 设置守护进程,false将进程交给supervisor管理
-daemon = False
+daemon = True
 
 
 # 设置最大并发量
