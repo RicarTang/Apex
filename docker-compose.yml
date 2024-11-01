@@ -47,8 +47,8 @@ services:
     restart: always
     ports:
       - "6379:6379"
-    environment:
-      REDIS_PASSWORD: 123456
+    env_file:
+      - .env
     volumes:
       - apex_redis:/data
     networks:
@@ -57,10 +57,8 @@ services:
   apex_mysql:
     image: mysql:8.1.0
     container_name: apex_mysql
-    environment:
-      MYSQL_ROOT_PASSWORD: 123456
-      MYSQL_DATABASE: apex
-      TZ: Asia/Shanghai
+    env_file:
+      - .env
     restart: always
     ports:
       - "3306:3306"
