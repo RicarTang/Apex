@@ -1,4 +1,3 @@
-version: "3.8"
 services:
   # fastapi backend
   apex_server:
@@ -40,7 +39,7 @@ services:
       - apex_mysql
     networks:
       - apex_network
-    command: "/usr/local/bin/celery -A src.autotest.utils.celery.celery_config.celery worker --logfile=/var/log/celery/worker.log --loglevel=INFO"
+    command: "/usr/local/bin/celery -A testframe_backend.src.autotest.utils.celery.celery_config.celery worker --logfile=/var/log/celery/worker.log --loglevel=INFO"
   # celery beat服务
   apex_celery_beat:
     build:
@@ -53,7 +52,7 @@ services:
       - apex_mysql
     networks:
       - apex_network
-    command: "/usr/local/bin/celery -A src.autotest.utils.celery.celery_config.celery beat --logfile=/var/log/celery/beat.log --loglevel=INFO"
+    command: "/usr/local/bin/celery -A testframe_backend.src.autotest.utils.celery.celery_config.celery beat --logfile=/var/log/celery/beat.log --loglevel=INFO"
   # redis服务
   apex_redis:
     image: redis:7.2.0
