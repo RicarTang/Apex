@@ -22,6 +22,7 @@ WORKDIR /app
 # 复制构建阶段生成的 requirements.txt 文件并安装依赖
 COPY --from=requirements-stage-celery /app/requirements.txt /app/requirements.txt
 RUN pip install --no-cache-dir -r /app/requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple \
-    && mkdir -p /var/log/celery
+    && mkdir -p /var/log/celery \
+    && apt-get update && apt-get install -y allure
 
 COPY . .
