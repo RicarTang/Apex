@@ -1,3 +1,4 @@
+version: "3.8"
 services:
   # fastapi backend
   apex_server:
@@ -10,12 +11,13 @@ services:
       - "4000:4000"
     env_file:
       - .env
-    volumes:
-      - apex_server_gunicorn_log:/var/log/gunicorn
+    # volumes:
+    #   - apex_server_gunicorn_log:/var/log/gunicorn
     depends_on:
       - apex_mysql
       - apex_redis
-      - apex_celery
+      - apex_celery_worker
+      - apex_celery_beat
     networks:
       - apex_network
     command:
@@ -26,26 +28,32 @@ services:
         aerich init-db || true
         uvicorn testframe_backend.main:app --host 0.0.0.0 --port 4000
 
-  # celery服务
-  apex_celery:
+  # celery worker服务
+  apex_celery_worker:
     build:
       context: .
       dockerfile: Dockerfile.celery
-    container_name: apex_celery
+    container_name: apex_celery_worker
     restart: always
     depends_on:
       - apex_redis
       - apex_mysql
     networks:
       - apex_network
-    command:
-      - bash
-      - -c
-      - |
-        mkdir -p /var/log/supervisor/
-        supervisord -c /app/conf/supervisor.conf
-        supervisorctl restart celery_worker
-        supervisorctl restart celery_beat
+    command: "/usr/local/bin/celery -A src.autotest.utils.celery.celery_config.celery worker --logfile=/var/log/celery/worker.log --loglevel=INFO"
+  # celery beat服务
+  apex_celery_beat:
+    build:
+      context: .
+      dockerfile: Dockerfile.celery
+    container_name: apex_celery_beat
+    restart: always
+    depends_on:
+      - apex_redis
+      - apex_mysql
+    networks:
+      - apex_network
+    command: "/usr/local/bin/celery -A src.autotest.utils.celery.celery_config.celery beat --logfile=/var/log/celery/beat.log --loglevel=INFO"
   # redis服务
   apex_redis:
     image: redis:7.2.0
@@ -86,4 +94,4 @@ networks:
 volumes:
   apex_mysql:
   apex_redis:
-  apex_server_gunicorn_log:
+  # apex_server_gunicorn_log:
