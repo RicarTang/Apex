@@ -33,7 +33,7 @@
 >   CELERY_BROKER: str  # celery消息代理, 用来发送任务.example: "redis://[[name]:[pwd]]127.0.0.1:6379/0"<br>
 >   CELERY_BACKEND: str  # celery消息后端,用来保存celery任务结果.example: "db+mysql+pymysql://root:123456@127.0.0.1:3306/tortoise"<br>
 >   SQL_ENGINE: str  # sqlalchemy.example: "mysql+pymysql://root:123456@127.0.0.1:3306/tortoise"
-### dev
+### 本地启动
 1. 安装pdm包管理工具
 ```Bash
 pip install pdm
@@ -71,18 +71,19 @@ pdm run upgrade_db # 迁移，修改数据库表结构
 ```Text
 http://127.0.0.1:4000/docs
 ```
-### pro
-#### Docker部署
-1. 项目目录添加.env文件
-2. 打包镜像
-```Bash
-docker build -t fastapi-image .
-```
-3. 启动容器
-```Bash
-docker run -d --name fastapi-pro -p 80:80 fastapi-image
-```
-4. api文档
+### 服务器docker-compose部署
+1. 项目目录添加.env文件,对比上面新增3个字段
 ```Text
-http://127.0.0.1/docs
+REDIS_PASSWORD: str
+MYSQL_ROOT_PASSWORD: str
+MYSQL_DATABASE: str
+TZ="Asia/Shanghai"  ## 可选
+```
+2. 执行docker-compose部署
+```Bash
+docker-compose up -d
+```
+3. api文档
+```Text
+http://127.0.0.1:4000/docs
 ```

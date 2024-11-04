@@ -18,13 +18,12 @@ services:
       - apex_celery
     networks:
       - apex_network
-    #command: ["gunicorn","-c","gunicorn.conf.py","testframe_backend.main:app"]
     command:
       - bash
       - -c
       - |
-        aerich init -t testframe_backend.src.db.settings.TORTOISE_ORM
-        aerich init-db
+        aerich init -t testframe_backend.src.db.settings.TORTOISE_ORM || true
+        aerich init-db || true
         uvicorn testframe_backend.main:app --host 0.0.0.0 --port 4000
 
   # celery服务
@@ -60,7 +59,7 @@ services:
       - apex_redis:/data
     networks:
       - apex_network
-    command: redis-server --requirepass "$REDIS_PASSWORD"
+    command: "redis-server --requirepass $REDIS_PASSWORD"
   # mysql服务
   apex_mysql:
     image: mysql:8.1.0
