@@ -17,6 +17,8 @@ services:
       - apex_redis
       - apex_celery_worker
       - apex_celery_beat
+    volumes:
+      - allure_results:/app/testframe_backend/src/autotest/report/allure_report
     networks:
       - apex_network
     command:
@@ -37,6 +39,8 @@ services:
     depends_on:
       - apex_redis
       - apex_mysql
+    volumes:
+      - allure_results:/app/testframe_backend/src/autotest/report/allure_report
     networks:
       - apex_network
     command: "/usr/local/bin/celery -A testframe_backend.src.autotest.utils.celery.celery_config.celery worker --logfile=/var/log/celery/worker.log --loglevel=INFO"
@@ -93,4 +97,5 @@ networks:
 volumes:
   apex_mysql:
   apex_redis:
+  allure_results:
   # apex_server_gunicorn_log:
