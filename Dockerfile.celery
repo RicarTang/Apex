@@ -13,14 +13,12 @@ COPY pyproject.toml pdm.lock /app/
 # 安装依赖并导出 requirements.txt 文件
 RUN pdm export -o requirements.txt --no-hashes
 
-# 生产阶段：仅包含运行依赖和应用代码
-FROM python:3.9
+# 生产阶段：仅包含运行依赖和应用代码;使用构建的有allure的镜像为基础镜像
+FROM ricardothb/python3.9-slim-allure-pytest:latest
 
 # 设置工作目录
 WORKDIR /app
-## 利用缓存机制下载allure
-RUN wget https://github.com/allure-framework/allure2/releases/download/2.32.0/allure_2.32.0-1_all.deb \
-    && dpkg -i allure_2.32.0-1_all.deb
+
 # 复制构建阶段生成的 requirements.txt 文件并安装依赖
 COPY --from=requirements-stage-celery /app/requirements.txt /app/requirements.txt
 RUN pip install --no-cache-dir -r /app/requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple \
