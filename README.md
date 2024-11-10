@@ -27,12 +27,15 @@
 ## 使用
 默认管理员账号：admin,123456;
 > Tips💡：需要在项目根目录新建一个.env文件,添加字段如下:<br>
->   DB_URL: str   # 数据库地址，example： "mysql://root:123456@127.0.0.1:3306/tortoise"（Dockerfile构建镜像时不能填本地回环地址,要指定ip）<br>
+>   DB_HOST: str  # 数据库地址，<style color="red">构建docker镜像时不能填本地回环地址,要指定ip</style><br>
+>   DB_PORT: int  # 数据库端口<br>
+>   DB_USER: str  # 数据库用户名<br>
+>   DB_PASSWORD: str  # 数据库密码<br>
+>   DB_DATEBASE: str  # 数据库名<br>
 >   REDIS_URL: str  # redis地址，example："redis://[[name]:[pwd]]127.0.0.1:6379/0"<br>
 >   SECRET_KEY: str  # jwt私钥，使用openssl rand -hex 32快捷生成<br>
 >   CELERY_BROKER: str  # celery消息代理, 用来发送任务.example: "redis://[[name]:[pwd]]127.0.0.1:6379/0"<br>
 >   CELERY_BACKEND: str  # celery消息后端,用来保存celery任务结果.example: "db+mysql+pymysql://root:123456@127.0.0.1:3306/tortoise"<br>
->   SQL_ENGINE: str  # sqlalchemy.example: "mysql+pymysql://root:123456@127.0.0.1:3306/tortoise"
 ### 本地启动
 1. 安装pdm包管理工具
 ```Bash
@@ -74,9 +77,9 @@ http://127.0.0.1:4000/docs
 ### 服务器docker-compose部署
 1. 项目目录添加.env文件,对比上面新增3个字段
 ```Text
-REDIS_PASSWORD: str
-MYSQL_ROOT_PASSWORD: str
-MYSQL_DATABASE: str
+REDIS_PASSWORD: str  # redis密码
+MYSQL_ROOT_PASSWORD: str  # mysql root用户密码
+MYSQL_DATABASE: str  # 初始创建的数据库名
 TZ="Asia/Shanghai"  ## 可选
 ```
 2. 执行docker-compose部署

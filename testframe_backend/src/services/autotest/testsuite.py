@@ -45,14 +45,19 @@ class TestSuiteSSEService:
         """
         key = task_id + "-sse_data"
         # 创建订阅者对象
-        pubsub = await RedisService().aioredis_pool.pubsub()
-        # 订阅频道
-        await pubsub.subscribe(key)
-        # 处理异步生成器
-        async for message in pubsub.listen():
-            if message["type"] == "message":
-                # log.debug(message)
-                return message
+        pubsub = RedisService().aioredis_pool.pubsub()
+        try:
+            # 订阅频道
+            await pubsub.subscribe(key)
+            # 处理异步生成器
+            async for message in pubsub.listen():
+                if message["type"] == "message":
+                    log.debug(message)
+                    return message
+        finally:
+            await pubsub.unsubscribe(key)
+            await pubsub.close()
+
 
     @classmethod
     async def generate_sse_data(
