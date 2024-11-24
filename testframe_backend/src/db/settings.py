@@ -4,7 +4,7 @@ from ...config import config
 TORTOISE_ORM = {
     "connections": {
         "default": {
-            "engine": "tortoise.backends.mysql",  # 指定数据库为mysql，必须参数
+            "engine": f"tortoise.backends.{config.DB_ENGINE}",  # 指定数据库，必须参数
             "credentials": {
                 "host": config.DB_HOST,  # 数据库地址
                 "port": config.DB_PORT,  # 数据库端口
@@ -20,7 +20,7 @@ TORTOISE_ORM = {
             "default_connection": "default",
         }
     },
-    "use_tz": False,
-    # 设置时区为上海
-    "timezone": "Asia/Shanghai",
+    "use_tz": config.USE_TZ,
+    # 设置数据库datetime时区
+    "timezone": config.TZ,
 }

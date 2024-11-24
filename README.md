@@ -27,7 +27,7 @@
 ## 使用
 默认管理员账号：admin,123456;
 > Tips💡：需要在项目根目录新建一个.env文件,添加字段如下:<br>
->   DB_HOST: str  # 数据库地址，<style color="red">构建docker镜像时不能填本地回环地址,要指定ip</style><br>
+>   DB_HOST: str  # 数据库地址，<span style="color: red;">构建docker镜像时不能填本地回环地址,要指定ip</span><br>
 >   DB_PORT: int  # 数据库端口<br>
 >   DB_USER: str  # 数据库用户名<br>
 >   DB_PASSWORD: str  # 数据库密码<br>

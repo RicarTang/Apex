@@ -3,7 +3,7 @@
 """
 
 from pathlib import Path
-from typing import Union
+from typing import Union,Literal
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -43,11 +43,14 @@ class BaseConfig(BaseSettings):
     )
 
     # 数据库
+    DB_ENGINE: Literal["mysql","asyncpg","sqlite","mssql"] = "mysql"  # 数据库引擎
     DB_HOST: str
     DB_PORT: int
     DB_USER: str
     DB_PASSWORD: str
     DB_DATEBASE: str
+    USE_TZ: bool = False
+    TZ: str = "Asia/Shanghai"  # 数据库时区
 
     # redis
     ## example：redis://:123456@127.0.0.1:6379/0
