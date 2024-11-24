@@ -31,11 +31,10 @@ class BaseConfig(BaseSettings):
 
     # 日志配置
     ## 控制台日志级别
-    STREAM_LOG_LEVEL: str = (
-        "DEBUG"  # log级别：'CRITICAL': CRITICAL,'FATAL': FATAL,'ERROR': ERROR,'WARN': WARNING,'WARNING': WARNING,'INFO': INFO,'DEBUG': DEBUG,'NOTSET': NOTSET
-    )
+    STREAM_LOG_LEVEL: Literal["TRACE","DEBUG","INFO","SUCCESS","WARNING","ERROR","CRITICAL"] = "DEBUG"  
+    
     ## 保存至.log的日志级别
-    FILE_LOG_LEVEL: str = "INFO"
+    FILE_LOG_LEVEL: Literal["TRACE","DEBUG","INFO","SUCCESS","WARNING","ERROR","CRITICAL"] = "INFO"
     ## 日志格式
     ## LOG_FORMATTER = "%(levelname)s:     %(asctime)s - %(filename)s - %(funcName)s - line: %(lineno)d - message: %(message)s"
     LOG_FORMATTER: str = (
@@ -49,7 +48,7 @@ class BaseConfig(BaseSettings):
     DB_USER: str
     DB_PASSWORD: str
     DB_DATEBASE: str
-    USE_TZ: bool = False
+    USE_TZ: bool = False  # 是否启用UTC时区
     TZ: str = "Asia/Shanghai"  # 数据库时区
 
     # redis
