@@ -6,7 +6,7 @@ from fastapi import UploadFile
 from openpyxl import load_workbook, Workbook
 
 
-async def read_all_testcase(filepath) -> List[NamedTuple]:
+async def read_all_testcase(filepath: Path) -> List[NamedTuple]:
     """读取excel所有数据
 
     Args:
@@ -16,10 +16,14 @@ async def read_all_testcase(filepath) -> List[NamedTuple]:
         List[NamedTuple]: _description_
     """
     # 异步循环运行同步函数load_workbook
-    loop = asyncio.get_event_loop()
-    wb: Workbook = await loop.run_in_executor(
-        None, lambda: load_workbook(filepath, data_only=True)
-    )
+    loop = asyncio.get_running_loop()
+    try:
+        wb: Workbook = await loop.run_in_executor(
+            None,
+            lambda: load_workbook(filepath, data_only=True, read_only=True),
+        )
+    except Exception as e:
+        raise ValueError(f"Failed to load Excel file: {filepath}. Error: {e}")
     # 获取所有sheet
     sheets = wb.sheetnames
     testcases = []  # 存放所有读取的testcase
@@ -47,13 +51,25 @@ async def read_all_testcase(filepath) -> List[NamedTuple]:
             "remark",
         ],
     )
-    # 遍历每个sheet的所有数据
-    for sheetname in sheets:
-        sheet = wb[sheetname]
-        # 使用列表推导式生成单个sheet的testcase
-        testcase = [Testcase(*item) for item in sheet.values][1:]
-        # 使用 extend() 将单个sheet的testcase合并到总的testcases列表中
-        testcases.extend(testcase)
+    # 把循环读取的耗时任务放进线程池运行避免阻塞主线程
+    tasks = [
+        loop.run_in_executor(
+            None,
+            lambda sheet=wb[sheetname]: [
+                row for row in sheet.iter_rows(values_only=True) if any(row)
+            ],
+        )
+        for sheetname in wb.sheetnames
+    ]
+    # 同步读取所有sheet
+    all_sheets_data = await asyncio.gather(*tasks)
+    testcases = []
+
+    for rows in all_sheets_data:
+        testcases.extend(
+            [Testcase(*row) for row in rows[1:] if len(row) == len(Testcase._fields)]
+        )
+
     return testcases
 
 
