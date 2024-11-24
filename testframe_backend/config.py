@@ -69,6 +69,14 @@ class BaseConfig(BaseSettings):
     ## jwt过期时间,单位s
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7
 
+    # swagger
+    SWAGGER_TITLE: str = "api swagger"
+    SWAGGER_VERSION: str = "1.0"
+    SWAGGER_DES: str = "fastapi+tortoise-orm async web framework"
+    SWAGGER_JS_URL: str = "/static/swagger-ui/swagger-ui-bundle.js"  # 使用本地文件
+    SWAGGER_CSS_URL: str = "/static/swagger-ui/swagger-ui.css"
+    SWAGGER_FAVICON_URL: str = "https://fastapi.tiangolo.com/img/favicon.png"
+
 
 config = BaseConfig()
 

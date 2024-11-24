@@ -37,9 +37,9 @@ from .src.db import InitDbData
 
 
 app = FastAPI(
-    title="api swagger",
-    version="1.0",
-    description="fastapi+tortoise-orm async web framework",
+    title=config.SWAGGER_TITLE,
+    version=config.SWAGGER_VERSION,
+    description=config.SWAGGER_DES,
     middleware=middleware,  # 注册middleware
     docs_url=None,  # docs url设置为none，使用自定义的docs路由
 )
@@ -89,9 +89,9 @@ async def custom_swagger_ui_html():
         openapi_url=app.openapi_url,
         title=app.title + "- Swagger UI",
         oauth2_redirect_url=app.swagger_ui_oauth2_redirect_url,
-        swagger_js_url="/static/swagger-ui/swagger-ui-bundle.js",
-        swagger_css_url="/static/swagger-ui/swagger-ui.css",
-        swagger_favicon_url="https://fastapi.tiangolo.com/img/favicon.png",
+        swagger_js_url=config.SWAGGER_JS_URL,
+        swagger_css_url=config.SWAGGER_CSS_URL,
+        swagger_favicon_url=config.SWAGGER_FAVICON_URL,
     )
 
 
