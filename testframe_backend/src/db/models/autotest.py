@@ -104,3 +104,16 @@ class TestEnv(AbstractBaseModel):
     class Meta:
         table = "test_environment"
         ordering = ["-created_at"]
+
+
+class ScheduledTask(AbstractBaseModel):
+    """定时任务表"""
+
+    task_name = fields.CharField(max_length=30,description="任务名称")
+    interval = fields.IntField(description="执行间隔（秒）")
+    pass
+    # is_active =    # 是否激活
+
+    class Meta:
+        table = "scheduled_task"
+        ordering = ["-created_at"]

@@ -1,0 +1,1 @@
+from celery.beat import Scheduler

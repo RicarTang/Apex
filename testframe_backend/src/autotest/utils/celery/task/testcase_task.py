@@ -2,7 +2,7 @@ import json, os
 import pytest
 import subprocess
 from .base import BaseTaskWithTest
-from ..celery_config import celery
+from ..celery_app import celery
 from ....utils.formatter import publish_format
 from .....core.redis import RedisService
 from .....utils.log_util import log
