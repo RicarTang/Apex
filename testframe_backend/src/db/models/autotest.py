@@ -1,11 +1,13 @@
 from tortoise import fields
 from tortoise.contrib.pydantic import pydantic_model_creator
 from ..base_models import AbstractBaseModel
-from ..enum import (
+from ...utils.enum import (
     SuiteStatusEnum,
     BoolEnum,
     ApiMethodEnum,
     RequestParamTypeEnum,
+    BoolEnum,
+    ScheduleTaskStatusEnum,
 )
 
 
@@ -110,9 +112,18 @@ class ScheduledTask(AbstractBaseModel):
     """定时任务表"""
 
     task_name = fields.CharField(max_length=30,description="任务名称")
-    interval = fields.IntField(description="执行间隔（秒）")
-    pass
-    # is_active =    # 是否激活
+    schedule = fields.CharField(max_length=30, description="CRON 表达式")
+    enabled = fields.IntEnumField(
+        enum_type=BoolEnum,
+        default=BoolEnum.TRUE,
+        description="是否启用;1: enable, 0: disable",
+    )
+    status = fields.IntEnumField(
+        enum_type=ScheduleTaskStatusEnum,
+        default=ScheduleTaskStatusEnum.PENDING,
+        description="任务状态;0: pending, 1: running, 2: completed, 3: failed, 4: paused",
+    )
+    remark = fields.CharField(max_length=100, null=True, description="备注")
 
     class Meta:
         table = "scheduled_task"

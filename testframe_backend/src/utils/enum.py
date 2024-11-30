@@ -1,13 +1,5 @@
 from enum import IntEnum, Enum
 
-
-class DisabledEnum(IntEnum):
-    """用户disabled枚举"""
-
-    ENABLE = 1
-    DISABLE = 0
-
-
 class BoolEnum(IntEnum):
     """true / false"""
 
@@ -57,3 +49,13 @@ class SuiteStatusEnum(IntEnum):
     NOT_EXECUTED = 0
     EXECUTED_OK = 1
     EXECUTED_FAILED = 2
+
+
+class ScheduleTaskStatusEnum(IntEnum):
+    """定时任务状态"""
+
+    PENDING = 0
+    RUNNING = 1
+    COMPLETED = 2
+    FAILED = 3
+    PAUSED = 4

@@ -1,5 +1,5 @@
 from tortoise import fields, models
-from .enum import BoolEnum
+from ..utils.enum import BoolEnum
 
 
 class AbstractBaseModel(models.Model):

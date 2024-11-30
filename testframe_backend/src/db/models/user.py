@@ -1,6 +1,6 @@
 from tortoise import fields
 from ..base_models import AbstractBaseModel
-from ..enum import DisabledEnum, BoolEnum, AccessActionEnum, AccessModelEnum
+from ...utils.enum import BoolEnum, BoolEnum, AccessActionEnum, AccessModelEnum
 
 
 class Users(AbstractBaseModel):
@@ -10,8 +10,8 @@ class Users(AbstractBaseModel):
     remark = fields.CharField(max_length=30, null=True, description="个人描述")
     password = fields.CharField(max_length=128, index=True, description="密码")
     status = fields.IntEnumField(
-        enum_type=DisabledEnum,
-        default=DisabledEnum.ENABLE,
+        enum_type=BoolEnum,
+        default=BoolEnum.TRUE,
         description="用户活动状态,0:disable,1:enabled",
     )
     # 关联关系

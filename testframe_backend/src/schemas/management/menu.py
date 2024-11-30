@@ -2,7 +2,7 @@ from typing import Optional, List, Union, Any
 from pydantic import BaseModel, Field, field_validator, ConfigDict
 from tortoise.fields.relational import ReverseRelation
 from ...db.models import Routes, RouteMeta
-from ...db.enum import BoolEnum, DisabledEnum
+from ...utils.enum import BoolEnum, BoolEnum
 
 # from ..schemas.default import Routes
 from ..common import PageParam, DefaultModel
@@ -20,7 +20,7 @@ class Menu(BaseModel):
         description="是否总是显示",
         alias="alwaysShow",
     )
-    status: DisabledEnum = Field(description="菜单状态")
+    status: BoolEnum = Field(description="菜单状态")
 
 
 class MenuMeta(BaseModel):
@@ -144,6 +144,6 @@ class MenuUpdateIn(BaseModel):
         description="是否总是显示",
         alias="alwaysShow",
     )
-    status: Optional[DisabledEnum] = Field(default=None, description="菜单状态")
+    status: Optional[BoolEnum] = Field(default=None, description="菜单状态")
     parent_id: int = Field(default=None,alias="parentId")
     meta: Optional[MetaUpdate] = Field(default=None)

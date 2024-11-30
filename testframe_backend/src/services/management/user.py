@@ -3,7 +3,7 @@ from fastapi import HTTPException, status
 from tortoise.queryset import QuerySet
 from tortoise.exceptions import DoesNotExist, MultipleObjectsReturned
 from ...db.models import Users, Role
-from ...db.enum import DisabledEnum
+from ...utils.enum import BoolEnum
 from ...utils.log_util import log
 from ...utils.exceptions.user import TokenInvalidException, UserNotExistException
 

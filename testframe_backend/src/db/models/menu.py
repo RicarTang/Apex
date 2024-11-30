@@ -1,6 +1,6 @@
 from tortoise import fields
 from ..base_models import AbstractBaseModel
-from ..enum import DisabledEnum
+from ...utils.enum import BoolEnum
 
 
 class Routes(AbstractBaseModel):
@@ -13,8 +13,8 @@ class Routes(AbstractBaseModel):
     component = fields.CharField(max_length=255)
     always_show = fields.BooleanField(null=True)
     status = fields.IntEnumField(
-        enum_type=DisabledEnum,
-        default=DisabledEnum.ENABLE,
+        enum_type=BoolEnum,
+        default=BoolEnum.TRUE,
         description="菜单可用状态,0:disable,1:enabled",
     )
     parent: fields.ReverseRelation["Routes"] = fields.ForeignKeyField(

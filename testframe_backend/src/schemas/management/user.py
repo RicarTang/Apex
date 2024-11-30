@@ -1,6 +1,6 @@
 from typing import List, Optional
 from pydantic import BaseModel, Field, ConfigDict
-from ...db.models import DisabledEnum
+from ...db.models import BoolEnum
 from ..common import PageParam, DefaultModel
 
 
@@ -9,7 +9,7 @@ class User(BaseModel):
 
     user_name: str = Field(max_length=20, description="用户名", alias="userName")
     remark: Optional[str] = Field(default=None, max_length=50, description="用户描述")
-    status: DisabledEnum = Field(description="0:Disable,1:Enable")
+    status: BoolEnum = Field(description="0:Disable,1:Enable")
 
 
 class UserIn(User):
@@ -25,7 +25,7 @@ class UserUpdateIn(BaseModel):
     user_roles: Optional[list] = Field(
         default=None, description="角色id列表", alias="roleIds"
     )
-    status: Optional[DisabledEnum] = Field(
+    status: Optional[BoolEnum] = Field(
         default=None, description="0:Disable,1:Enable"
     )
     remark: Optional[str] = Field(

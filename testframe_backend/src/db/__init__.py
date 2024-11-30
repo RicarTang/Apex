@@ -3,7 +3,7 @@ from typing import Tuple
 from passlib.hash import md5_crypt
 from tortoise.transactions import in_transaction
 from .models import Users, Role, Routes, RouteMeta, Permission
-from .enum import AccessModelEnum, AccessActionEnum, BoolEnum, DisabledEnum
+from ..utils.enum import AccessModelEnum, AccessActionEnum, BoolEnum, BoolEnum
 from ..utils.log_util import log
 
 

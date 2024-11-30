@@ -1,7 +1,7 @@
 from typing import Optional, List, Union
 from pydantic import BaseModel, Field, field_validator, ConfigDict
 from ...db.models import TestSuiteTaskId
-from ...db.enum import SuiteStatusEnum
+from ...utils.enum import SuiteStatusEnum
 from ..common import PageParam, DefaultModel
 from .testcase import TestCaseTo
 
