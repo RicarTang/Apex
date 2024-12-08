@@ -30,12 +30,12 @@ router = APIRouter()
 @router.post(
     "/add",
     summary="添加测试用例",
-    response_model=ResultResponse[testcase.TestCaseTo],
+    response_model=ResultResponse[testcase.TestCaseOut],
 )
 async def add_testcase(body: testcase.TestCaseIn):
     """添加测试用例"""
     result = await TestCaseService.add_testcase(body.model_dump(exclude_unset=True))
-    return ResultResponse[testcase.TestCaseTo](result=result)
+    return ResultResponse[testcase.TestCaseOut](result=result)
 
 
 @router.post(
@@ -85,7 +85,7 @@ async def get_testcase_template():
 @router.get(
     "/list",
     summary="获取测试用例列表",
-    response_model=ResultResponse[testcase.TestCasesTo],
+    response_model=ResultResponse[testcase.TestCaseListOut],
 )
 async def get_all_testcase(
     case_title: Optional[str] = Query(
@@ -126,8 +126,8 @@ async def get_all_testcase(
     query = TestCase.filter(**filters)
     testcases = await query.offset(limit * (page - 1)).limit(limit).all()
     total = await query.count()
-    return ResultResponse[testcase.TestCasesTo](
-        result=testcase.TestCasesTo(
+    return ResultResponse[testcase.TestCaseListOut](
+        result=testcase.TestCaseListOut(
             data=testcases,
             page=page,
             limit=limit,
@@ -139,7 +139,7 @@ async def get_all_testcase(
 @router.post(
     "/executeOne",
     summary="执行单条测试用例",
-    response_model=ResultResponse[testcase.ExecuteTestcaseTo],
+    response_model=ResultResponse[testcase.ExecuteTestcaseOut],
 )
 async def execute_testcase(
     body: testcase.ExecuteTestcaseIn,
@@ -163,7 +163,7 @@ async def execute_testcase(
         headers=dict(result.headers),
         body=result.json(),
     )
-    return ResultResponse[testcase.ExecuteTestcaseTo](result=res)
+    return ResultResponse[testcase.ExecuteTestcaseOut](result=res)
 
 
 @router.delete(
@@ -183,7 +183,7 @@ async def delete_testcase(case_ids: Annotated[str, StringConstraints(strip_white
 @router.get(
     "/{case_id}",
     summary="获取指定testcase",
-    response_model=ResultResponse[testcase.TestCaseTo],
+    response_model=ResultResponse[testcase.TestCaseOut],
 )
 async def get_testcase(case_id: int):
     """获取指定testcase"""
@@ -191,7 +191,7 @@ async def get_testcase(case_id: int):
         case = await TestCase.get(id=case_id)
     except DoesNotExist:
         raise TestcaseNotExistException
-    return ResultResponse[testcase.TestCaseTo](result=case)
+    return ResultResponse[testcase.TestCaseOut](result=case)
 
 
 @router.put(

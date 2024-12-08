@@ -1,24 +1,32 @@
+"""用户管理schemas"""
+
 from typing import List, Optional
 from pydantic import BaseModel, Field, field_validator, ConfigDict
 from ...db.models import (
     AccessActionEnum,
     AccessModelEnum,
 )
-from ..common import PageParam, DefaultModel
+from ..common import PageParam, CommonMixinModel
 
 
 class PermissionIn(BaseModel):
+    """权限 req schema"""
+
     model_config = ConfigDict(
         json_schema_extra={
             "example": {"name": "admin", "model": "user", "action": "add"}
         }
     )
     name: str = Field(description="权限名称", alias="permissionName")
-    model: AccessModelEnum = Field(description="权限能访问的模块", alias="permissionModule")
-    action: AccessActionEnum = Field(description="权限能操作的动作", alias="permissionAction")
+    model: AccessModelEnum = Field(
+        description="权限能访问的模块", alias="permissionModule"
+    )
+    action: AccessActionEnum = Field(
+        description="权限能操作的动作", alias="permissionAction"
+    )
 
 
-class PermissionTo(DefaultModel):
+class PermissionOut(CommonMixinModel):
     """权限 res schema"""
 
     # model_config = ConfigDict(from_attributes=True)
@@ -28,11 +36,14 @@ class PermissionTo(DefaultModel):
     action: Optional[str] = Field(default=None, serialization_alias="permissionAction")
 
 
-class PermissionsTo(PageParam):
-    data: List[PermissionTo]
+class PermissionListOut(PageParam):
+    """权限列表 res schema"""
+
+    data: List[PermissionOut]
 
 
-class PutPermissionIn(BaseModel):
+class PermissionUpdateIn(BaseModel):
+    """更新权限 req schema"""
     name: Optional[str] = Field(
         default=None, description="权限名称", alias="permissionName"
     )
@@ -58,7 +69,7 @@ class RoleIn(BaseModel):
     remark: Optional[str] = Field(default=None, max_length=50, description="角色详情")
 
 
-class RoleTo(DefaultModel):
+class RoleOut(CommonMixinModel):
     """角色res schema"""
 
     model_config = ConfigDict(from_attributes=True)
@@ -74,7 +85,10 @@ class RoleTo(DefaultModel):
         alias="permissionIds",
     )
     menu_ids: Optional[List[int]] = Field(
-        default=None, description="角色的菜单", alias="menuIds", validation_alias="menus"
+        default=None,
+        description="角色的菜单",
+        alias="menuIds",
+        validation_alias="menus",
     )
 
     @field_validator("menu_ids", mode="before")
@@ -90,10 +104,10 @@ class RoleTo(DefaultModel):
         return [permission.id for permission in v]
 
 
-class RolesTo(PageParam):
-    """返回多角色res schema"""
+class RoleListOut(PageParam):
+    """角色列表res schema"""
 
-    data: List[RoleTo]
+    data: List[RoleOut]
 
 
 class UserAddRoleIn(BaseModel):
@@ -101,5 +115,3 @@ class UserAddRoleIn(BaseModel):
 
     user_id: int = Field(description="用户id", alias="userId")
     role_id: int = Field(description="角色id", alias="roleId")
-
-

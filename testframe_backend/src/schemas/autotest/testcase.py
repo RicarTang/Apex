@@ -1,18 +1,24 @@
+"""测试用例schema"""
+
 from typing import Optional, List
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import BaseModel, Field
 from ...utils.enum import BoolEnum, ApiMethodEnum, RequestParamTypeEnum
-from ..common import PageParam, DefaultModel
+from ..common import PageParam, CommonMixinModel
 
 
 class TestCaseIn(BaseModel):
     """测试用例 request schema"""
 
     case_no: str = Field(max_length=10, description="用例编号", alias="caseNo")
-    case_title: str = Field(max_length=50, description="用例名称/标题", alias="caseTitle")
+    case_title: str = Field(
+        max_length=50, description="用例名称/标题", alias="caseTitle"
+    )
     case_description: Optional[str] = Field(
         default=None, max_length=100, description="用例说明", alias="caseDescription"
     )
-    case_module: str = Field(max_length=20, description="用例所属模块", alias="caseModule")
+    case_module: str = Field(
+        max_length=20, description="用例所属模块", alias="caseModule"
+    )
     case_sub_module: Optional[str] = Field(
         default=None, max_length=20, description="用例子模块", alias="caseSubModule"
     )
@@ -57,7 +63,7 @@ class TestCaseIn(BaseModel):
     remark: Optional[str] = Field(default=None, description="备注")
 
 
-class TestCaseTo(DefaultModel):
+class TestCaseOut(CommonMixinModel):
     """测试用例 response schema"""
 
     case_no: Optional[str] = Field(
@@ -124,14 +130,14 @@ class TestCaseTo(DefaultModel):
     remark: Optional[str] = Field(default=None, description="备注")
 
 
-# class TestCases(List[TestCaseTo]):
+# class TestCases(List[TestCaseOut]):
 #     pass
 
 
-class TestCasesTo(PageParam):
-    """翻页测试用例 response schema"""
+class TestCaseListOut(PageParam):
+    """测试用例列表 response schema"""
 
-    data: List[TestCaseTo]
+    data: List[TestCaseOut]
 
 
 class ExecuteTestcaseIn(BaseModel):
@@ -140,7 +146,7 @@ class ExecuteTestcaseIn(BaseModel):
     case_id: int = Field(alias="caseId")
 
 
-class ExecuteTestcaseTo(BaseModel):
+class ExecuteTestcaseOut(BaseModel):
     """执行单条测试用例response schema"""
 
     code: int = Field(description="测试结果响应状态码")

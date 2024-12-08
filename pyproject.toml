@@ -13,7 +13,7 @@ includes = []
 [tool.pdm.scripts]
 dev = "uvicorn testframe_backend.main:app --host 0.0.0.0 --port 4000 --reload"
 pro = "gunicorn -c gunicorn.conf.py testframe_backend.main:app"
-aerich_init = "aerich init -t testframe_backend.src.db.settings.TORTOISE_ORM"
+aerich_init = "aerich init -t testframe_backend.src.core.db.TORTOISE_ORM"
 init_db = "aerich init-db"
 migrate_db = "aerich migrate"
 upgrade_db = "aerich upgrade"
@@ -32,7 +32,7 @@ version = ""
 description = ""
 authors = [{ name = "RicarTang", email = "357965604@qq.com" }]
 dependencies = [
-    "pydantic<3.0.0,>=2.5.2",
+    "pydantic==2.9.2",
     "tortoise-orm[asyncmy]<1.0.0,>=0.20.0",
     "gunicorn<22.0.0,>=21.2.0",
     "passlib<2.0.0,>=1.7.4",

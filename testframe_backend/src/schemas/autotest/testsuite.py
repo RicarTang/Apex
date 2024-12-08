@@ -1,9 +1,10 @@
+"""测试套件schema"""
 from typing import Optional, List, Union
-from pydantic import BaseModel, Field, field_validator, ConfigDict
+from pydantic import BaseModel, Field, field_validator
 from ...db.models import TestSuiteTaskId
 from ...utils.enum import SuiteStatusEnum
-from ..common import PageParam, DefaultModel
-from .testcase import TestCaseTo
+from ..common import PageParam, CommonMixinModel
+from .testcase import TestCaseOut
 
 
 class TestSuiteIn(BaseModel):
@@ -23,14 +24,14 @@ class DeleteSuiteIn(BaseModel):
     suite_ids: List[int] = Field(alias="suiteIds")
 
 
-class TestSuiteTo(DefaultModel):
+class TestSuiteOut(CommonMixinModel):
     """测试套件response schema"""
 
     suite_no: str = Field(serialization_alias="suiteNo")
     suite_title: str = Field(serialization_alias="suiteTitle")
     remark: Optional[str] = Field(default=None)
     status: SuiteStatusEnum = Field()
-    testcases: List[TestCaseTo] = Field(description="套件包含的用例")
+    testcases: List[TestCaseOut] = Field(description="套件包含的用例")
     task_id: Union[str, None] = Field(
         description="运行测试的task id", serialization_alias="taskId"
     )
@@ -55,10 +56,10 @@ class TestSuiteTo(DefaultModel):
             pass
 
 
-class TestSuitesTo(PageParam):
+class TestSuiteListOut(PageParam):
     """翻页测试套件 response schema"""
 
-    data: List[TestSuiteTo]
+    data: List[TestSuiteOut]
 
 
 class RunSuiteIn(BaseModel):

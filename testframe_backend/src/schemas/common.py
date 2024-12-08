@@ -1,3 +1,5 @@
+"""公共schema"""
+
 from typing import Optional, TypeVar, Generic
 from datetime import datetime
 from pydantic import Field, BaseModel, ConfigDict
@@ -31,14 +33,30 @@ class PageParam(BaseModel):
     total: int = Field(description="总数据数")
 
 
-class DefaultModel(BaseModel):
-    """默认返回schema"""
+class CommonMixinModel(BaseModel):
+    """id、创建/更新时间Mixin Model"""
+
     model_config = ConfigDict(from_attributes=True)
 
     id: Optional[int] = Field(default=None)
     created_at: Optional[datetime] = Field(
         default=None, serialization_alias="createdAt"
     )
-    update_at: Optional[datetime] = Field(
-        default=None, serialization_alias="updateAt"
-    )
+    update_at: Optional[datetime] = Field(default=None, serialization_alias="updateAt")
+
+
+# class CommonListQueryMixinModel(BaseModel):
+#     """公共列表查询schema"""
+
+#     begin_time: Optional[str] = Field(
+#         default=None,
+#         description="开始时间",
+#         alias="beginTime",
+#     ),
+#     end_time: Optional[str] = Field(
+#         default=None,
+#         description="结束时间",
+#         alias="endTime",
+#     )
+#     limit: Optional[int] = Field(default=20, ge=10),
+#     page: Optional[int] = Field(default=1, gt=0),

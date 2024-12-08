@@ -1,3 +1,5 @@
+"""用户管理访问控制"""
+
 from datetime import datetime
 from typing import Optional
 from fastapi import APIRouter, Depends, Query, HTTPException, status
@@ -24,17 +26,21 @@ router = APIRouter()
 @router.get(
     "/role/list",
     summary="角色列表",
-    response_model=ResultResponse[admin.RolesTo],
+    response_model=ResultResponse[admin.RoleListOut],
 )
 async def query_roles(
     role_name: Optional[str] = Query(
         default=None, description="角色名称", alias="roleName"
     ),
-    role_key: Optional[str] = Query(default=None, description="角色详情", alias="roleKey"),
+    role_key: Optional[str] = Query(
+        default=None, description="角色详情", alias="roleKey"
+    ),
     begin_time: Optional[str] = Query(
         default=None, description="开始时间", alias="beginTime"
     ),
-    end_time: Optional[str] = Query(default=None, description="结束时间", alias="endTime"),
+    end_time: Optional[str] = Query(
+        default=None, description="结束时间", alias="endTime"
+    ),
     limit: Optional[int] = Query(default=20, ge=10),
     page: Optional[int] = Query(default=1, gt=0),
 ):
@@ -68,15 +74,15 @@ async def query_roles(
     )
     # total
     total = await query.count()
-    return ResultResponse[admin.RolesTo](
-        result=admin.RolesTo(data=result, page=page, limit=limit, total=total)
+    return ResultResponse[admin.RoleListOut](
+        result=admin.RoleListOut(data=result, page=page, limit=limit, total=total)
     )
 
 
 @router.get(
     "/permission/list",
     summary="查询权限列表",
-    response_model=ResultResponse[admin.PermissionsTo],
+    response_model=ResultResponse[admin.PermissionListOut],
 )
 async def query_permissions(
     permission_name: Optional[str] = Query(
@@ -91,7 +97,9 @@ async def query_permissions(
     begin_time: Optional[str] = Query(
         default=None, description="开始时间", alias="beginTime"
     ),
-    end_time: Optional[str] = Query(default=None, description="结束时间", alias="endTime"),
+    end_time: Optional[str] = Query(
+        default=None, description="结束时间", alias="endTime"
+    ),
     limit: Optional[int] = Query(default=20, ge=10),
     page: Optional[int] = Query(default=1, gt=0),
 ):
@@ -117,8 +125,8 @@ async def query_permissions(
     query = Permission.filter(**filters)
     permissions = await query.offset(limit * (page - 1)).limit(limit).all()
     total = await query.count()
-    return ResultResponse[admin.PermissionsTo](
-        result=admin.PermissionsTo(
+    return ResultResponse[admin.PermissionListOut](
+        result=admin.PermissionListOut(
             data=permissions, page=page, limit=limit, total=total
         )
     )
@@ -127,7 +135,7 @@ async def query_permissions(
 @router.post(
     "/role",
     summary="新增角色",
-    response_model=ResultResponse[admin.RoleTo],
+    response_model=ResultResponse[admin.RoleOut],
     # dependencies=[Depends(Authority("admin", "add"))],
 )
 async def add_role(body: admin.RoleIn):
@@ -167,22 +175,22 @@ async def add_role(body: admin.RoleIn):
             .prefetch_related("permissions", "menus")
             .first()
         )
-        return ResultResponse[admin.RoleTo](result=query)
+        return ResultResponse[admin.RoleOut](result=query)
 
 
 @router.post(
     "/permission/add",
     summary="新增权限",
-    response_model=ResultResponse[admin.PermissionTo],
+    response_model=ResultResponse[admin.PermissionOut],
     # dependencies=[Depends(Authority("admin,add"))],
 )
 async def add_permission(body: admin.PermissionIn):
     """新增权限"""
-    get_permission = await Permission.get_or_none(name=body.name)
-    if get_permission:
+    fetch_permission = await Permission.get_or_none(name=body.name)
+    if fetch_permission:
         raise PermissionExistException
     permission = await Permission.create(**body.model_dump(exclude_unset=True))
-    return ResultResponse[admin.PermissionTo](result=permission)
+    return ResultResponse[admin.PermissionOut](result=permission)
 
 
 @router.delete(
@@ -191,12 +199,18 @@ async def add_permission(body: admin.PermissionIn):
     response_model=ResultResponse[None],
     dependencies=[Depends(Authority("admin", "delete"))],
 )
-async def delete_role(role_ids: Annotated[str, StringConstraints(strip_whitespace=True, pattern=r'^\d+(,\d+)*$')]):
+async def delete_role(
+    role_ids: Annotated[
+        str, StringConstraints(strip_whitespace=True, pattern=r"^\d+(,\d+)*$")
+    ]
+):
     """删除角色"""
     # 解析role ids为列表
     resource_ids_list = role_ids.split(",")
     # 检查是否存在admin角色
-    admin_role_ids = await Role.filter(id__in=resource_ids_list, role_key="admin").exists()
+    admin_role_ids = await Role.filter(
+        id__in=resource_ids_list, role_key="admin"
+    ).exists()
     # 禁止删除admin角色
     if admin_role_ids:
         raise HTTPException(
@@ -214,7 +228,11 @@ async def delete_role(role_ids: Annotated[str, StringConstraints(strip_whitespac
     summary="删除权限",
     response_model=ResultResponse[None],
 )
-async def del_permission(permission_ids: Annotated[str, StringConstraints(strip_whitespace=True, pattern=r'^\d+(,\d+)*$')]):
+async def del_permission(
+    permission_ids: Annotated[
+        str, StringConstraints(strip_whitespace=True, pattern=r"^\d+(,\d+)*$")
+    ]
+):
     """删除权限"""
     resource_ids_list = permission_ids.split(",")
     permission = await Permission.filter(id__in=resource_ids_list).delete()
@@ -226,7 +244,7 @@ async def del_permission(permission_ids: Annotated[str, StringConstraints(strip_
 @router.get(
     "/role/{role_id}",
     summary="获取角色",
-    response_model=ResultResponse[admin.RoleTo],
+    response_model=ResultResponse[admin.RoleOut],
 )
 async def get_role(
     role_id: int,
@@ -253,7 +271,7 @@ async def get_role(
     )
     if not role:
         raise RoleNotExistException
-    return ResultResponse[admin.RoleTo](result=role)
+    return ResultResponse[admin.RoleOut](result=role)
 
 
 @router.put(
@@ -299,7 +317,7 @@ async def update_role(role_id: int, body: admin.RoleIn):
 @router.get(
     "/permission/{permission_id}",
     summary="获取权限",
-    response_model=ResultResponse[admin.PermissionTo],
+    response_model=ResultResponse[admin.PermissionOut],
 )
 async def get_permission(
     permission_id: int,
@@ -308,7 +326,7 @@ async def get_permission(
     permission = await Permission.filter(id=permission_id).first()
     if not permission:
         raise PermissionNotExistException
-    return ResultResponse[admin.PermissionTo](result=permission)
+    return ResultResponse[admin.PermissionOut](result=permission)
 
 
 @router.put(
@@ -316,7 +334,7 @@ async def get_permission(
     summary="修改权限",
     response_model=ResultResponse[None],
 )
-async def update_permission(permission_id: int, body: admin.PutPermissionIn):
+async def update_permission(permission_id: int, body: admin.PermissionUpdateIn):
     """修改权限"""
     permission = await Permission.filter(id=permission_id).update(
         **body.model_dump(exclude_unset=True)

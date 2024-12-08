@@ -1,15 +1,18 @@
-from typing import Optional, List, Union, Any
+"""菜单scheams"""
+
+from typing import Optional, List, Union
 from pydantic import BaseModel, Field, field_validator, ConfigDict
 from tortoise.fields.relational import ReverseRelation
-from ...db.models import Routes, RouteMeta
-from ...utils.enum import BoolEnum, BoolEnum
+from ...db.models import Routes
+from ...utils.enum import BoolEnum
 
 # from ..schemas.default import Routes
-from ..common import PageParam, DefaultModel
+from ..common import PageParam, CommonMixinModel
 from ...utils.log_util import log
 
 
-class Menu(BaseModel):
+class MenuMixinModel(BaseModel):
+    """菜单Mixin"""
     name: str = Field(description="菜单名称")
     path: str = Field(description="菜单path")
     hidden: BoolEnum = Field(description="是否隐藏")
@@ -23,23 +26,26 @@ class Menu(BaseModel):
     status: BoolEnum = Field(description="菜单状态")
 
 
-class MenuMeta(BaseModel):
+class MenuMetaMixinModel(BaseModel):
+    """菜单meta Mixin"""
     title: str = Field(description="路由标题")
     icon: str = Field(description="icon图标")
     link: Optional[str] = Field(default=None, description="链接")
 
 
-class MenuMetaIn(MenuMeta):
+class MenuMetaIn(MenuMetaMixinModel):
+    """菜单meta req schema"""
     no_cache: BoolEnum = Field(description="不使用keepalive", alias="noCache")
 
 
-class MenuMetaTo(DefaultModel, MenuMeta):
+class MenuMetaOut(CommonMixinModel, MenuMetaMixinModel):
+    """菜单meta res schema"""
     no_cache: BoolEnum = Field(
         description="不使用keepalive", serialization_alias="noCache"
     )
 
 
-class AddMenuIn(Menu):
+class AddMenuIn(MenuMixinModel):
     """添加路由菜单schema"""
 
     parent_id: Optional[int] = Field(
@@ -48,8 +54,8 @@ class AddMenuIn(Menu):
     meta: MenuMetaIn
 
 
-class MenuTo(DefaultModel, Menu):
-    """res schmea"""
+class MenuTo(CommonMixinModel, MenuMixinModel):
+    """menu res schmea"""
 
     parent_id: Optional[int] = Field(default=None, serialization_alias="parentId")
     always_show: Optional[BoolEnum] = Field(
@@ -58,7 +64,7 @@ class MenuTo(DefaultModel, Menu):
         serialization_alias="alwaysShow",
     )
     children: Optional[Union[List["MenuTo"], List[None]]] = Field(default=None)
-    route_meta: MenuMetaTo = Field(alias="meta", validation_alias="route_meta")
+    route_meta: MenuMetaOut = Field(alias="meta", validation_alias="route_meta")
 
     @field_validator("children", mode="before")
     @classmethod
@@ -84,15 +90,15 @@ class MenuTo(DefaultModel, Menu):
     #     return [meta for meta in v][0]
 
 
-class TreeSelectTo(BaseModel):
-    """树形菜单"""
+class TreeSelectOut(BaseModel):
+    """树形菜单 res schema"""
 
     model_config = ConfigDict(from_attributes=True)
     id: Optional[int] = Field(default=None)
     label: Optional[str] = Field(
         default=None, validation_alias="route_meta", description="树形菜单label"
     )
-    children: Optional[List["TreeSelectTo"]] = Field(default=None)
+    children: Optional[List["TreeSelectOut"]] = Field(default=None)
 
     @field_validator("label", mode="before")
     @classmethod
@@ -120,11 +126,13 @@ class TreeSelectTo(BaseModel):
             log.error(e)
 
 
-class MenuListTo(PageParam):
+class MenuListOut(PageParam):
+    """菜单列表 res schema"""
     data: List[MenuTo]
 
 
-class MetaUpdate(BaseModel):
+class MetaUpdateMixinModel(BaseModel):
+    """更新菜单Mixin"""
     title: Optional[str] = Field(default=None, description="路由标题")
     icon: Optional[str] = Field(default=None, description="icon图标")
     link: Optional[str] = Field(default=None, description="链接")
@@ -134,6 +142,7 @@ class MetaUpdate(BaseModel):
 
 
 class MenuUpdateIn(BaseModel):
+    """更新菜单 req schema"""
     name: Optional[str] = Field(default=None, description="菜单名称")
     path: Optional[str] = Field(default=None, description="菜单path")
     hidden: Optional[BoolEnum] = Field(default=None, description="是否隐藏")
@@ -145,5 +154,5 @@ class MenuUpdateIn(BaseModel):
         alias="alwaysShow",
     )
     status: Optional[BoolEnum] = Field(default=None, description="菜单状态")
-    parent_id: int = Field(default=None,alias="parentId")
-    meta: Optional[MetaUpdate] = Field(default=None)
+    parent_id: int = Field(default=None, alias="parentId")
+    meta: Optional[MetaUpdateMixinModel] = Field(default=None)

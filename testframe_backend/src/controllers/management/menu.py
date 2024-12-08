@@ -16,7 +16,7 @@ router = APIRouter()
 @router.get(
     "/list",
     summary="菜单列表",
-    response_model=ResultResponse[menu.MenuListTo],
+    response_model=ResultResponse[menu.MenuListOut],
 )
 async def menu_list(
     menuname: Optional[str] = Query(
@@ -65,22 +65,22 @@ async def menu_list(
         .all()
     )
     total = await query.count()
-    return ResultResponse[menu.MenuListTo](
-        result=menu.MenuListTo(data=menu_list, page=page, limit=limit, total=total)
+    return ResultResponse[menu.MenuListOut](
+        result=menu.MenuListOut(data=menu_list, page=page, limit=limit, total=total)
     )
 
 
 @router.get(
     "/treeselect",
     summary="查询菜单树结构",
-    response_model=ResultResponse[List[menu.TreeSelectTo]],
+    response_model=ResultResponse[List[menu.TreeSelectOut]],
 )
 async def get_treeselect():
     """查询菜单树结构"""
     route_list = await Routes.filter(parent_id__isnull=True).prefetch_related(
         "children__route_meta", "route_meta"
     )
-    return ResultResponse[List[menu.TreeSelectTo]](result=route_list)
+    return ResultResponse[List[menu.TreeSelectOut]](result=route_list)
 
 
 @router.post(

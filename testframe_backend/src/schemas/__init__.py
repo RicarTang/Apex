@@ -1,1 +1,1 @@
-from .common import ResultResponse, PageParam, DefaultModel
+from .common import ResultResponse, PageParam, CommonMixinModel

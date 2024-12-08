@@ -27,7 +27,7 @@ router = APIRouter()
 @router.post(
     "/add",
     summary="添加测试套件",
-    response_model=ResultResponse[testsuite.TestSuiteTo],
+    response_model=ResultResponse[testsuite.TestSuiteOut],
 )
 async def add_testsuite(body: testsuite.TestSuiteIn):
     """新增测试套件"""
@@ -42,13 +42,13 @@ async def add_testsuite(body: testsuite.TestSuiteIn):
             await result.testcases.add(*testcases_result)
             # 查询关联用例
             await result.fetch_related("testcases")
-    return ResultResponse[testsuite.TestSuiteTo](result=result)
+    return ResultResponse[testsuite.TestSuiteOut](result=result)
 
 
 @router.get(
     "/list",
     summary="获取测试套件列表",
-    response_model=ResultResponse[testsuite.TestSuitesTo],
+    response_model=ResultResponse[testsuite.TestSuiteListOut],
 )
 async def get_all_testsuite(
     suite_title: Optional[str] = Query(
@@ -91,8 +91,8 @@ async def get_all_testsuite(
         .all()
     )
     total = await query.count()
-    return ResultResponse[testsuite.TestSuitesTo](
-        result=testsuite.TestSuitesTo(
+    return ResultResponse[testsuite.TestSuiteListOut](
+        result=testsuite.TestSuiteListOut(
             data=suite_list,
             page=page,
             limit=limit,
@@ -124,7 +124,7 @@ async def run_testsuite(body: testsuite.RunSuiteIn):
         raise CurrentTestEnvNotSetException
     task: AsyncResult = task_test.apply_async(
         [
-            jsonable_encoder(testsuite.TestSuiteTo.model_validate(result).testcases),
+            jsonable_encoder(testsuite.TestSuiteOut.model_validate(result).testcases),
             body.suite_id,
         ],
     )  # 将Celery任务发送到消息队列,并传递测试数据
@@ -170,7 +170,7 @@ async def delete_testsuite(
 @router.get(
     "/{suite_id}",
     summary="获取指定testsuite",
-    response_model=ResultResponse[testsuite.TestSuiteTo],
+    response_model=ResultResponse[testsuite.TestSuiteOut],
 )
 async def get_testsuite(suite_id: int):
     """获取指定测试套件"""
@@ -180,13 +180,13 @@ async def get_testsuite(suite_id: int):
         )
     except DoesNotExist:
         raise TestsuiteNotExistException
-    return ResultResponse[testsuite.TestSuiteTo](result=result)
+    return ResultResponse[testsuite.TestSuiteOut](result=result)
 
 
 @router.put(
     "/{suite_id}",
     summary="更新测试套件",
-    response_model=ResultResponse[testsuite.TestSuiteTo],
+    response_model=ResultResponse[testsuite.TestSuiteOut],
 )
 async def update_testsuite(suite_id: int, body: testsuite.TestSuiteIn):
     """更新测试套件数据"""
@@ -220,4 +220,4 @@ async def update_testsuite(suite_id: int, body: testsuite.TestSuiteIn):
                 await suite.testcases.remove(*case_ids_to_remove)
         # 刷新
         await suite.refresh_from_db()
-        return ResultResponse[testsuite.TestSuiteTo](result=suite)
+        return ResultResponse[testsuite.TestSuiteOut](result=suite)

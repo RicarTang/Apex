@@ -23,7 +23,7 @@ worker_connections = 500
 
 # 设置进程文件目录
 # pidfile = '/var/run/gunicorn.pid'
-pidfile = "./gunicorn.pid"
+# pidfile = "./gunicorn.pid"
 
 # 日志标准输出
 # accesslog = "./testframe_backend/src/log/gunicorn_access.log"

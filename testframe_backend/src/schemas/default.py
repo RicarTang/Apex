@@ -1,11 +1,13 @@
+"""default路由schema"""
+
 from pydantic import Field, BaseModel, ConfigDict
-from .management.user import UserTo
+from .management.user import UserOut
 
 
-class Login(BaseModel):
+class LoginOut(BaseModel):
     """登录res schema"""
 
-    data: UserTo = Field(description="用户信息主体")
+    data: UserOut = Field(description="用户信息主体")
     access_token: str = Field(description="jwt")
     token_type: str = Field(description="token类型")
 

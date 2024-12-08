@@ -1,6 +1,7 @@
+"""测试环境schmea"""
 from typing import Optional, List
 from pydantic import BaseModel, HttpUrl, Field, ConfigDict, field_validator
-from ..common import PageParam, DefaultModel
+from ..common import PageParam, CommonMixinModel
 
 
 class TestEnvIn(BaseModel):
@@ -23,7 +24,7 @@ class DeleteEnvIn(BaseModel):
     env_ids: List[int] = Field(alias="envIds")
 
 
-class TestEnvTo(DefaultModel):
+class TestEnvOut(CommonMixinModel):
     """response schema"""
 
     model_config = ConfigDict(from_attributes=True)
@@ -33,10 +34,10 @@ class TestEnvTo(DefaultModel):
     remark: Optional[str] = Field(default=None)
 
 
-class TestEnvsTo(PageParam):
+class TestEnvListOut(PageParam):
     """环境列表response schema"""
 
-    data: List[TestEnvTo]
+    data: List[TestEnvOut]
 
 
 class CurrentEnvIn(BaseModel):

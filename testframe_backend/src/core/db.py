@@ -1,6 +1,8 @@
+from fastapi import FastAPI
+from tortoise.contrib.fastapi import register_tortoise
 from ...config import config
 
-
+# orm config
 TORTOISE_ORM = {
     "connections": {
         "default": {
@@ -24,3 +26,17 @@ TORTOISE_ORM = {
     # 设置数据库datetime时区
     "timezone": config.TZ,
 }
+
+
+def register_db(app: FastAPI):
+    """注册tortoise
+
+    Args:
+        app (FastAPI): _description_
+    """
+    register_tortoise(
+        app,
+        config=TORTOISE_ORM,
+        generate_schemas=False,  # 重启服务时自动生成数据库表；关闭，改为使用aerich
+        add_exception_handlers=True,
+    )

@@ -19,7 +19,7 @@ router = APIRouter()
 @router.post(
     "/add",
     summary="添加测试环境地址",
-    response_model=ResultResponse[testenv.TestEnvTo],
+    response_model=ResultResponse[testenv.TestEnvOut],
 )
 async def add_test_env(body: testenv.TestEnvIn):
     """添加测试环境地址
@@ -28,13 +28,13 @@ async def add_test_env(body: testenv.TestEnvIn):
         body (testenv.TestEnvIn): _description_
     """
     result = await TestEnv.create(**body.model_dump())
-    return ResultResponse[testenv.TestEnvTo](result=result)
+    return ResultResponse[testenv.TestEnvOut](result=result)
 
 
 @router.get(
     "/list",
     summary="获取测试环境列表",
-    response_model=ResultResponse[testenv.TestEnvsTo],
+    response_model=ResultResponse[testenv.TestEnvListOut],
 )
 async def get_all_env(
     env_name: Optional[str] = Query(
@@ -70,8 +70,8 @@ async def get_all_env(
     query = TestEnv.filter(**filters)
     test_env_list = await query.offset(limit * (page - 1)).limit(limit).all()
     total = await query.count()
-    return ResultResponse[testenv.TestEnvsTo](
-        result=testenv.TestEnvsTo(
+    return ResultResponse[testenv.TestEnvListOut](
+        result=testenv.TestEnvListOut(
             data=test_env_list,
             page=page,
             limit=limit,
@@ -128,7 +128,7 @@ async def delete_env(env_ids: Annotated[str, StringConstraints(strip_whitespace=
 @router.get(
     "/{env_id}",
     summary="获取指定环境变量",
-    response_model=ResultResponse[testenv.TestEnvTo],
+    response_model=ResultResponse[testenv.TestEnvOut],
 )
 async def get_env(env_id: int):
     """获取指定环境
@@ -140,7 +140,7 @@ async def get_env(env_id: int):
         result = await TestEnv.get(id=env_id)
     except DoesNotExist:
         raise TestEnvNotExistException
-    return ResultResponse[testenv.TestEnvTo](result=result)
+    return ResultResponse[testenv.TestEnvOut](result=result)
 
 
 @router.put(

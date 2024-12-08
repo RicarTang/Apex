@@ -1,3 +1,5 @@
+"""default标签路由访问控制"""
+
 from typing import List
 from fastapi import APIRouter, Depends, Request, HTTPException, status
 
@@ -28,7 +30,7 @@ router = APIRouter()
 @router.post(
     "/login",
     summary="登录",
-    response_model=ResultResponse[default.Login],
+    response_model=ResultResponse[default.LoginOut],
 )
 async def login(
     request: Request,
@@ -48,8 +50,8 @@ async def login(
         raise PasswordValidateErrorException
     # 创建jwt
     access_token = create_access_token(data={"sub": query_user.user_name})
-    return ResultResponse[default.Login](
-        result=default.Login(
+    return ResultResponse[default.LoginOut](
+        result=default.LoginOut(
             data=query_user,
             access_token=access_token,
             token_type="bearer",
@@ -139,4 +141,4 @@ async def get_routers(current_user=Depends(current_user)):
 async def statistics_data():
     """统计测试数据"""
     # 从redis获取统计数据
-    return ResultResponse(result=dict(caseNum=5,scheduledTask=8,project=15))
+    return ResultResponse(result=dict(caseNum=5, scheduledTask=8, project=15))

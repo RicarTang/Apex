@@ -1,16 +1,12 @@
-import sys, os
+"""项目入口文件"""
 
-# from contextlib import asynccontextmanager
+import os
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.exceptions import RequestValidationError
-from fastapi.openapi.docs import (
-    get_swagger_ui_html,
-    get_swagger_ui_oauth2_redirect_html,
-)
+from fastapi.openapi.docs import get_swagger_ui_html
 from tortoise.exceptions import IntegrityError
-from tortoise.contrib.fastapi import register_tortoise
-from .src.api import (
+from .src.controllers import (
     user_api,
     admin_api,
     testcase_api,
@@ -27,12 +23,8 @@ from .src.core.exception import (
     custom_validation_exception_handler,
     custom_integrity_exception_handler,
 )
+from .src.core.db import register_db
 from .config import config
-
-# from .src.core.cache import init_cache
-# from .src.utils.background_task_util import scheduler
-from .src.utils.log_util import log
-from .src.db.settings import TORTOISE_ORM
 from .src.db import InitDbData
 
 
@@ -44,21 +36,13 @@ app = FastAPI(
     docs_url=None,  # docs url设置为none，使用自定义的docs路由
 )
 
-
 # 注册tortoise orm 需要在initial_data前面
-register_tortoise(
-    app,
-    config=TORTOISE_ORM,
-    generate_schemas=False,  # 重启服务时自动生成数据库表；关闭，改为使用aerich
-    add_exception_handlers=True,
-)
+register_db(app)
 
 
 @app.on_event("startup")
 async def lifespan():
     """fastapi初始化"""
-    # 初始化缓存池
-    # await init_cache()
     # 挂载静态文件
     # swagger 静态文件
     app.mount(
@@ -78,7 +62,7 @@ async def lifespan():
         except RuntimeError:
             os.makedirs(config.ALLURE_REPORT)
 
-    # 初始化数据库,需要在注册tortoise后面初始化
+    # 初始化用户角色数据,需要在注册tortoise后面初始化
     await InitDbData().execute_init()
 
 
@@ -93,16 +77,6 @@ async def custom_swagger_ui_html():
         swagger_css_url=config.SWAGGER_CSS_URL,
         swagger_favicon_url=config.SWAGGER_FAVICON_URL,
     )
-
-
-# 自定义中间件(函数方式)
-# @app.middleware("http")
-# async def custom_time_header(request: Request, call_next):
-#     start_time = time.time()
-#     response = await call_next(request)
-#     process_time = time.time() - start_time
-#     response.headers["X-Process-Time"] = str(process_time)
-#     return response
 
 
 # include router
@@ -151,15 +125,7 @@ app.include_router(
 )
 
 
-# 注册自定义的exception(方式一)
+# 注册自定义的exception
 app.add_exception_handler(HTTPException, custom_http_exception_handler)
 app.add_exception_handler(RequestValidationError, custom_validation_exception_handler)
 app.add_exception_handler(IntegrityError, custom_integrity_exception_handler)
-
-# 注册自定义的exception(方式二)
-# @app.exception_handler(RequestValidationError)
-# async def custom_validation_exception_handler(
-#     request: Request, exc: RequestValidationError
-# ):
-#     """修改默认的请求验证错误模型"""
-#     return JSONResponse(status_code=422, content={"code": 400, "message": exc.errors()})
