@@ -6,7 +6,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.exceptions import RequestValidationError
 from fastapi.openapi.docs import get_swagger_ui_html
 from tortoise.exceptions import IntegrityError
-from .src.controllers import (
+from src.controllers import (
     user_api,
     admin_api,
     testcase_api,
@@ -16,16 +16,16 @@ from .src.controllers import (
     default_api,
     menu_api,
 )
-from .src.core.security import check_jwt_auth
-from .src.core.middleware import middleware
-from .src.core.exception import (
+from src.core.security import check_jwt_auth
+from src.core.middleware import middleware
+from src.core.exception import (
     custom_http_exception_handler,
     custom_validation_exception_handler,
     custom_integrity_exception_handler,
 )
-from .src.core.db import register_db
+from src.core.db import register_db
 from .config import config
-from .src.db import InitDbData
+from src.db import InitDbData
 
 
 app = FastAPI(

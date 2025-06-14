@@ -36,10 +36,10 @@ def load_tasks_from_db(sender, **kwargs):
                     )
                 else:
                     log.error("只支持简单的5字段CRON表达式！")
-                    raise
+                    # raise 
             log.info(f"已从数据库加载了 {len(active_tasks)} 个定时任务")
         except Exception as e:
-            log.error("从数据库加载定时任务失败！")
+            log.error(f"从数据库加载定时任务失败！{e}")
 
     run_async(load_task())
 

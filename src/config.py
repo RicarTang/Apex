@@ -27,7 +27,7 @@ class BaseConfig(BaseSettings):
     ## autotest 配置路径
     TEST_CONFIG_PATH: Union[str, Path] = TEST_PATH / "config" / "config.yaml"
     ## orm models路径
-    MODELS_PATH: str = "testframe_backend.src.db.models"
+    MODELS_PATH: str = "src.db.models"
 
     # 日志配置
     ## 控制台日志级别

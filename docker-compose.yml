@@ -18,16 +18,16 @@ services:
       - apex_celery_worker
       - apex_celery_beat
     volumes:
-      - allure_results:/app/testframe_backend/src/autotest/report/allure_report
+      - allure_results:/app/src/autotest/report/allure_report
     networks:
       - apex_network
     command:
       - bash
       - -c
       - |
-        aerich init -t testframe_backend.src.db.settings.TORTOISE_ORM || true
+        aerich init -t src.db.settings.TORTOISE_ORM || true
         aerich init-db || true
-        uvicorn testframe_backend.main:app --host 0.0.0.0 --port 4000
+        uvicorn main:app --host 0.0.0.0 --port 4000
 
   # celery worker服务
   apex_celery_worker:
@@ -40,10 +40,10 @@ services:
       - apex_redis
       - apex_mysql
     volumes:
-      - allure_results:/app/testframe_backend/src/autotest/report/allure_report
+      - allure_results:/app/src/autotest/report/allure_report
     networks:
       - apex_network
-    command: "/usr/local/bin/celery -A testframe_backend.src.autotest.utils.celery.celery_app.celery worker --logfile=/var/log/celery/worker.log --loglevel=INFO"
+    command: "/usr/local/bin/celery -A src.core.celery.celery_app.celery worker --logfile=/var/log/celery/worker.log --loglevel=INFO"
   # celery beat服务
   apex_celery_beat:
     build:
@@ -56,7 +56,7 @@ services:
       - apex_mysql
     networks:
       - apex_network
-    command: "/usr/local/bin/celery -A testframe_backend.src.autotest.utils.celery.celery_app.celery beat --logfile=/var/log/celery/beat.log --loglevel=INFO"
+    command: "/usr/local/bin/celery -A src.core.celery.celery_app.celery beat --logfile=/var/log/celery/beat.log --loglevel=INFO"
   # redis服务
   apex_redis:
     image: redis:7.2.0

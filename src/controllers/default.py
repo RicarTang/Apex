@@ -140,5 +140,7 @@ async def get_routers(current_user=Depends(current_user)):
 )
 async def statistics_data():
     """统计测试数据"""
+    
+    # 定时任务每天统计数据保存至redis
     # 从redis获取统计数据
     return ResultResponse(result=dict(caseNum=5, scheduledTask=8, project=15))

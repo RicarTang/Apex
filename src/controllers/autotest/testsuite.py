@@ -15,7 +15,7 @@ from ...schemas import ResultResponse
 from ...utils.log_util import log
 from ...utils.exceptions.testsuite import TestsuiteNotExistException
 from ...utils.exceptions.testenv import CurrentTestEnvNotSetException
-from ...autotest.utils.celery.task.testcase_task import task_test
+from ...core.celery.task.testcase_task import task_test
 from ...services.autotest.testenv import TestEnvService
 from ...services.autotest.testsuite import TestSuiteSSEService
 from ...core.redis import RedisService

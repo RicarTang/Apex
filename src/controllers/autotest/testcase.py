@@ -13,16 +13,16 @@ from pydantic import StringConstraints
 from fastapi.responses import FileResponse
 from tortoise.exceptions import DoesNotExist
 
-from ...schemas.autotest import testcase
-from ....config import config
-from ...core.redis import RedisService
-from ...services import TestCaseService
-from ...db.models import TestCase
-from ...schemas import ResultResponse
-from ...utils.log_util import log
-from ...utils.excel_util import save_file, read_all_testcase
-from ...utils.exceptions.testcase import TestcaseNotExistException
-from ...utils.exceptions.testenv import CurrentTestEnvNotSetException
+from src.schemas.autotest import testcase
+from src.config import config
+from src.core.redis import RedisService
+from src.services import TestCaseService
+from src.db.models import TestCase
+from src.schemas import ResultResponse
+from src.utils.log_util import log
+from src.utils.excel_util import save_file, read_all_testcase
+from src.utils.exceptions.testcase import TestcaseNotExistException
+from src.utils.exceptions.testenv import CurrentTestEnvNotSetException
 
 router = APIRouter()
 

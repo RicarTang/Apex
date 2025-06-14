@@ -1,5 +1,5 @@
 [tool.aerich]
-tortoise_orm = "testframe_backend.src.db.settings.TORTOISE_ORM"
+tortoise_orm = "src.db.settings.TORTOISE_ORM"
 location = "./migrations"
 src_folder = "./."
 
@@ -11,9 +11,9 @@ dev = ["black>=23.12.1", "faker>=22.5.0"]
 includes = []
 
 [tool.pdm.scripts]
-dev = "uvicorn testframe_backend.main:app --host 0.0.0.0 --port 4000 --reload"
-pro = "gunicorn -c gunicorn.conf.py testframe_backend.main:app"
-aerich_init = "aerich init -t testframe_backend.src.core.db.TORTOISE_ORM"
+dev = "uvicorn src.main:app --host 0.0.0.0 --port 4000 --reload"
+pro = "gunicorn -c gunicorn.conf.py src.main:app"
+aerich_init = "aerich init -t src.core.db.TORTOISE_ORM"
 init_db = "aerich init-db"
 migrate_db = "aerich migrate"
 upgrade_db = "aerich upgrade"

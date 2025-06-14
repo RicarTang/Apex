@@ -1,7 +1,7 @@
 import pytest
 from pathlib import Path
 from asgi_lifespan import LifespanManager
-from testframe_backend.main import app
+from src.main import app
 from httpx import AsyncClient
 from loguru import logger
 

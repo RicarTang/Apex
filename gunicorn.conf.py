@@ -26,8 +26,8 @@ worker_connections = 500
 # pidfile = "./gunicorn.pid"
 
 # 日志标准输出
-# accesslog = "./testframe_backend/src/log/gunicorn_access.log"
-# errorlog = "./testframe_backend/src/log/gunicorn_error.log"
+# accesslog = "./src/log/gunicorn_access.log"
+# errorlog = "./src/log/gunicorn_error.log"
 # accesslog = "/var/log/gunicorn/gunicorn_access.log"
 # errorlog = "/var/log/gunicorn/gunicorn_error.log"
 

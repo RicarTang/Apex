@@ -5,11 +5,11 @@ from pathlib import Path
 from redis import ConnectionPool
 from redis.client import Redis
 from redis.asyncio import Redis as AioRedis, ConnectionPool as AioConnectionPool
-from .custom_metaclass import Singleton
+from src.core.custom_metaclass import Singleton
 
 # from fastapi_cache import FastAPICache
 # from fastapi_cache.backends.redis import RedisServiceBackend
-from ...config import config
+from src.config import config
 
 
 class RedisService(metaclass=Singleton):

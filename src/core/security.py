@@ -3,9 +3,9 @@ from datetime import timedelta, datetime
 from jose import JWTError, jwt
 from fastapi.security import HTTPBearer
 from fastapi import Depends, Request
-from ...config import config
-from ..db.models import Users
-from ..utils.log_util import log
+from src.config import config
+from src.db.models import Users
+from src.utils.log_util import log
 from ..utils.exceptions.user import (
     TokenUnauthorizedException,
     TokenExpiredException,

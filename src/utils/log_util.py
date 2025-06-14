@@ -1,7 +1,7 @@
 import sys
 from pathlib import Path
 from loguru import logger
-from ...config import config
+from src.config import config
 
 
 def log_handler():

@@ -1,6 +1,6 @@
 from celery import Celery
-from .....config import config
-from ..celery import celery_config
+from src.config import config
+from src.core.celery import celery_config
 
 
 # 配置Celery

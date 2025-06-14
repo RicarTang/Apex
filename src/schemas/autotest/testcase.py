@@ -45,7 +45,7 @@ class TestCaseIn(BaseModel):
         default=None, description="预期结果", alias="expectResult"
     )
     expect_data: Optional[str] = Field(
-        default=None, escription="预期返回数据", alias="expectData"
+        default=None, description="预期返回数据", alias="expectData"
     )
     request_to_redis: Optional[BoolEnum] = Field(
         default=BoolEnum.FALSE,
@@ -208,7 +208,7 @@ class UpdateCaseIn(BaseModel):
         default=None, description="预期结果", alias="expectResult"
     )
     expect_data: Optional[str] = Field(
-        default=None, escription="预期返回数据", alias="expectData"
+        default=None, description="预期返回数据", alias="expectData"
     )
     request_to_redis: Optional[BoolEnum] = Field(
         default=None,
