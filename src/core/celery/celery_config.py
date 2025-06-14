@@ -1,5 +1,5 @@
 # 导入task模块
-imports=("src.autotest.utils.celery.task.testcase_task",)
+imports=("src.core.celery.task.testcase_task",)
 # 使用utc时区
 enable_utc=True
 # 时区
