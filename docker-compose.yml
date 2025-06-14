@@ -25,7 +25,7 @@ services:
       - bash
       - -c
       - |
-        uvicorn main:app --host 0.0.0.0 --port 4000
+        uvicorn src.main:app --host 0.0.0.0 --port 4000
 
   # celery worker服务
   apex_celery_worker:
