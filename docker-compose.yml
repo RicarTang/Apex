@@ -25,8 +25,6 @@ services:
       - bash
       - -c
       - |
-        aerich init -t src.db.settings.TORTOISE_ORM || true
-        aerich init-db || true
         uvicorn main:app --host 0.0.0.0 --port 4000
 
   # celery worker服务
