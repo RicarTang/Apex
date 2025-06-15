@@ -2,6 +2,7 @@ import json
 from tortoise import run_async
 from celery.schedules import crontab
 from src.core.celery.celery_app import celery
+from src.core.celery.task.base import BaseTask
 from src.core.redis import RedisService
 from src.db.models import ScheduledTask
 from src.utils.log_util import log
@@ -60,15 +61,15 @@ def delete_allure():
     pass
 
 
-@celery.task(bind=True, name="statistics_dashbord_data")
+@celery.task(bind=True, name="statistics_dashbord_data",base=BaseTask)
 def statistics_index_dashbord_data(self):
     """首页面板统计任务"""
     # 查询所有用例数量与定时任务数量
     sql_text = text(
         """
     SELECT 
-        (SELECT COUNT(id) FROM test_case) AS case_total,
-        (SELECT COUNT(id) FROM scheduled_task) AS task_total
+        (SELECT COUNT(id) FROM test_case) AS caseNum,
+        (SELECT COUNT(id) FROM scheduled_task) AS scheduledTask
 """
     )
     with engine.connect() as db:
