@@ -11,6 +11,6 @@ task_track_started=True
 beat_schedule = {
     'statistics-dashbord-data': {
         'task': 'statistics_dashbord_data',  # task指向task name
-        'schedule': crontab(minute="*"), 
+        'schedule': crontab(hour="*/1",minute=0),  # 每个小时执行
     }
 }

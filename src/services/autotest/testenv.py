@@ -24,7 +24,7 @@ class TestEnvService:
         Args:
             value (str): 环境变量值
         """
-        return await RedisService().aioredis_pool.set(self.current_env_name, value)
+        return await RedisService().aioredis_pool.set(f"test:{self.current_env_name}", value)
 
     @staticmethod
     async def execute_one(method: str, url: str, expect_code: int):

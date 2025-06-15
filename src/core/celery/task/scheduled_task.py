@@ -76,6 +76,6 @@ def statistics_index_dashbord_data(self):
         result: RowMapping = db.execute(sql_text).mappings().fetchone()
     # 保存json格式至redis
     try:
-        RedisService().redis_pool.set("dashbord_statistics_data", json.dumps(dict(result)))
+        RedisService().redis_pool.set("task:dashbord-statistics-data", json.dumps(dict(result)))
     except Exception:
         raise RedisError
