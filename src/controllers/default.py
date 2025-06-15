@@ -144,6 +144,9 @@ async def statistics_data():
     """统计测试数据"""
     # 定时任务每天统计数据保存至redis
     # 从redis获取统计数据
-    json_data = await RedisService().aioredis_pool.get("dashbord_statistics_data")
-    statistics_data_dict = json.loads(json_data)
+    try:
+        json_data = await RedisService().aioredis_pool.get("dashbord_statistics_data")
+        statistics_data_dict = json.loads(json_data)
+    except Exception:
+        raise HTTPException(status_code=500,detail="redis错误")
     return ResultResponse[default.StatisticsOut](result=statistics_data_dict)

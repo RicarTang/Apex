@@ -10,8 +10,7 @@ task_track_started=True
 # 定时任务配置
 beat_schedule = {
     'statistics-dashbord-data': {
-        'task': 'src.core.celery.task.scheduled_task.statistics_index_dashbord_data',
-        'schedule': crontab(), 
-        # 'args': ('manager@company.com',),
+        'task': 'statistics_dashbord_data',  # task指向task name
+        'schedule': crontab(minute="*"), 
     }
 }
