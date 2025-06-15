@@ -1,10 +1,10 @@
-import asyncio
+# import asyncio
 from typing import Tuple
 from passlib.hash import md5_crypt
 from tortoise.transactions import in_transaction
 from .models import Users, Role, Routes, RouteMeta, Permission
-from ..utils.enum import AccessModelEnum, AccessActionEnum, BoolEnum, BoolEnum
-from ..utils.log_util import log
+from src.utils.enum_util import AccessModelEnum, AccessActionEnum, BoolEnum, BoolEnum
+from src.utils.log_util import log
 
 
 class InitDbData:

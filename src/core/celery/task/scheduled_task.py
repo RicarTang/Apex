@@ -1,9 +1,14 @@
+import json
 from tortoise import run_async
 from celery.schedules import crontab
-from ..celery_app import celery
-from .....db.models import ScheduledTask
-from .....utils.log_util import log
-from .....utils.enum import BoolEnum
+from src.core.celery.celery_app import celery
+from src.core.redis import RedisService
+from src.db.models import ScheduledTask
+from src.utils.log_util import log
+from src.utils.enum_util import BoolEnum
+from src.utils.sql_engine import engine
+from sqlalchemy import text, RowMapping
+from redis.exceptions import RedisError
 
 
 @celery.on_after_configure.connect
@@ -36,7 +41,7 @@ def load_tasks_from_db(sender, **kwargs):
                     )
                 else:
                     log.error("只支持简单的5字段CRON表达式！")
-                    # raise 
+                    # raise
             log.info(f"已从数据库加载了 {len(active_tasks)} 个定时任务")
         except Exception as e:
             log.error(f"从数据库加载定时任务失败！{e}")
@@ -53,3 +58,23 @@ def execute_test():
 def delete_allure():
     # @TODO 定期删除TestSuiteTaskId表中没有的allure目录
     pass
+
+
+@celery.task(bind=True, name="statistics_dashbord_data")
+def statistics_index_dashbord_data(self):
+    """首页面板统计任务"""
+    # 查询所有用例数量与定时任务数量
+    sql_text = text(
+        """
+    SELECT 
+        (SELECT COUNT(id) FROM test_case) AS case_total,
+        (SELECT COUNT(id) FROM scheduled_task) AS task_total
+"""
+    )
+    with engine.connect() as db:
+        result: RowMapping = db.execute(sql_text).mappings().fetchone()
+    # 保存json格式至redis
+    try:
+        RedisService().redis_pool.set("dashbord_statistics_data", json.dumps(dict(result)))
+    except Exception:
+        raise RedisError

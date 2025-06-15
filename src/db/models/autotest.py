@@ -1,7 +1,7 @@
 from tortoise import fields
 from tortoise.contrib.pydantic import pydantic_model_creator
-from ..base_models import AbstractBaseModel
-from ...utils.enum import (
+from src.db.base_models import AbstractBaseModel
+from src.utils.enum_util import (
     SuiteStatusEnum,
     BoolEnum,
     ApiMethodEnum,

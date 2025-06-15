@@ -3,8 +3,8 @@
 from typing import Optional, List, Union
 from pydantic import BaseModel, Field, field_validator, ConfigDict
 from tortoise.fields.relational import ReverseRelation
-from ...db.models import Routes
-from ...utils.enum import BoolEnum
+from src.db.models import Routes
+from src.utils.enum_util import BoolEnum
 
 # from ..schemas.default import Routes
 from ..common import PageParam, CommonMixinModel

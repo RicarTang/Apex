@@ -1,6 +1,6 @@
 from celery import Task
 from src.autotest.utils.result_process import ResultProcessor
-from ....utils.log_util import log
+from src.utils.log_util import log
 
 
 class BaseTaskWithTest(Task):

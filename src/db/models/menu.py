@@ -1,6 +1,6 @@
 from tortoise import fields
-from ..base_models import AbstractBaseModel
-from ...utils.enum import BoolEnum
+from src.db.base_models import AbstractBaseModel
+from src.utils.enum_util import BoolEnum
 
 
 class Routes(AbstractBaseModel):

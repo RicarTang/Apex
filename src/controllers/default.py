@@ -1,10 +1,11 @@
 """default标签路由访问控制"""
 
+import json
 from typing import List
 from fastapi import APIRouter, Depends, Request, HTTPException, status
 
-from ..schemas.management import menu
-from ..core.security import (
+from src.schemas.management import menu
+from src.core.security import (
     create_access_token,
     check_jwt_auth,
     get_current_user as current_user,
@@ -12,17 +13,18 @@ from ..core.security import (
 from passlib.hash import md5_crypt
 from tortoise.exceptions import DoesNotExist
 from tortoise.query_utils import Prefetch
-from ..core.redis import RedisService
-from ..db.models import Users, Routes
-from ..schemas import ResultResponse, default
-from ..utils.exceptions.user import (
+from src.core.redis import RedisService
+from src.db.models import Users, Routes
+from src.schemas import ResultResponse, default
+from src.utils.exceptions.user import (
     UserUnavailableException,
     PasswordValidateErrorException,
     UserNotExistException,
     TokenInvalidException,
 )
-from ..utils.log_util import log
-from ..services import UserService
+from src.utils.log_util import log
+from src.services import UserService
+from src.core.celery.task.scheduled_task import statistics_index_dashbord_data
 
 router = APIRouter()
 
@@ -135,12 +137,13 @@ async def get_routers(current_user=Depends(current_user)):
 @router.get(
     "/statistics",
     summary="首页统计数据",
-    response_model=ResultResponse[dict],
-    dependencies=[Depends(check_jwt_auth)],
+    response_model=ResultResponse[default.StatisticsOut],
+    # dependencies=[Depends(check_jwt_auth)],
 )
 async def statistics_data():
     """统计测试数据"""
-    
     # 定时任务每天统计数据保存至redis
     # 从redis获取统计数据
-    return ResultResponse(result=dict(caseNum=5, scheduledTask=8, project=15))
+    json_data = await RedisService().aioredis_pool.get("dashbord_statistics_data")
+    statistics_data_dict = json.loads(json_data)
+    return ResultResponse[default.StatisticsOut](result=statistics_data_dict)

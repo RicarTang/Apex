@@ -1,9 +1,9 @@
 """测试套件schema"""
 from typing import Optional, List, Union
 from pydantic import BaseModel, Field, field_validator
-from ...db.models import TestSuiteTaskId
-from ...utils.enum import SuiteStatusEnum
-from ..common import PageParam, CommonMixinModel
+from src.db.models import TestSuiteTaskId
+from src.utils.enum_util import SuiteStatusEnum
+from src.schemas.common import PageParam, CommonMixinModel
 from .testcase import TestCaseOut
 
 

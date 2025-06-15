@@ -2,8 +2,8 @@
 
 from typing import Optional, List
 from pydantic import BaseModel, Field
-from ...utils.enum import BoolEnum, ApiMethodEnum, RequestParamTypeEnum
-from ..common import PageParam, CommonMixinModel
+from src.utils.enum_util import BoolEnum, ApiMethodEnum, RequestParamTypeEnum
+from src.schemas.common import PageParam, CommonMixinModel
 
 
 class TestCaseIn(BaseModel):

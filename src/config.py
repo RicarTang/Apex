@@ -17,7 +17,7 @@ class BaseConfig(BaseSettings):
     ## static静态文件目录
     STATIC_PATH: Union[str, Path] = ROOT_PATH / "static"
     ## 测试目录
-    TEST_PATH: Union[str, Path] = ROOT_PATH / "src" / "autotest"
+    TEST_PATH: Union[str, Path] = ROOT_PATH / "autotest"
     ## pytest测试结果输出目录
     PYTEST_DATA: Union[str, Path] = TEST_PATH / "report" / "pytest_data"
     ## allure report 目录
