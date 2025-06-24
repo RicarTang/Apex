@@ -24,7 +24,6 @@ from src.utils.exceptions.user import (
 )
 from src.utils.log_util import log
 from src.services import UserService
-from src.core.celery.task.scheduled_task import statistics_index_dashbord_data
 
 router = APIRouter()
 

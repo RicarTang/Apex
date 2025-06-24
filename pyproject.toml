@@ -61,6 +61,7 @@ dependencies = [
     "pytest-assume>=2.4.3",
     "asgi-lifespan>=2.1.0",
     "sqlalchemy>=2.0.25",
+    "croniter>=6.0.0",
 ]
 requires-python = ">=3.9"
 readme = "README.md"

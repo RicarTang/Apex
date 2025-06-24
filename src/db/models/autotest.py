@@ -1,5 +1,4 @@
 from tortoise import fields
-from tortoise.contrib.pydantic import pydantic_model_creator
 from src.db.base_models import AbstractBaseModel
 from src.utils.enum_util import (
     SuiteStatusEnum,
@@ -7,7 +6,6 @@ from src.utils.enum_util import (
     ApiMethodEnum,
     RequestParamTypeEnum,
     BoolEnum,
-    ScheduleTaskStatusEnum,
 )
 
 
@@ -15,10 +13,16 @@ class TestCase(AbstractBaseModel):
     """测试用例表"""
 
     case_no = fields.CharField(max_length=10, unique=True, description="用例编号")
-    case_title = fields.CharField(max_length=50, index=True, description="用例名称/标题")
-    case_description = fields.CharField(max_length=100, null=True, description="用例说明")
+    case_title = fields.CharField(
+        max_length=50, index=True, description="用例名称/标题"
+    )
+    case_description = fields.CharField(
+        max_length=100, null=True, description="用例说明"
+    )
     case_module = fields.CharField(max_length=20, description="用例模块")
-    case_sub_module = fields.CharField(max_length=20, null=True, description="用例子模块")
+    case_sub_module = fields.CharField(
+        max_length=20, null=True, description="用例子模块"
+    )
     case_is_execute = fields.IntEnumField(
         enum_type=BoolEnum,
         default=BoolEnum.TRUE,
@@ -66,7 +70,9 @@ class TestSuite(AbstractBaseModel):
     """测试套件表"""
 
     suite_no = fields.CharField(max_length=10, unique=True, description="套件编号")
-    suite_title = fields.CharField(max_length=50, index=True, description="套件名称/标题")
+    suite_title = fields.CharField(
+        max_length=50, index=True, description="套件名称/标题"
+    )
     remark = fields.CharField(max_length=100, null=True, description="备注")
     status = fields.IntEnumField(
         enum_type=SuiteStatusEnum,
@@ -86,7 +92,9 @@ class TestSuite(AbstractBaseModel):
 class TestSuiteTaskId(AbstractBaseModel):
     """测试套件与task id表"""
 
-    task_id = fields.CharField(max_length=50, index=True, description="运行测试套件的task id")
+    task_id = fields.CharField(
+        max_length=50, index=True, description="运行测试套件的task id"
+    )
     testsuite: fields.OneToOneRelation["TestSuite"] = fields.OneToOneField(
         model_name="models.TestSuite", related_name="task_id"
     )
@@ -111,17 +119,14 @@ class TestEnv(AbstractBaseModel):
 class ScheduledTask(AbstractBaseModel):
     """定时任务表"""
 
-    task_name = fields.CharField(max_length=30,description="任务名称")
-    schedule = fields.CharField(max_length=30, description="CRON 表达式")
-    enabled = fields.IntEnumField(
+    name = fields.CharField(max_length=30, description="任务唯一标识")
+    task = fields.CharField(max_length=100, description="任务函数路径")
+    cron_expression = fields.CharField(max_length=30, description="CRON 表达式")
+    task_kwargs = fields.CharField(max_length=200, null=True, description="任务参数")
+    status = fields.IntEnumField(
         enum_type=BoolEnum,
         default=BoolEnum.TRUE,
         description="是否启用;1: enable, 0: disable",
-    )
-    status = fields.IntEnumField(
-        enum_type=ScheduleTaskStatusEnum,
-        default=ScheduleTaskStatusEnum.PENDING,
-        description="任务状态;0: pending, 1: running, 2: completed, 3: failed, 4: paused",
     )
     remark = fields.CharField(max_length=100, null=True, description="备注")
 

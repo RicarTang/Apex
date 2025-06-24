@@ -15,6 +15,7 @@ from src.controllers import (
     config_api,
     default_api,
     menu_api,
+    task_api,
 )
 from src.core.security import check_jwt_auth
 from src.core.middleware import middleware
@@ -122,6 +123,11 @@ app.include_router(
     tags=["Menu"],
     prefix="/menu",
     # dependencies=[Depends(check_jwt_auth)],
+)
+app.include_router(
+    task_api,
+    tags=["Task"],
+    prefix="/task",
 )
 
 

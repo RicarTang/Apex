@@ -1,4 +1,5 @@
-from ...utils.sql_engine import engine, text
+from sqlalchemy import text
+from ...utils.sql_engine import engine
 from ...utils.log_util import log
 
 

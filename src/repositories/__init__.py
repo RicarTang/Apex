@@ -1,4 +1,4 @@
-from typing import TypeVar, Generic, Type, List, Optional
+from typing import TypeVar, Generic, Type, List, Optional, Tuple
 from tortoise.models import Model
 from tortoise.queryset import QuerySet
 
@@ -46,6 +46,25 @@ class BaseRepository(Generic[T]):
             List[T]: List[T]
         """
         return await cls.model.filter(**filters).all()
+
+    @classmethod
+    async def fetch_page_by_filter(
+        cls, limit: int, page: int, **filters
+    ) -> Tuple[List[T], int]:
+        """根据分页与条件查询
+
+        Args:
+            limit (int): _description_
+            page (int): _description_
+
+        Returns:
+            _type_: _description_
+        """
+        query = cls.model.filter(**filters)
+        result = await query.offset(limit * (page - 1)).limit(limit).all()
+        # total
+        total = await query.count()
+        return result, total
 
     @classmethod
     async def create(cls, **kwargs) -> T:

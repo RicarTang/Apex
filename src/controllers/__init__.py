@@ -6,3 +6,4 @@ from .autotest.testenv import router as testenv_api
 from .autotest.config import router as config_api
 from .default import router as default_api
 from .management.menu import router as menu_api
+from .management.task import router as task_api

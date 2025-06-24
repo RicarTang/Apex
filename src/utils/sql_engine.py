@@ -1,7 +1,7 @@
 """同步sql引擎"""
 
 # import re
-from sqlalchemy import create_engine, text
+from sqlalchemy import create_engine
 from src.config import config
 
 
