@@ -54,7 +54,7 @@ services:
       - apex_mysql
     networks:
       - apex_network
-    command: "/usr/local/bin/celery -A src.core.celery.celery_app.celery beat --logfile=/var/log/celery/beat.log --loglevel=INFO"
+    command: "/usr/local/bin/celery -A src.core.celery.celery_app.celery beat --logfile=/var/log/celery/beat.log --loglevel=DEBUG"
   # redis服务
   apex_redis:
     image: redis:7.2.0

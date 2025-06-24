@@ -26,21 +26,25 @@ class DatabaseScheduler(PersistentScheduler):
     def _load_tasks_from_db(self):
         """从数据库加载任务配置"""
         sql_text = text("SELECT * FROM scheduled_task WHERE status = 1")
+        try:
+            tasks = self.db_connection.execute(sql_text).fetchall()
+        except Exception as e:
+            self.logger.error(f"数据库查询失败: {e}")
+        else:
+            # 添加/更新任务
+            for task in tasks:
+                entry = self.Entry(
+                    name=task.name,
+                    task=task.task,
+                    schedule=task.cron_expression,
+                    kwargs=task.task_kwargs or {},
+                )
 
-        tasks = self.db_connection.execute(sql_text).fetchall()
-        # 添加/更新任务
-        for task in tasks:
-            entry = self.Entry(
-                name=task.name,
-                task=task.task,
-                schedule=task.cron_expression,
-                kwargs=task.task_kwargs or {},
-            )
-
-            if task.name in self.schedule:
-                self.schedule[task.name].update(entry)
-            else:
-                self.schedule[task.name] = entry
+                if task.name in self.schedule:
+                    self.schedule[task.name].update(entry)
+                else:
+                    self.schedule[task.name] = entry
+        
 
     def tick(self, *args, **kwargs):
         """重写tick方法，增加数据库检查逻辑"""
