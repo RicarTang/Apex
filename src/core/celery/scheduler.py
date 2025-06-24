@@ -12,7 +12,6 @@ class DatabaseScheduler(PersistentScheduler):
 
     def __init__(self, *args, **kwargs):
         """初始化调度器，设置数据库连接和检查间隔"""
-        self.db_connection = engine.connect()
         self.db_check_interval = config.CELERY_BEAT_CHECK_INTERVAL or self.max_interval
         self.last_db_check = 0
         super().__init__(*args, **kwargs)
@@ -27,7 +26,8 @@ class DatabaseScheduler(PersistentScheduler):
         """从数据库加载任务配置"""
         sql_text = text("SELECT * FROM scheduled_task WHERE status = 1")
         try:
-            tasks = self.db_connection.execute(sql_text).fetchall()
+            with engine.connect() as db:
+                tasks = db.execute(sql_text).fetchall()
         except Exception as e:
             self.logger.error(f"数据库查询失败: {e}")
         else:
@@ -44,7 +44,6 @@ class DatabaseScheduler(PersistentScheduler):
                     self.schedule[task.name].update(entry)
                 else:
                     self.schedule[task.name] = entry
-        
 
     def tick(self, *args, **kwargs):
         """重写tick方法，增加数据库检查逻辑"""
@@ -61,9 +60,3 @@ class DatabaseScheduler(PersistentScheduler):
                 self.logger.error(f"Failed to reload database tasks: {e}")
 
         return delay
-
-    def close(self):
-        """添加数据库连接的断开逻辑"""
-        if self.db_connection:
-            self.db_connection.close()
-        super().close()
