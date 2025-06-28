@@ -33,6 +33,8 @@ services:
       context: .
       dockerfile: Dockerfile.celery
     container_name: apex_celery_worker
+    environment:
+      - TZ=Asia/Shanghai
     restart: always
     depends_on:
       - apex_redis
@@ -48,6 +50,8 @@ services:
       context: .
       dockerfile: Dockerfile.celery
     container_name: apex_celery_beat
+    environment:
+      - TZ=Asia/Shanghai
     restart: always
     depends_on:
       - apex_redis
