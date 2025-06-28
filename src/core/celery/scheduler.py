@@ -15,6 +15,7 @@ class DatabaseScheduler(PersistentScheduler):
         self.refresh_interval = config.CELERY_BEAT_CHECK_INTERVAL or self.max_interval
         self._last_refresh = None
         super().__init__(*args, **kwargs)
+        super().setup_schedule()
 
     def _parse_cron(self, expr: str) -> dict:
         """解析cron表达式"""
