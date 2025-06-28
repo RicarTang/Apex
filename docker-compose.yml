@@ -41,7 +41,7 @@ services:
       - allure_results:/app/src/autotest/report/allure_report
     networks:
       - apex_network
-    command: "/usr/local/bin/celery -A src.core.celery.celery_app.celery worker --logfile=/var/log/celery/worker.log --loglevel=INFO"
+    command: "/usr/local/bin/celery -A src.core.celery.celery_app.celery worker --logfile=/var/log/celery/worker.log --loglevel=DEBUG"
   # celery beat服务
   apex_celery_beat:
     build:
