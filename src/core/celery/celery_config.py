@@ -1,7 +1,7 @@
 # 导入task模块
 imports = ("src.core.celery.task.testcase_task", "src.core.celery.task.scheduled_task")
 # 使用utc时区
-enable_utc = True
+enable_utc = False
 # 时区
 timezone = "Asia/Shanghai"
 # started状态显示

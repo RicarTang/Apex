@@ -51,12 +51,15 @@ class DatabaseScheduler(PersistentScheduler):
     # 定期刷新任务配置（不影响 PersistentScheduler 的状态存储）
     def sync(self):
         if self._should_refresh():
-            log.info("开始从数据库同步task".center(30,"-"))
+            log.info("开始从数据库同步task".center(30, "-"))
             self._last_refresh = self.app.now()
             new_entries = self._load_entries()
             self.update_from_dict(new_entries)  # 更新内存中的任务列表
-            log.info("成功从数据库更新task任务".center(30,"-"))
+            log.info("成功从数据库更新task任务".center(30, "-"))
         super().sync()  # 调用父类方法处理状态持久化
+        log.debug(
+            f"任务状态更新: {[(entry.name,entry.last_run_at) for entry in self.schedule.values()]}"
+        )
 
     def _should_refresh(self):
         if self._last_refresh is None:
