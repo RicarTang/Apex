@@ -50,11 +50,6 @@ from redis.exceptions import RedisError
 
 
 @celery.task
-def execute_test():
-    log.debug("测试定时任务")
-
-
-@celery.task
 def delete_allure():
     # @TODO 定期删除TestSuiteTaskId表中没有的allure目录
     pass
