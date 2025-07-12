@@ -1,6 +1,6 @@
 # 导入task模块
 # from celery.beat import crontab
-from .scheduler import StableScheduler
+from .scheduler import DatabaseScheduleEntry
 imports = ("src.core.celery.task.testcase_task", "src.core.celery.task.scheduled_task","src.core.celery.scheduler")
 # 使用utc时区
 enable_utc = False
@@ -16,4 +16,4 @@ task_track_started = True
 #     }
 # }
 # 自定义调度器
-beat_scheduler = StableScheduler
+beat_scheduler = DatabaseScheduleEntry
