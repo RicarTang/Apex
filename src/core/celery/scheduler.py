@@ -10,10 +10,6 @@ from src.utils.sql_engine import engine
 from src.utils.log_util import log
 import threading
 
-# 全局调度器实例
-_scheduler_instance = None
-_scheduler_lock = threading.Lock()
-
 
 class TaskEntry:
     """任务条目"""
@@ -81,81 +77,79 @@ class StableScheduler(Scheduler):
 
     def setup(self):
         """初始化方法，Beat启动时调用"""
-        with self._lock:
-            log.info("=" * 50)
-            log.info("初始化调度器")
+        log.info("=" * 50)
+        log.info("初始化调度器")
 
-            # 从数据库加载任务
-            self.update_tasks()
+        # 从数据库加载任务
+        self.update_tasks()
 
-            log.info(f"已加载 {len(self.task_heap)} 个任务")
-            log.info("=" * 50)
+        log.info(f"已加载 {len(self.task_heap)} 个任务")
+        log.info("=" * 50)
 
     def update_tasks(self):
         """从数据库更新任务配置"""
-        with self._lock:
-            log.info("更新任务配置")
-            try:
-                # 保存当前任务状态
-                current_state = {}
-                for entry in self.task_heap:
-                    current_state[entry.name] = {
-                        "last_run": entry.last_run,
-                        "next_run": entry.next_run,
-                    }
-                log.debug(f"保存了 {len(current_state)} 个任务状态")
+        log.info("更新任务配置")
+        try:
+            # 保存当前任务状态
+            current_state = {}
+            for entry in self.task_heap:
+                current_state[entry.name] = {
+                    "last_run": entry.last_run,
+                    "next_run": entry.next_run,
+                }
+            log.debug(f"保存了 {len(current_state)} 个任务状态")
 
-                # 清空任务堆
-                self.task_heap = []
-                self.task_map = {}
+            # 清空任务堆
+            self.task_heap = []
+            self.task_map = {}
 
-                # 从数据库加载任务
-                sql = text("SELECT * FROM scheduled_task WHERE status = 1")
-                with engine.connect() as conn:
-                    tasks = conn.execute(sql).fetchall()
-                log.info(f"从数据库获取到 {len(tasks)} 个任务")
+            # 从数据库加载任务
+            sql = text("SELECT * FROM scheduled_task WHERE status = 1")
+            with engine.connect() as conn:
+                tasks = conn.execute(sql).fetchall()
+            log.info(f"从数据库获取到 {len(tasks)} 个任务")
 
-                # 创建新任务条目
-                for task in tasks:
-                    try:
-                        cron_parts = task.cron_expression.split()
+            # 创建新任务条目
+            for task in tasks:
+                try:
+                    cron_parts = task.cron_expression.split()
 
-                        # 恢复任务状态（如果存在）
-                        task_state = current_state.get(task.name, {})
+                    # 恢复任务状态（如果存在）
+                    task_state = current_state.get(task.name, {})
 
-                        # 创建任务条目
-                        entry = TaskEntry(
-                            name=task.name,
-                            task=task.task,
-                            schedule=crontab(
-                                minute=cron_parts[0],
-                                hour=cron_parts[1],
-                                day_of_month=cron_parts[2],
-                                month_of_year=cron_parts[3],
-                                day_of_week=cron_parts[4],
-                            ),
-                            kwargs=(
-                                json.loads(task.task_kwargs) if task.task_kwargs else {}
-                            ),
+                    # 创建任务条目
+                    entry = TaskEntry(
+                        name=task.name,
+                        task=task.task,
+                        schedule=crontab(
+                            minute=cron_parts[0],
+                            hour=cron_parts[1],
+                            day_of_month=cron_parts[2],
+                            month_of_year=cron_parts[3],
+                            day_of_week=cron_parts[4],
+                        ),
+                        kwargs=(
+                            json.loads(task.task_kwargs) if task.task_kwargs else {}
+                        ),
+                    )
+
+                    # 恢复状态
+                    if task_state:
+                        entry.last_run = task_state.get("last_run")
+                        entry.next_run = task_state.get(
+                            "next_run", entry.calculate_next_run()
                         )
 
-                        # 恢复状态
-                        if task_state:
-                            entry.last_run = task_state.get("last_run")
-                            entry.next_run = task_state.get(
-                                "next_run", entry.calculate_next_run()
-                            )
+                    # 添加到堆和映射
+                    heapq.heappush(self.task_heap, entry)
+                    self.task_map[task.name] = entry
+                    log.info(f"添加任务: {task.name}")
+                except Exception as e:
+                    log.error(f"添加任务 {task.name} 失败: {str(e)}", exc_info=True)
 
-                        # 添加到堆和映射
-                        heapq.heappush(self.task_heap, entry)
-                        self.task_map[task.name] = entry
-                        log.info(f"添加任务: {task.name}")
-                    except Exception as e:
-                        log.error(f"添加任务 {task.name} 失败: {str(e)}", exc_info=True)
-
-                log.info(f"成功更新 {len(self.task_heap)} 个任务")
-            except Exception as e:
-                log.error(f"更新任务失败: {str(e)}", exc_info=True)
+            log.info(f"成功更新 {len(self.task_heap)} 个任务")
+        except Exception as e:
+            log.error(f"更新任务失败: {str(e)}", exc_info=True)
 
     def tick(self):
         """核心调度方法"""
@@ -177,36 +171,35 @@ class StableScheduler(Scheduler):
 
     def process_due_tasks(self):
         """处理所有到期任务"""
-        with self._lock:
-            now = datetime.now()
-            executed = 0
-            processed_entries = []
+        now = datetime.now()
+        executed = 0
+        processed_entries = []
 
-            while self.task_heap and self.task_heap[0].is_due():
-                task = heapq.heappop(self.task_heap)
+        while self.task_heap and self.task_heap[0].is_due():
+            task = heapq.heappop(self.task_heap)
 
-                try:
-                    # 发送任务
-                    self.apply_async(
-                        task.task, args=task.args, kwargs=task.kwargs, **task.options
-                    )
-                    log.info(f"发送任务: {task.name}")
-                    executed += 1
+            try:
+                # 发送任务
+                self.apply_async(
+                    task.task, args=task.args, kwargs=task.kwargs, **task.options
+                )
+                log.info(f"发送任务: {task.name}")
+                executed += 1
 
-                    # 更新任务状态
-                    task.mark_executed()
-                except Exception as e:
-                    log.error(f"发送任务失败: {str(e)}", exc_info=True)
+                # 更新任务状态
+                task.mark_executed()
+            except Exception as e:
+                log.error(f"发送任务失败: {str(e)}", exc_info=True)
 
-                # 添加到处理列表
-                processed_entries.append(task)
+            # 添加到处理列表
+            processed_entries.append(task)
 
-            # 将处理过的任务重新加入堆
-            for task in processed_entries:
-                heapq.heappush(self.task_heap, task)
+        # 将处理过的任务重新加入堆
+        for task in processed_entries:
+            heapq.heappush(self.task_heap, task)
 
-            if executed:
-                log.info(f"本次执行了 {executed} 个任务")
+        if executed:
+            log.info(f"本次执行了 {executed} 个任务")
 
     def calculate_next_interval(self):
         """计算下次唤醒时间"""
@@ -224,13 +217,3 @@ class StableScheduler(Scheduler):
             return self.max_interval
 
         return wait_seconds
-
-
-# 单例工厂函数
-def get_scheduler(app):
-    global _scheduler_instance
-    with _scheduler_lock:
-        if _scheduler_instance is None:
-            _scheduler_instance = StableScheduler(app=app)
-            log.info("创建新的调度器实例")
-        return _scheduler_instance
