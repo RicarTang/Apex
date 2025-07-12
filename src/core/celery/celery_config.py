@@ -1,5 +1,5 @@
 # 导入task模块
-imports = ("src.core.celery.task.testcase_task", "src.core.celery.task.scheduled_task")
+imports = ("src.core.celery.task.testcase_task", "src.core.celery.task.scheduled_task","src.core.celery.scheduler")
 # 使用utc时区
 enable_utc = False
 # 时区
