@@ -44,7 +44,7 @@ class DatabaseScheduler(Scheduler):
                         month_of_year=cron_parts[3],
                         day_of_week=cron_parts[4],
                     ),
-                    "kwargs": json.loads(task.kwargs) if task.kwargs else {},
+                    "kwargs": json.loads(task.task_kwargs) if task.task_kwargs else {},
                 }
 
             # 更新内存中的配置
