@@ -24,7 +24,7 @@ def parse_cron(expr: str) -> dict:
     }
 
 
-@celery.on_after_configure.connect
+@signals.beat_init.connect
 def load_tasks_on_beat_start(sender=None, **kwargs):
     """Beat启动时/独立或嵌入式从数据库加载所有任务"""
     global beat_schedule
@@ -46,5 +46,5 @@ def load_tasks_on_beat_start(sender=None, **kwargs):
                 "kwargs": json.loads(task.task_kwargs) or {},
             }
     # 更新Beat配置
-    celery.conf.beat_schedule = beat_schedule
+    celery.conf.update(beat_schedule=beat_schedule)
     log.info(f"Beat初始化完成,从数据库中获取了最新的task:{celery.conf.beat_schedule}")
