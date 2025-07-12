@@ -14,5 +14,6 @@ task_track_started = True
 #         'schedule': crontab(minute="*"),
 #     }
 # }
+
 # 自定义调度器
 # beat_scheduler = "src.core.celery.scheduler.DatabaseScheduler"
