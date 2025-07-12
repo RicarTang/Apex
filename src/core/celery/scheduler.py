@@ -5,10 +5,10 @@ import time
 import json
 from datetime import datetime, timedelta
 from celery.schedules import crontab
+from celery import signals
 from sqlalchemy import text
 from src.utils.sql_engine import engine
 from src.utils.log_util import log
-import threading
 
 
 class TaskEntry:
@@ -87,7 +87,6 @@ class StableScheduler(Scheduler):
         self.max_interval = 30  # 最大检查间隔
         self.last_update = time.time()
         self.update_interval = 300  # 5分钟更新一次任务
-        self._lock = threading.Lock()
 
         # 确保只初始化一次
         if not self._initialized:
@@ -219,22 +218,37 @@ class StableScheduler(Scheduler):
 
         while self.task_heap and self.task_heap[0].is_due():
             task = heapq.heappop(self.task_heap)
+            log.debug(f"处理任务: {task.name}, 到期时间: {task.next_run}")
 
             try:
                 # 发送任务
-                self.apply_async(
-                    task.task, args=task.args, kwargs=task.kwargs, **task.options
+                log.info(f"准备发送任务: {task.name}, 任务路径: {task.task}")
+                result = self.apply_async(
+                    task.task,
+                    args=task.args,
+                    kwargs=task.kwargs,
+                    **task.options
                 )
-                log.info(f"发送任务: {task.name}")
+                log.info(f"已发送任务: {task.name}, 任务ID: {result.id}")
                 executed += 1
 
                 # 更新任务状态
                 task.mark_executed()
+                log.debug(f"更新任务状态: last_run={task.last_run}, next_run={task.next_run}")
             except Exception as e:
                 log.error(f"发送任务失败: {str(e)}", exc_info=True)
 
             # 添加到处理列表
             processed_entries.append(task)
+
+        # 将处理过的任务重新加入堆
+        for task in processed_entries:
+            heapq.heappush(self.task_heap, task)
+
+        if executed:
+            log.info(f"本次执行了 {executed} 个任务")
+        else:
+            log.debug("没有到期任务需要执行")
 
         # 将处理过的任务重新加入堆
         for task in processed_entries:
@@ -259,3 +273,10 @@ class StableScheduler(Scheduler):
             return self.max_interval
 
         return wait_seconds
+
+
+
+@signals.worker_init.connect
+def on_worker_init(sender=None, **kwargs):
+    log.info("Worker初始化")
+    log.info(f"已注册的任务: {list(sender.app.tasks.keys())}")
