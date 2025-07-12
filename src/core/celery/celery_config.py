@@ -1,4 +1,5 @@
 # 导入task模块
+# from celery.beat import crontab
 imports = ("src.core.celery.task.testcase_task", "src.core.celery.task.scheduled_task","src.core.celery.scheduler")
 # 使用utc时区
 enable_utc = False
@@ -10,7 +11,7 @@ task_track_started = True
 # beat_schedule = {
 #     'statistics-dashbord-data': {
 #         'task': 'src.core.celery.task.scheduled_task.statistics_dashbord_data',  # task指向task name
-#         'schedule': crontab(hour="*/1",minute=0),  # 每个小时执行
+#         'schedule': crontab(minute="*"),
 #     }
 # }
 # 自定义调度器

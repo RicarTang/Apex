@@ -3,7 +3,7 @@
 import json
 from sqlalchemy import text
 from celery.beat import crontab
-from celery.signals import beat_init, beat_embedded_init
+from celery import signals
 from src.utils.sql_engine import engine
 from src.utils.log_util import log
 from src.core.celery.celery_app import celery
@@ -24,8 +24,7 @@ def parse_cron(expr: str) -> dict:
     }
 
 
-@beat_init.connect
-@beat_embedded_init.connect  # 兼容worker --beat
+@celery.on_after_configure.connect
 def load_tasks_on_beat_start(sender=None, **kwargs):
     """Beat启动时/独立或嵌入式从数据库加载所有任务"""
     global beat_schedule
