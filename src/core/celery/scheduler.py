@@ -38,13 +38,26 @@ class TaskEntry:
 
     def calculate_next_run(self):
         """计算下次执行时间"""
-        due, next_time = self.schedule.is_due(self.last_run)
+        # 确保 last_run 不是 None
+        last_run = self.last_run or datetime.now()
+
+        # 计算下次执行时间
+        due, next_time = self.schedule.is_due(last_run)
+
+        # 如果 next_time 为 None，使用默认值
         if next_time is None:
-            return datetime.now()
+            log.warning(f"任务 {self.name} 没有计算下次执行时间，使用默认值")
+            next_time = 60  # 默认60秒后
+
         return datetime.now() + timedelta(seconds=next_time)
 
     def is_due(self):
         """检查是否到期"""
+        # 确保 next_run 不是 None
+        if self.next_run is None:
+            self.next_run = self.calculate_next_run()
+            log.warning(f"任务 {self.name} 的 next_run 为 None，已重新计算")
+
         return datetime.now() >= self.next_run
 
     def mark_executed(self):
@@ -54,6 +67,12 @@ class TaskEntry:
         log.debug(f"任务 {self.name} 已执行, 下次执行: {self.next_run}")
 
     def __lt__(self, other):
+        # 确保比较对象有效
+        if self.next_run is None:
+            self.next_run = self.calculate_next_run()
+        if other.next_run is None:
+            other.next_run = other.calculate_next_run()
+
         return self.next_run < other.next_run
 
 
@@ -135,10 +154,33 @@ class StableScheduler(Scheduler):
 
                     # 恢复状态
                     if task_state:
-                        entry.last_run = task_state.get("last_run")
-                        entry.next_run = task_state.get(
-                            "next_run", entry.calculate_next_run()
-                        )
+                        # 确保 last_run 是 datetime 对象
+                        last_run = task_state.get("last_run")
+                        if last_run and not isinstance(last_run, datetime):
+                            try:
+                                last_run = datetime.fromisoformat(last_run)
+                            except:
+                                log.warning(f"无效的 last_run 格式: {last_run}")
+                                last_run = None
+
+                        # 确保 next_run 是 datetime 对象
+                        next_run = task_state.get("next_run")
+                        if next_run and not isinstance(next_run, datetime):
+                            try:
+                                next_run = datetime.fromisoformat(next_run)
+                            except:
+                                log.warning(f"无效的 next_run 格式: {next_run}")
+                                next_run = None
+
+                        # 应用恢复的状态
+                        entry.last_run = last_run
+
+                        # 如果 next_run 无效，重新计算
+                        if next_run and isinstance(next_run, datetime):
+                            entry.next_run = next_run
+                        else:
+                            entry.next_run = entry.calculate_next_run()
+                            log.info(f"任务 {task.name} 的 next_run 无效，已重新计算")
 
                     # 添加到堆和映射
                     heapq.heappush(self.task_heap, entry)
