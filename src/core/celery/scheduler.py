@@ -85,9 +85,6 @@ class StableScheduler(Scheduler):
             log.info("=" * 50)
             log.info("初始化调度器")
 
-            # 添加测试任务
-            self.add_test_task()
-
             # 从数据库加载任务
             self.update_tasks()
 
