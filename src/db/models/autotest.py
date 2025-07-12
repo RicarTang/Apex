@@ -122,12 +122,16 @@ class ScheduledTask(AbstractBaseModel):
     name = fields.CharField(max_length=30, description="任务唯一标识")
     task = fields.CharField(max_length=100, description="任务函数路径")
     cron_expression = fields.CharField(max_length=30, description="CRON 表达式")
-    task_kwargs = fields.CharField(max_length=200, null=True, description="任务参数")
+    task_args = fields.CharField(max_length=200, null=True, description="任务位置参数")
+    task_kwargs = fields.CharField(max_length=200, null=True, description="任务关键字参数")
     status = fields.IntEnumField(
         enum_type=BoolEnum,
         default=BoolEnum.TRUE,
         description="是否启用;1: enable, 0: disable",
     )
+    last_run_at = fields.DatetimeField(description="上次执行时间")
+    next_run_at = fields.DatetimeField(description="下一次执行时间")
+    total_run_count = fields.IntField(default=0,description="总执行次数")
     remark = fields.CharField(max_length=100, null=True, description="备注")
 
     class Meta:
