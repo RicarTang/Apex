@@ -44,7 +44,7 @@ def load_tasks_on_beat_start(sender=None, **kwargs):
                 "schedule": crontab(**parse_cron(task.cron_expression)),
                 "kwargs": task.task_kwargs or {},
             }
-
+    log.debug(f"beat_schedule:{beat_schedule}")
     # 更新Beat配置
     celery.conf.beat_schedule = beat_schedule
     log.info("Beat初始化完成,从数据库中获取了最新的task".center(30, "-"))
