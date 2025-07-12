@@ -94,29 +94,6 @@ class StableScheduler(Scheduler):
             log.info(f"已加载 {len(self.task_heap)} 个任务")
             log.info("=" * 50)
 
-    def add_test_task(self):
-        """添加测试任务用于验证"""
-        try:
-            log.info("添加测试任务")
-            test_task = {
-                "name": "test_task",
-                "task": "src.core.celery.task.test_task",
-                "schedule": crontab(minute="*"),
-                "args": ("每分钟测试任务",),
-            }
-
-            entry = TaskEntry(
-                name=test_task["name"],
-                task=test_task["task"],
-                schedule=test_task["schedule"],
-                args=test_task["args"],
-            )
-            heapq.heappush(self.task_heap, entry)
-            self.task_map[test_task["name"]] = entry
-            log.info("已添加每分钟执行的测试任务")
-        except Exception as e:
-            log.error(f"添加测试任务失败: {str(e)}", exc_info=True)
-
     def update_tasks(self):
         """从数据库更新任务配置"""
         with self._lock:
