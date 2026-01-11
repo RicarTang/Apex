@@ -49,10 +49,10 @@ from redis.exceptions import RedisError
 #     run_async(load_task())
 
 
-@celery.task
-def delete_allure():
+@celery.task(bind=True, name="delete_allure")
+def delete_allure(self):
     # @TODO 定期删除TestSuiteTaskId表中没有的allure目录
-    pass
+    log.info("执行删除所有ure目录任务开始")
 
 
 @celery.task(
@@ -62,20 +62,26 @@ def delete_allure():
 )
 def statistics_dashbord_data(self):
     """首页面板统计任务"""
-    # 查询所有用例数量与定时任务数量
-    sql_text = text(
-        """
-    SELECT 
-        (SELECT COUNT(id) FROM test_case) AS caseNum,
-        (SELECT COUNT(id) FROM scheduled_task) AS scheduledTask
-"""
-    )
-    with engine.connect() as db:
-        result: RowMapping = db.execute(sql_text).mappings().fetchone()
-    # 保存json格式至redis
+    log.info("执行首页面板统计任务开始")
     try:
-        RedisService().redis_pool.set(
-            "task:dashbord-statistics-data", json.dumps(dict(result))
-        )
-    except Exception:
-        raise RedisError
+        # 查询所有用例数量与定时任务数量
+#         sql_text = text(
+#             """
+#         SELECT 
+#             (SELECT COUNT(id) FROM test_case) AS caseNum,
+#             (SELECT COUNT(id) FROM scheduled_task) AS scheduledTask
+# """
+#         )
+#         with engine.connect() as db:
+#             result: RowMapping = db.execute(sql_text).mappings().fetchone()
+#         # 保存json格式至redis
+#         try:
+#             RedisService().redis_pool.set(
+#                 "task:dashbord-statistics-data", json.dumps(dict(result))
+#             )
+#         except Exception:
+#             raise RedisError
+        log.info("首页面板统计任务执行成功")
+    except Exception as e:
+        log.error(f"首页面板统计任务执行失败: {str(e)}")
+        raise

@@ -13,3 +13,6 @@ celery = Celery(
 
 # 指定celery配置
 celery.config_from_object(celery_config)
+
+# 导出Celery实例，供外部导入使用
+app = celery

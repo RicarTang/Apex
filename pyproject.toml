@@ -2,14 +2,12 @@
 tortoise_orm = "src.core.db.TORTOISE_ORM"
 location = "./migrations"
 src_folder = "./."
-
 [tool.pdm]
 [tool.pdm.dev-dependencies]
 dev = ["black>=23.12.1", "faker>=22.5.0"]
 
 [tool.pdm.build]
 includes = []
-
 [tool.pdm.scripts]
 dev = "uvicorn src.main:app --host 0.0.0.0 --port 4000 --reload"
 pro = "gunicorn -c gunicorn.conf.py src.main:app"
@@ -28,7 +26,7 @@ markers = ["add_user: add fake user"]
 
 [project]
 name = ""
-version = ""
+version = "1.0.0"
 description = ""
 authors = [{ name = "RicarTang", email = "357965604@qq.com" }]
 dependencies = [
@@ -47,7 +45,7 @@ dependencies = [
     "sse-starlette<2.0.0,>=1.8.2",
     "pydantic-settings<3.0.0,>=2.1.0",
     "python-multipart<1.0.0,>=0.0.6",
-    "fastapi<1.0.0,>=0.115",
+    "fastapi[standard]>=0.115,<1.0.0",
     "uvicorn[standard]<1.0.0.0,>=0.24.0.post1",
     "celery>=5.3.6",
     "cryptography>=41.0.7",
@@ -62,7 +60,14 @@ dependencies = [
     "asgi-lifespan>=2.1.0",
     "sqlalchemy>=2.0.25",
     "croniter>=6.0.0",
+    "ujson>=5.11.0",
 ]
 requires-python = ">=3.9"
 readme = "README.md"
 license = { text = "MIT" }
+
+[dependency-groups]
+dev = [
+    "black>=25.9.0",
+    "faker>=37.11.0",
+]

@@ -72,13 +72,17 @@ services:
       - apex_redis:/data
     networks:
       - apex_network
-    command: "redis-server --requirepass $REDIS_PASSWORD"
+    # command: "redis-server --requirepass $REDIS_PASSWORD"
   # mysql服务
   apex_mysql:
     image: mysql:8.1.0
     container_name: apex_mysql
     env_file:
       - .env
+    environment:
+      - TZ=Asia/Shanghai
+      - MYSQL_ROOT_PASSWORD=$DB_PASSWORD
+      - MYSQL_DATABASE=$DB_DATEBASE
     restart: always
     ports:
       - "3306:3306"
